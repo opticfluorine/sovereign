@@ -21,6 +21,7 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems.Combat;
 using Sovereign.EngineCore.Systems.Movement;
 using Xunit;
@@ -63,10 +64,11 @@ public class TestVitalsSystem
 
         var vitalsController = new VitalsController();
         var movementController = new MovementController();
+        var loggingUtil = new LoggingUtil(new NameComponentCollection(entityTable, componentManager));
         var deathHandler = new EntityDeathHandler(entityTypes, healths, entityManager, entityTable,
             vitalsController, movementController, new CombatInternalController(),
-            new EntityKilledByPlayerHandler(Mock.Of<ILogger<EntityKilledByPlayerHandler>>()),
-            mockEventSender.Object, Mock.Of<ILogger<EntityDeathHandler>>());
+            new EntityKilledByPlayerHandler(Mock.Of<ILogger<EntityKilledByPlayerHandler>>(), loggingUtil),
+            loggingUtil, mockEventSender.Object, Mock.Of<ILogger<EntityDeathHandler>>());
         eventHandler = new VitalsEventHandler(deathHandler, healths, staminas, manas,
             Mock.Of<ILogger<VitalsEventHandler>>());
         system = new VitalsSystem(eventCommunicator, new Mock<IEventLoop>().Object, eventHandler,

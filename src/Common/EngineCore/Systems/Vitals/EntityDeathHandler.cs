@@ -22,6 +22,7 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems.Combat;
 using Sovereign.EngineCore.Systems.Movement;
 
@@ -50,6 +51,7 @@ public class EntityDeathHandler
     private readonly MovementController movementController;
     private readonly CombatInternalController internalController;
     private readonly EntityKilledByPlayerHandler killedByPlayerHandler;
+    private readonly LoggingUtil loggingUtil;
     private readonly IEventSender eventSender;
     private readonly ILogger<EntityDeathHandler> logger;
 
@@ -61,6 +63,7 @@ public class EntityDeathHandler
         MovementController movementController,
         CombatInternalController internalController,
         EntityKilledByPlayerHandler killedByPlayerHandler,
+        LoggingUtil loggingUtil,
         IEventSender eventSender,
         ILogger<EntityDeathHandler> logger)
     {
@@ -72,6 +75,7 @@ public class EntityDeathHandler
         this.movementController = movementController;
         this.internalController = internalController;
         this.killedByPlayerHandler = killedByPlayerHandler;
+        this.loggingUtil = loggingUtil;
         this.eventSender = eventSender;
         this.logger = logger;
 
@@ -122,12 +126,14 @@ public class EntityDeathHandler
 
         if (killerId > 0)
         {
-            logger.LogInformation("Player {EntityId} was killed by entity {KillerId}.", entityId, killerId);
+            logger.LogInformation("Player {Player} was killed by {Killer}.",
+                loggingUtil.FormatEntity(entityId), loggingUtil.FormatEntity(killerId));
             internalController.PlayerKilled(eventSender, entityId, killerId);
         }
         else
         {
-            logger.LogInformation("Player {EntityId} died; respawning at spawn point.", entityId);
+            logger.LogInformation("Player {Player} died; respawning at spawn point.",
+                loggingUtil.FormatEntity(entityId));
         }
 
         // TODO Select per-player spawn point.

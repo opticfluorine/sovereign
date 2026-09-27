@@ -278,6 +278,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<BasicInformationControlGroup>();
         services.TryAddSingleton<AppearanceControlGroup>();
         services.TryAddSingleton<BehaviorControlGroup>();
+        services.TryAddSingleton<CombatControlGroup>();
         services.TryAddSingleton<EntityDataControlGroup>();
         services.TryAddSingleton<TemplateEditorInternalController>();
         services.TryAddSingleton<WorldEditorGui>();

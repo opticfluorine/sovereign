@@ -894,7 +894,6 @@ public enum EventId
     #endregion Server_WorldGen
 
     #region Server_Combat
-    #region Server_Combat
 
     /// <summary>
     ///     Sent to request that an actor perform an attack.
