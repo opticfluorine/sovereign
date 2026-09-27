@@ -288,4 +288,265 @@ public class TestProfileValidator
         Assert.Contains(issues, i => i.Severity == ProfileValidationSeverity.Error
                                      && i.Message.Contains(messageFragment, StringComparison.Ordinal));
     }
+
+    /// <summary>
+    ///     Creates a valid profile with the shared biomes section attached.
+    /// </summary>
+    /// <returns>Profile.</returns>
+    private static WorldGenProfile CreateValidWithBiomes()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Biomes = TestProfiles.CreateSmall128Biomes().Biomes;
+        return profile;
+    }
+
+    [Fact]
+    public void Validate_ValidBiomesSection_HasNoIssues()
+    {
+        Assert.Empty(validator.Validate(CreateValidWithBiomes()));
+    }
+
+    [Fact]
+    public void Validate_AbsentBiomesSection_HasNoIssues()
+    {
+        Assert.Empty(validator.Validate(TestProfiles.CreateValid()));
+    }
+
+    [Fact]
+    public void Validate_AlpineAtOrAboveSnowcap_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.AlpineZ = profile.Biomes.SnowcapZ;
+
+        AssertHasError(validator.Validate(profile), "alpineZ");
+    }
+
+    [Fact]
+    public void Validate_SnowcapAboveSurfaceMax_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.SnowcapZ = profile.SurfaceMaxZ + 1;
+
+        AssertHasError(validator.Validate(profile), "snowcapZ");
+    }
+
+    [Fact]
+    public void Validate_AlpineAtOrBelowSeaLevel_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.AlpineZ = profile.SeaLevelZ;
+
+        AssertHasError(validator.Validate(profile), "alpineZ");
+    }
+
+    [Fact]
+    public void Validate_TableReferenceToUnknownBiome_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Table.Mild.Temperate = "Bogus";
+
+        AssertHasError(validator.Validate(profile), "Bogus");
+    }
+
+    [Fact]
+    public void Validate_MissingTableCellReference_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Table.Hot.Dry = null!;
+
+        AssertHasError(validator.Validate(profile), "table.hot.dry");
+    }
+
+    [Fact]
+    public void Validate_TableReferencedBiomeWithoutDefinition_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions.Remove("Savanna");
+
+        AssertHasError(validator.Validate(profile), "Savanna");
+    }
+
+    [Fact]
+    public void Validate_MissingBeachDefinition_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions.Remove("Beach");
+
+        AssertHasError(validator.Validate(profile), "Beach");
+    }
+
+    [Fact]
+    public void Validate_MissingSnowcapDefinition_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions.Remove("Snowcap");
+
+        AssertHasError(validator.Validate(profile), "Snowcap");
+    }
+
+    [Fact]
+    public void Validate_SwampOverrideWithoutSwampDefinition_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions.Remove("Swamp");
+
+        AssertHasError(validator.Validate(profile), "Swamp");
+    }
+
+    [Fact]
+    public void Validate_UnknownDefinitionName_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Bogus"] = TestTerrainMaps.Definition("Grass", "Dirt", 1);
+
+        AssertHasError(validator.Validate(profile), "Bogus");
+    }
+
+    [Fact]
+    public void Validate_EmptySurfaceTemplate_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].SurfaceTemplate = "";
+
+        AssertHasError(validator.Validate(profile), "surfaceTemplate");
+    }
+
+    [Fact]
+    public void Validate_EmptySubSurfaceTemplate_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].SubSurfaceTemplate = " ";
+
+        AssertHasError(validator.Validate(profile), "subSurfaceTemplate");
+    }
+
+    [Fact]
+    public void Validate_SubSurfaceDepthOutOfRange_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].SubSurfaceDepth = 17;
+
+        AssertHasError(validator.Validate(profile), "subSurfaceDepth");
+
+        profile.Biomes.Definitions["Grassland"].SubSurfaceDepth = -1;
+        AssertHasError(validator.Validate(profile), "subSurfaceDepth");
+    }
+
+    [Fact]
+    public void Validate_DecorationWeightOutOfRange_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        var pool = profile.Biomes!.Definitions["Grassland"].Decorations!;
+        pool[0].Weight = 0.0;
+
+        AssertHasError(validator.Validate(profile), "weight");
+
+        pool[0].Weight = 1.5;
+        AssertHasError(validator.Validate(profile), "weight");
+    }
+
+    [Fact]
+    public void Validate_DecorationMinSpacingBelowOne_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].Decorations![0].MinSpacing = 0;
+
+        AssertHasError(validator.Validate(profile), "minSpacing");
+    }
+
+    [Fact]
+    public void Validate_DecorationMaxSlopeOutOfRange_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].Decorations![0].MaxSlope = 3;
+
+        AssertHasError(validator.Validate(profile), "maxSlope");
+    }
+
+    [Fact]
+    public void Validate_EmptyDecorationTemplate_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].Decorations![0].Template = "";
+
+        AssertHasError(validator.Validate(profile), "template");
+    }
+
+    [Fact]
+    public void Validate_TooManyDecorationsInPool_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        var pool = new List<DecorationOptions>();
+        for (var i = 0; i < 9; ++i)
+        {
+            pool.Add(new DecorationOptions
+            {
+                Template = $"Tree{i}",
+                Weight = 0.01,
+                MinSpacing = 2,
+                MaxSlope = 1
+            });
+        }
+
+        profile.Biomes!.Definitions["Grassland"].Decorations = pool;
+
+        AssertHasError(validator.Validate(profile), "decorations");
+    }
+
+    [Fact]
+    public void Validate_EmptyDecorationPool_IsAllowed()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Grassland"].Decorations = new List<DecorationOptions>();
+
+        var issues = validator.Validate(profile);
+
+        Assert.DoesNotContain(issues, i => i.Severity == ProfileValidationSeverity.Error);
+    }
+
+    [Fact]
+    public void Validate_TableBiomeWithoutDecorations_IsWarningOnly()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Savanna"].Decorations = null;
+
+        var issues = validator.Validate(profile);
+
+        Assert.DoesNotContain(issues, i => i.Severity == ProfileValidationSeverity.Error);
+        Assert.Contains(issues, i => i.Severity == ProfileValidationSeverity.Warning
+                                     && i.Message.Contains("Savanna", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Validate_NonTableBiomeWithoutDecorations_IsSilent()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Definitions["Alpine"].Decorations = null;
+
+        var issues = validator.Validate(profile);
+
+        Assert.DoesNotContain(issues, i => i.Message.Contains("Alpine", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Validate_EmptyFloorTemplate_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.OceanFloorTemplate = "";
+
+        AssertHasError(validator.Validate(profile), "oceanFloorTemplate");
+
+        profile.Biomes.OceanFloorTemplate = "Gravel";
+        profile.Biomes.WaterFloorTemplate = "";
+        AssertHasError(validator.Validate(profile), "waterFloorTemplate");
+    }
+
+    [Fact]
+    public void Validate_EmptySwampTemplate_IsError()
+    {
+        var profile = CreateValidWithBiomes();
+        profile.Biomes!.Swamp = new SwampOptions { Template = "", MaxHeightZ = 14 };
+
+        AssertHasError(validator.Validate(profile), "swamp.template");
+    }
 }

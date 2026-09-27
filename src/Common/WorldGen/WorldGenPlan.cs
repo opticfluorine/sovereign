@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
+using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Terrain;
 
 namespace Sovereign.WorldGen;
@@ -47,6 +50,23 @@ public sealed class WorldGenPlan
     ///     Terrain surface map of the plan.
     /// </summary>
     public required TerrainMap Terrain { get; init; }
+
+    /// <summary>
+    ///     Biome classification map of the plan. Null if the profile has no biomes section.
+    /// </summary>
+    public BiomeMap? Biomes { get; init; }
+
+    /// <summary>
+    ///     Per-column material assignment of the plan. Null if the profile has no biomes
+    ///     section.
+    /// </summary>
+    public ColumnMaterials? Materials { get; init; }
+
+    /// <summary>
+    ///     Decoration placements of the plan, in scan order. Null if the profile has no
+    ///     biomes section.
+    /// </summary>
+    public IReadOnlyList<DecorationPlacement>? Decorations { get; init; }
 
     /// <summary>
     ///     Summary statistics of the plan.

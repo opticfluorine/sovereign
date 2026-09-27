@@ -22,5 +22,88 @@
   "caves": {
     "shaftsPerLevelPair": 3,
     "surfaceMouths": 2
+  },
+  "biomes": {
+    "snowcapZ": 26,
+    "alpineZ": 23,
+    "oceanFloorTemplate": "Gravel",
+    "waterFloorTemplate": "Sand",
+    "table": {
+      "cold": { "dry": "Taiga", "temperate": "Forest", "wet": "Forest" },
+      "mild": { "dry": "Savanna", "temperate": "Grassland", "wet": "Forest" },
+      "hot": { "dry": "Desert", "temperate": "Savanna", "wet": "Grassland" }
+    },
+    "swamp": {
+      "template": "Grass",
+      "maxHeightZ": 14
+    },
+    "definitions": {
+      "Grassland": {
+        "surfaceTemplate": "Grass",
+        "subSurfaceTemplate": "Dirt",
+        "subSurfaceDepth": 4,
+        "decorations": [
+          { "template": "OakTree", "weight": 0.02, "minSpacing": 5, "maxSlope": 1 },
+          { "template": "Boulder", "weight": 0.004, "minSpacing": 7, "maxSlope": 2 }
+        ]
+      },
+      "Forest": {
+        "surfaceTemplate": "Grass",
+        "subSurfaceTemplate": "Dirt",
+        "subSurfaceDepth": 3,
+        "decorations": [
+          { "template": "OakTree", "weight": 0.07, "minSpacing": 3, "maxSlope": 1 },
+          { "template": "PineTree", "weight": 0.02, "minSpacing": 4, "maxSlope": 1 }
+        ]
+      },
+      "Taiga": {
+        "surfaceTemplate": "Grass",
+        "subSurfaceTemplate": "Dirt",
+        "subSurfaceDepth": 2,
+        "decorations": [
+          { "template": "PineTree", "weight": 0.06, "minSpacing": 3, "maxSlope": 2 }
+        ]
+      },
+      "Desert": {
+        "surfaceTemplate": "Sand",
+        "subSurfaceTemplate": "Sandstone",
+        "subSurfaceDepth": 8,
+        "decorations": [
+          { "template": "Cactus", "weight": 0.01, "minSpacing": 5, "maxSlope": 1 },
+          { "template": "Boulder", "weight": 0.003, "minSpacing": 8, "maxSlope": 2 }
+        ]
+      },
+      "Savanna": {
+        "surfaceTemplate": "Grass",
+        "subSurfaceTemplate": "Sand",
+        "subSurfaceDepth": 2,
+        "decorations": [
+          { "template": "AcaciaTree", "weight": 0.008, "minSpacing": 6, "maxSlope": 1 }
+        ]
+      },
+      "Beach": {
+        "surfaceTemplate": "Sand",
+        "subSurfaceTemplate": "Sand",
+        "subSurfaceDepth": 3
+      },
+      "Swamp": {
+        "surfaceTemplate": "Grass",
+        "subSurfaceTemplate": "Dirt",
+        "subSurfaceDepth": 2,
+        "decorations": [
+          { "template": "DeadBush", "weight": 0.04, "minSpacing": 4, "maxSlope": 1 }
+        ]
+      },
+      "Alpine": {
+        "surfaceTemplate": "Shale",
+        "subSurfaceTemplate": "Shale",
+        "subSurfaceDepth": 1
+      },
+      "Snowcap": {
+        "surfaceTemplate": "Snow",
+        "subSurfaceTemplate": "Shale",
+        "subSurfaceDepth": 1
+      }
+    }
   }
 }

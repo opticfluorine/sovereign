@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Sovereign.WorldGen;
@@ -156,6 +157,26 @@ public class TestProfileLoader
         Assert.Equal(-64, profile.BedrockZ);
         Assert.Equal(new[] { -16, -32, -48 },
             new[] { profile.CaveLevels![0].FloorZ, profile.CaveLevels[1].FloorZ, profile.CaveLevels[2].FloorZ });
+        Assert.NotNull(profile.Biomes);
+        Assert.Equal(
+            new HashSet<string> { "Taiga", "Forest", "Savanna", "Grassland", "Desert" },
+            ReferencedTableBiomes(profile.Biomes!));
+        Assert.Contains("OakTree", profile.Biomes.Definitions["Grassland"].Decorations![0].Template);
+    }
+
+    /// <summary>
+    ///     Collects the distinct biome names referenced by a table.
+    /// </summary>
+    /// <param name="options">Biome options.</param>
+    /// <returns>Distinct referenced biome names.</returns>
+    private static HashSet<string> ReferencedTableBiomes(BiomeOptions options)
+    {
+        return new HashSet<string>
+        {
+            options.Table.Cold.Dry, options.Table.Cold.Temperate, options.Table.Cold.Wet,
+            options.Table.Mild.Dry, options.Table.Mild.Temperate, options.Table.Mild.Wet,
+            options.Table.Hot.Dry, options.Table.Hot.Temperate, options.Table.Hot.Wet
+        };
     }
 
     /// <summary>

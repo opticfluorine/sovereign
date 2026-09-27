@@ -18,6 +18,8 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using Sovereign.WorldGen;
+using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Terrain;
 using Xunit;
 
@@ -58,6 +60,19 @@ public class TestWorldGenPipeline
     /// </summary>
     private const string GoldenHeightsSha256 =
         "640904D9B5CB6A8B8EB24A9A20256E93A1317D2F599C8DA429EF9963CBAA3305";
+
+    /// <summary>
+    ///     SHA-256 hash of the golden 128x128 preview PNG produced with the biome-enabled
+    ///     test baseline profile (<see cref="TestProfiles.CreateSmall128Biomes" />) and the
+    ///     fixed seed above. The heights hash is shared with the biome-free profile.
+    ///
+    ///     The biome preview palette is load-bearing for this hash: palette edits in
+    ///     <see cref="Sovereign.WorldGen.Output.PreviewRenderer" /> are golden-hash edits.
+    ///     To regenerate after an intentional change: run this test once and read the actual
+    ///     hash from the assertion failure message, then update this constant.
+    /// </summary>
+    private const string GoldenBiomesPreviewSha256 =
+        "12369AA6FC9468DE389533F44835BD35A788A928597360F24F36E957BB3ACE07";
 
     [Fact]
     public void Plan_SameSeedAndProfile_ProducesIdenticalHeightsAndPreview()
@@ -194,6 +209,166 @@ public class TestWorldGenPipeline
                     Assert.InRange(map.Heights[x, y], profile.RockFloorZ + 8, profile.SurfaceMaxZ);
                 }
             }
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithBiomes_PopulatesBiomeMaterialAndDecorationOutputs()
+    {
+        var profile = TestProfiles.CreateSmall128Biomes();
+        var path = TempPreviewPath("biomes");
+
+        try
+        {
+            var plan = new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0, path, null);
+
+            Assert.NotNull(plan.Biomes);
+            Assert.NotNull(plan.Materials);
+            Assert.NotNull(plan.Decorations);
+
+            // Every cell is classified and the heights golden hash is unchanged.
+            var biomeMap = plan.Biomes!;
+            var total = 0;
+            for (var y = 0; y < profile.Height; ++y)
+            {
+                for (var x = 0; x < profile.Width; ++x)
+                {
+                    Assert.True(Enum.IsDefined(biomeMap.Biome[x, y]));
+                    ++total;
+                }
+            }
+
+            Assert.Equal((long)profile.Width * profile.Height, total);
+            Assert.Equal(GoldenHeightsSha256,
+                Sha256(HeightsBytes(plan.Terrain)).ToUpperInvariant());
+
+            // Biome percentages sum to one within tolerance.
+            var percentages = plan.Statistics.BiomePercentages!;
+            var sum = 0.0;
+            foreach (var fraction in percentages.Values) sum += fraction;
+            Assert.InRange(sum, 1.0 - 0.001, 1.0 + 0.001);
+
+            // Materials cover the footprint.
+            var materials = plan.Materials!;
+            Assert.Equal(profile.Width, materials.Width);
+            Assert.Equal(profile.Height, materials.Height);
+            Assert.False(string.IsNullOrEmpty(materials.SurfaceTemplate[0, 0]));
+
+            // Decoration placements sit on the surface top of their column.
+            foreach (var placement in plan.Decorations!)
+            {
+                Assert.InRange(placement.X, 0, profile.Width - 1);
+                Assert.InRange(placement.Y, 0, profile.Height - 1);
+                Assert.Equal(plan.Terrain.Heights[placement.X, placement.Y] + 1, placement.Z);
+            }
+
+            Assert.Equal(plan.Decorations.Count, plan.Statistics.DecorationsTotal);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithBiomes_IsDeterministicAcrossRuns()
+    {
+        var profile = TestProfiles.CreateSmall128Biomes();
+        var firstPath = TempPreviewPath("biomesdet1");
+        var secondPath = TempPreviewPath("biomesdet2");
+
+        try
+        {
+            var first = new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0,
+                firstPath, null);
+            var second = new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0,
+                secondPath, null);
+
+            for (var y = 0; y < profile.Height; ++y)
+            {
+                for (var x = 0; x < profile.Width; ++x)
+                {
+                    Assert.Equal(first.Biomes!.Biome[x, y], second.Biomes!.Biome[x, y]);
+                    Assert.Equal(first.Materials!.SurfaceTemplate[x, y],
+                        second.Materials!.SurfaceTemplate[x, y]);
+                    Assert.Equal(first.Materials.SubSurfaceTemplate[x, y],
+                        second.Materials.SubSurfaceTemplate[x, y]);
+                    Assert.Equal(first.Materials.SubSurfaceDepth[x, y],
+                        second.Materials.SubSurfaceDepth[x, y]);
+                    Assert.Equal(first.Materials.SurfaceModifier[x, y],
+                        second.Materials.SurfaceModifier[x, y]);
+                }
+            }
+
+            Assert.Equal(first.Decorations!.Count, second.Decorations!.Count);
+            for (var i = 0; i < first.Decorations.Count; ++i)
+            {
+                var a = first.Decorations[i];
+                var b = second.Decorations[i];
+                Assert.Equal(a.TemplateName, b.TemplateName);
+                Assert.Equal(a.X, b.X);
+                Assert.Equal(a.Y, b.Y);
+                Assert.Equal(a.Z, b.Z);
+                Assert.Equal(a.Biome, b.Biome);
+                Assert.Equal(a.PoolIndex, b.PoolIndex);
+            }
+
+            Assert.Equal(Sha256(File.ReadAllBytes(firstPath)), Sha256(File.ReadAllBytes(secondPath)));
+        }
+        finally
+        {
+            File.Delete(firstPath);
+            File.Delete(secondPath);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithBiomes_GoldenPreviewMatchesHash()
+    {
+        var profile = TestProfiles.CreateSmall128Biomes();
+        var path = TempPreviewPath("biomesgolden");
+
+        try
+        {
+            new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0, path, null);
+            var actual = Sha256(File.ReadAllBytes(path));
+
+            Assert.True(string.Equals(actual, GoldenBiomesPreviewSha256,
+                    StringComparison.OrdinalIgnoreCase),
+                $"Golden biome preview hash mismatch: expected {GoldenBiomesPreviewSha256}, " +
+                $"actual {actual}. If the change (e.g. a palette edit) was intentional, " +
+                "regenerate the constant as described in its documentation.");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithoutBiomes_SkipsBiomeStagesAndSaysSo()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        var path = TempPreviewPath("nobiomes");
+
+        try
+        {
+            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+
+            Assert.Null(plan.Biomes);
+            Assert.Null(plan.Materials);
+            Assert.Null(plan.Decorations);
+            Assert.Null(plan.Statistics.BiomePercentages);
+            Assert.Null(plan.Statistics.DecorationCounts);
+            Assert.Equal(0, plan.Statistics.DecorationsTotal);
+            Assert.Contains("Biomes: not configured", plan.Statistics.Format());
+
+            // The biome-free preview hash is unchanged from card 2.
+            Assert.Equal(GoldenPreviewSha256, Sha256(File.ReadAllBytes(path)));
         }
         finally
         {

@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using System.Text;
+using Sovereign.WorldGen.Biomes;
 
 namespace Sovereign.WorldGen.Output;
 
@@ -74,6 +76,28 @@ public sealed class PlanStatistics
     public required long TotalMs { get; init; }
 
     /// <summary>
+    ///     Biome stages wall time in milliseconds.
+    /// </summary>
+    public required long BiomesMs { get; init; }
+
+    /// <summary>
+    ///     Fraction of the footprint classified as each biome, ordered by biome ID. Null if
+    ///     the profile has no biomes section.
+    /// </summary>
+    public IReadOnlyDictionary<BiomeId, double>? BiomePercentages { get; init; }
+
+    /// <summary>
+    ///     Number of placed decorations per template name, ordered by name. Null if the
+    ///     profile has no biomes section.
+    /// </summary>
+    public IReadOnlyDictionary<string, int>? DecorationCounts { get; init; }
+
+    /// <summary>
+    ///     Total number of placed decorations; zero if the profile has no biomes section.
+    /// </summary>
+    public int DecorationsTotal { get; init; }
+
+    /// <summary>
     ///     Formats the statistics as a chat-ready block.
     /// </summary>
     /// <returns>Formatted statistics.</returns>
@@ -83,14 +107,61 @@ public sealed class PlanStatistics
         var landPct = total > 0 ? 100.0 * LandCells / total : 0.0;
         var waterPct = total > 0 ? 100.0 * WaterCells / total : 0.0;
 
-        return new StringBuilder()
+        var builder = new StringBuilder()
             .AppendLine($"World generation plan ({Width}x{Height}):")
             .AppendLine($"  Land: {landPct:F1}%  Water: {waterPct:F1}%")
-            .AppendLine($"  Rivers: {RiverCount}  Lakes: {LakeCount}")
-            .Append(
-                $"  Terrain: {FormatSeconds(TerrainMs)}  Hydrology: {FormatSeconds(HydrologyMs)}  " +
-                $"Preview: {FormatSeconds(PreviewMs)}  Total: {FormatSeconds(TotalMs)}")
-            .ToString();
+            .AppendLine($"  Rivers: {RiverCount}  Lakes: {LakeCount}");
+        AppendBiomeLines(builder);
+        AppendDecorationLines(builder);
+        builder.Append(
+            $"  Terrain: {FormatSeconds(TerrainMs)}  Hydrology: {FormatSeconds(HydrologyMs)}  " +
+            $"Biomes: {FormatSeconds(BiomesMs)}  Preview: {FormatSeconds(PreviewMs)}  " +
+            $"Total: {FormatSeconds(TotalMs)}");
+        return builder.ToString();
+    }
+
+    /// <summary>
+    ///     Appends the biome percentage lines, or a not-configured line when the plan carries
+    ///     no biome data.
+    /// </summary>
+    /// <param name="builder">Builder to append to.</param>
+    private void AppendBiomeLines(StringBuilder builder)
+    {
+        if (BiomePercentages is null)
+        {
+            builder.AppendLine("  Biomes: not configured");
+            return;
+        }
+
+        foreach (var (biome, fraction) in BiomePercentages)
+        {
+            builder.AppendLine($"  Biome {biome}: {fraction:F4}");
+        }
+    }
+
+    /// <summary>
+    ///     Appends the decoration count line, or a not-configured line when the plan carries
+    ///     no biome data.
+    /// </summary>
+    /// <param name="builder">Builder to append to.</param>
+    private void AppendDecorationLines(StringBuilder builder)
+    {
+        if (DecorationCounts is null)
+        {
+            builder.AppendLine("  Decorations: not configured");
+            return;
+        }
+
+        var counts = new StringBuilder();
+        foreach (var (template, count) in DecorationCounts)
+        {
+            if (counts.Length > 0) counts.Append(", ");
+            counts.Append($"{template} {count}");
+        }
+
+        builder.AppendLine(counts.Length > 0
+            ? $"  Decorations: {DecorationsTotal} total: {counts}"
+            : $"  Decorations: {DecorationsTotal} total");
     }
 
     /// <summary>

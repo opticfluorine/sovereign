@@ -15,7 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Hydrology;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Output;
@@ -24,7 +27,8 @@ using Sovereign.WorldGen.Terrain;
 namespace Sovereign.WorldGen;
 
 /// <summary>
-///     Sequences the terrain, hydrology, and preview stages of a world generation plan.
+///     Sequences the terrain, hydrology, biome, and preview stages of a world generation
+///     plan.
 /// </summary>
 public interface IWorldGenPipeline
 {
@@ -44,9 +48,10 @@ public interface IWorldGenPipeline
 }
 
 /// <summary>
-///     Runs the terrain, hydrology, and preview stages of a world generation plan in sequence.
-///     All stages derive their sub-seeds deterministically from the root seed; the same root
-///     seed and profile always produce a byte-identical heightmap and preview PNG.
+///     Runs the terrain, hydrology, biome, and preview stages of a world generation plan in
+///     sequence. All stages derive their sub-seeds deterministically from the root seed; the
+///     same root seed and profile always produce a byte-identical heightmap, biome map,
+///     material assignment, decoration list, and preview PNG.
 /// </summary>
 public sealed class WorldGenPipeline : IWorldGenPipeline
 {
@@ -77,6 +82,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         var total = Stopwatch.StartNew();
         var terrainClock = new Stopwatch();
         var hydrologyClock = new Stopwatch();
+        var biomesClock = new Stopwatch();
         var previewClock = new Stopwatch();
 
         var landCells = 0;
@@ -125,9 +131,28 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         lakeCount = extraction.LakeCount;
         hydrologyClock.Stop();
 
+        BiomeMap? biomeMap = null;
+        ColumnMaterials? materials = null;
+        IReadOnlyList<DecorationPlacement> decorations = new List<DecorationPlacement>();
+
+        if (profile.Biomes is { } biomes)
+        {
+            Report(progress, "Biomes: classifying biomes");
+            biomesClock.Start();
+            biomeMap = new BiomeStage().Apply(map, continentalness, profile, SubSeed(seed, "Biomes"));
+
+            Report(progress, "Biomes: assigning materials");
+            materials = new MaterialStage().Apply(map, biomeMap, biomes, SubSeed(seed, "MaterialJitter"));
+
+            Report(progress, "Biomes: placing decorations");
+            decorations = new DecorationPlacer(SubSeed(seed, "Decorations"))
+                .Apply(map, biomeMap, biomes).Placements;
+            biomesClock.Stop();
+        }
+
         Report(progress, "Rendering preview");
         previewClock.Start();
-        var preview = new PreviewRenderer().Render(map, continentalness, profile);
+        var preview = new PreviewRenderer().Render(map, continentalness, profile, biomeMap);
         PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
         previewClock.Stop();
 
@@ -143,8 +168,12 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             LakeCount = lakeCount,
             TerrainMs = terrainClock.ElapsedMilliseconds,
             HydrologyMs = hydrologyClock.ElapsedMilliseconds,
+            BiomesMs = biomesClock.ElapsedMilliseconds,
             PreviewMs = previewClock.ElapsedMilliseconds,
-            TotalMs = total.ElapsedMilliseconds
+            TotalMs = total.ElapsedMilliseconds,
+            BiomePercentages = biomeMap is null ? null : BiomePercentages(biomeMap),
+            DecorationCounts = biomeMap is null ? null : DecorationCounts(decorations),
+            DecorationsTotal = decorations.Count
         };
 
         return new WorldGenPlan
@@ -154,9 +183,55 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             OriginX = originX,
             OriginY = originY,
             Terrain = map,
+            Biomes = biomeMap,
+            Materials = materials,
+            Decorations = biomeMap is null ? null : decorations,
             Statistics = statistics,
             PreviewPath = previewPath
         };
+    }
+
+    /// <summary>
+    ///     Computes the fraction of the footprint classified as each biome.
+    /// </summary>
+    /// <param name="biomeMap">Classified biome map.</param>
+    /// <returns>Biome fractions ordered by biome ID.</returns>
+    private static IReadOnlyDictionary<BiomeId, double> BiomePercentages(BiomeMap biomeMap)
+    {
+        var counts = new int[Enum.GetValues<BiomeId>().Length];
+        var total = (long)biomeMap.Width * biomeMap.Height;
+        for (var y = 0; y < biomeMap.Height; ++y)
+        {
+            for (var x = 0; x < biomeMap.Width; ++x)
+            {
+                ++counts[(int)biomeMap.Biome[x, y]];
+            }
+        }
+
+        var percentages = new SortedDictionary<BiomeId, double>();
+        for (var i = 0; i < counts.Length; ++i)
+        {
+            if (counts[i] > 0) percentages[(BiomeId)i] = (double)counts[i] / total;
+        }
+
+        return percentages;
+    }
+
+    /// <summary>
+    ///     Counts placed decorations per template name.
+    /// </summary>
+    /// <param name="decorations">Placed decorations.</param>
+    /// <returns>Counts ordered by template name.</returns>
+    private static IReadOnlyDictionary<string, int> DecorationCounts(
+        IReadOnlyList<DecorationPlacement> decorations)
+    {
+        var counts = new SortedDictionary<string, int>();
+        foreach (var placement in decorations)
+        {
+            counts[placement.TemplateName] = counts.GetValueOrDefault(placement.TemplateName) + 1;
+        }
+
+        return counts;
     }
 
     /// <summary>

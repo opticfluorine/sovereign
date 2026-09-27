@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Terrain;
 
 namespace Sovereign.WorldGen.Output;
@@ -41,9 +42,10 @@ public sealed class PreviewImage
 }
 
 /// <summary>
-///     Renders a hillshaded relief preview of a terrain map, one pixel per block with water,
-///     beach, cliff, and height-class coloring, downscaled to at most 1024 pixels on the long
-///     side. The preview is a diagnostic image, not art.
+///     Renders a hillshaded preview of a terrain map, one pixel per block. With a biome map
+///     the preview uses fixed per-biome colors; without one it falls back to water, beach,
+///     cliff, and height-class coloring. Downscaled to at most 1024 pixels on the long side.
+///     The preview is a diagnostic image, not art.
 /// </summary>
 public sealed class PreviewRenderer
 {
@@ -101,11 +103,33 @@ public sealed class PreviewRenderer
     ///     Mountain color.
     /// </summary>
     private static readonly (byte R, byte G, byte B) MountainColor = (172, 172, 176);
-
     /// <summary>
     ///     Beach color.
     /// </summary>
     private static readonly (byte R, byte G, byte B) BeachColor = (196, 178, 128);
+
+    /// <summary>
+    ///     Fixed biome palette, indexed by <see cref="BiomeId" />. Distinct hues per biome;
+    ///     ocean and shelf encode depth. Load-bearing for the biome preview golden hash:
+    ///     palette edits are golden-hash edits.
+    /// </summary>
+    private static readonly (byte R, byte G, byte B)[] BiomeColors =
+    {
+        (13, 28, 58),      // Ocean
+        (24, 52, 92),      // Shelf
+        (196, 178, 128),   // Beach
+        (58, 112, 180),    // Lake
+        (52, 96, 168),     // River
+        (110, 158, 68),    // Grassland
+        (52, 108, 46),     // Forest
+        (64, 104, 88),     // Taiga
+        (214, 186, 118),   // Desert
+        (178, 166, 92),    // Savanna
+        (88, 102, 60),     // Swamp
+        (142, 134, 120),   // Alpine
+        (234, 238, 242)    // Snowcap
+    };
+
     /// <summary>
     ///     Renders the preview image.
     /// </summary>
@@ -116,10 +140,24 @@ public sealed class PreviewRenderer
     public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
         WorldGenProfile profile)
     {
+        return Render(map, continentalness, profile, null);
+    }
+
+    /// <summary>
+    ///     Renders the preview image, coloring cells by biome when a biome map is given.
+    /// </summary>
+    /// <param name="map">Terrain map to render.</param>
+    /// <param name="continentalness">Banded continentalness classification.</param>
+    /// <param name="profile">World generation profile.</param>
+    /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
+    /// <returns>Rendered preview image.</returns>
+    public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
+        WorldGenProfile profile, BiomeMap? biomes)
+    {
         var factor = DownscaleFactor(map);
         var outWidth = (map.Width + factor - 1) / factor;
         var outHeight = (map.Height + factor - 1) / factor;
-        var pixels = RenderFull(map, continentalness, profile);
+        var pixels = RenderFull(map, continentalness, profile, biomes);
 
         if (factor > 1) pixels = Downscale(pixels, map.Width, map.Height, outWidth, outHeight, factor);
 
@@ -143,16 +181,17 @@ public sealed class PreviewRenderer
     /// <param name="map">Terrain map to render.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
+    /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
     /// <returns>Packed RGB pixel data in row-major order, top row first.</returns>
     private static byte[] RenderFull(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile)
+        WorldGenProfile profile, BiomeMap? biomes)
     {
         var pixels = new byte[map.Width * map.Height * 3];
         for (var y = 0; y < map.Height; ++y)
         {
             for (var x = 0; x < map.Width; ++x)
             {
-                var color = ColorOf(map, continentalness, profile, x, y);
+                var color = ColorOf(map, continentalness, profile, biomes, x, y);
                 var offset = (y * map.Width + x) * 3;
                 pixels[offset] = color.R;
                 pixels[offset + 1] = color.G;
@@ -169,13 +208,15 @@ public sealed class PreviewRenderer
     /// <param name="map">Terrain map.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
+    /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
     /// <param name="x">Cell X coordinate.</param>
     /// <param name="y">Cell Y coordinate.</param>
     /// <returns>Cell color.</returns>
-    private static (byte R, byte G, byte B) ColorOf(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, int x, int y)
+    private static (byte R, byte G, byte B) ColorOf(TerrainMap map,
+        ContinentalnessResult continentalness, WorldGenProfile profile, BiomeMap? biomes,
+        int x, int y)
     {
-        var baseColor = BaseColorOf(map, continentalness, profile, x, y);
+        var baseColor = BaseColorOf(map, continentalness, profile, biomes, x, y);
         var shade = HillshadeOf(map, x, y);
         if (map.IsCliff[x, y]) shade *= CliffTint;
 
@@ -191,12 +232,20 @@ public sealed class PreviewRenderer
     /// <param name="map">Terrain map.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
+    /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
     /// <param name="x">Cell X coordinate.</param>
     /// <param name="y">Cell Y coordinate.</param>
     /// <returns>Base color.</returns>
-    private static (byte R, byte G, byte B) BaseColorOf(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, int x, int y)
+    private static (byte R, byte G, byte B) BaseColorOf(TerrainMap map,
+        ContinentalnessResult continentalness, WorldGenProfile profile, BiomeMap? biomes,
+        int x, int y)
     {
+        if (biomes is not null)
+        {
+            if (map.IsRiver[x, y] || map.IsLake[x, y]) return RiverColor;
+            return BiomeColors[(int)biomes.Biome[x, y]];
+        }
+
         if (map.IsRiver[x, y] || map.IsLake[x, y]) return RiverColor;
         if (map.IsBeach[x, y]) return BeachColor;
 
