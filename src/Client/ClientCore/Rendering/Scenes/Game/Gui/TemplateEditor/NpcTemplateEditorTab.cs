@@ -47,6 +47,7 @@ public class NpcTemplateEditorTab
     private readonly AppearanceControlGroup appearanceControlGroup;
     private readonly BasicInformationControlGroup basicInformationControlGroup;
     private readonly BehaviorControlGroup behaviorControlGroup;
+    private readonly CombatControlGroup combatControlGroup;
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly DrawableComponentCollection drawables;
     private readonly EditorOptions editorOptions;
@@ -60,9 +61,6 @@ public class NpcTemplateEditorTab
     private readonly TemplateEntityDataClient templateEntityDataClient;
 
     private bool initialized;
-    private float inputAttackRange;
-    private bool inputAttackRangeEnabled;
-    private int inputAttackDelayUs;
     private EntityDefinition selectedDefinition = new();
     private ulong selectedEntityId;
     private int selectedIndex;
@@ -74,6 +72,7 @@ public class NpcTemplateEditorTab
         AnimatedSpriteComponentCollection animatedSprites, TemplateEntityDataClient templateEntityDataClient,
         BasicInformationControlGroup basicInformationControlGroup, AppearanceControlGroup appearanceControlGroup,
         EntityDataControlGroup entityDataControlGroup, BehaviorControlGroup behaviorControlGroup,
+        CombatControlGroup combatControlGroup,
         IOptions<RendererOptions> rendererOptions, DrawableComponentCollection drawables,
         IOptions<EditorOptions> editorOptions)
     {
@@ -89,6 +88,7 @@ public class NpcTemplateEditorTab
         this.templateEntityDataClient = templateEntityDataClient;
         this.entityDataControlGroup = entityDataControlGroup;
         this.behaviorControlGroup = behaviorControlGroup;
+        this.combatControlGroup = combatControlGroup;
         this.drawables = drawables;
         this.rendererOptions = rendererOptions.Value;
         this.editorOptions = editorOptions.Value;
@@ -241,7 +241,7 @@ public class NpcTemplateEditorTab
         behaviorControlGroup.Render(selectedDefinition);
         RenderNpcFlags();
         RenderStats();
-        RenderCombatControls();
+        combatControlGroup.Render(selectedDefinition);
         entityDataControlGroup.Render();
 
         ImGui.EndTable();
@@ -356,45 +356,6 @@ public class NpcTemplateEditorTab
     }
 
     /// <summary>
-    ///     Renders the combat-specific component controls.
-    /// </summary>
-    private void RenderCombatControls()
-    {
-        if (!ImGui.CollapsingHeader("Combat", ImGuiTreeNodeFlags.DefaultOpen)) return;
-        if (!ImGui.BeginTable("CombatControls", 2, ImGuiTableFlags.SizingFixedFit)) return;
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Attack:");
-        ImGui.TableNextColumn();
-        ImGui.Checkbox("##attackEnabled", ref inputAttackRangeEnabled);
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Attack Range:");
-        ImGui.TableNextColumn();
-        ImGui.BeginDisabled(!inputAttackRangeEnabled);
-        ImGui.InputFloat("##attackRange", ref inputAttackRange, 0.1f, 1.0f, "%.2f");
-        ImGui.EndDisabled();
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Attack Delay (us):");
-        ImGui.TableNextColumn();
-        ImGui.BeginDisabled(!inputAttackRangeEnabled);
-        ImGui.InputInt("##attackDelayUs", ref inputAttackDelayUs);
-        if (inputAttackDelayUs < 0) inputAttackDelayUs = 0;
-        ImGui.EndDisabled();
-
-        ImGui.EndTable();
-
-        selectedDefinition.AttackDetails = inputAttackRangeEnabled
-            ? new AttackDetails
-            {
-                AttackRange = inputAttackRange,
-                AttackDelayUs = (uint)inputAttackDelayUs
-            }
-            : null;
-    }
-
-    /// <summary>
     ///     Renders the save/cancel controls at the bottom of the editor.
     /// </summary>
     private void RenderEditorControls()
@@ -490,9 +451,6 @@ public class NpcTemplateEditorTab
             selectedEntityId = sortedTemplateEntityIds[index];
             selectedDefinition = definitionGenerator.GenerateDefinition(selectedEntityId);
             entityDataControlGroup.SelectEntity(selectedEntityId);
-            inputAttackRangeEnabled = selectedDefinition.AttackDetails.HasValue;
-            inputAttackRange = selectedDefinition.AttackDetails?.AttackRange ?? 0f;
-            inputAttackDelayUs = (int)(selectedDefinition.AttackDetails?.AttackDelayUs ?? 0);
         }
     }
 

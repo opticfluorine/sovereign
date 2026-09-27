@@ -53,6 +53,7 @@ public class ItemTemplateEditorTab
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AppearanceControlGroup appearanceControlGroup;
     private readonly BasicInformationControlGroup basicInformationControlGroup;
+    private readonly CombatControlGroup combatControlGroup;
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly DrawableComponentCollection drawables;
     private readonly EditorOptions editorOptions;
@@ -70,9 +71,6 @@ public class ItemTemplateEditorTab
     private bool inputEquippableEnabled;
     private float inputUseRange;
     private bool inputUseRangeEnabled;
-    private float inputAttackRange;
-    private bool inputAttackRangeEnabled;
-    private int inputAttackDelayUs;
     private EntityDefinition selectedDefinition = new();
     private ulong selectedEntityId;
     private int selectedIndex;
@@ -83,7 +81,7 @@ public class ItemTemplateEditorTab
         EntityDefinitionGenerator definitionGenerator, NameComponentValidator nameComponentValidator,
         AnimatedSpriteComponentCollection animatedSprites, TemplateEntityDataClient templateEntityDataClient,
         BasicInformationControlGroup basicInformationControlGroup, AppearanceControlGroup appearanceControlGroup,
-        EntityDataControlGroup entityDataControlGroup,
+        EntityDataControlGroup entityDataControlGroup, CombatControlGroup combatControlGroup,
         IOptions<RendererOptions> rendererOptions, DrawableComponentCollection drawables,
         IOptions<EditorOptions> editorOptions)
     {
@@ -98,6 +96,7 @@ public class ItemTemplateEditorTab
         this.appearanceControlGroup = appearanceControlGroup;
         this.templateEntityDataClient = templateEntityDataClient;
         this.entityDataControlGroup = entityDataControlGroup;
+        this.combatControlGroup = combatControlGroup;
         this.drawables = drawables;
         this.rendererOptions = rendererOptions.Value;
         this.editorOptions = editorOptions.Value;
@@ -248,7 +247,7 @@ public class ItemTemplateEditorTab
         basicInformationControlGroup.Render(selectedDefinition);
         appearanceControlGroup.Render(selectedDefinition);
         RenderItemControls();
-        RenderCombatControls();
+        combatControlGroup.Render(selectedDefinition);
         entityDataControlGroup.Render();
 
         ImGui.EndTable();
@@ -348,37 +347,6 @@ public class ItemTemplateEditorTab
     }
 
     /// <summary>
-    ///     Renders the combat-specific component controls.
-    /// </summary>
-    private void RenderCombatControls()
-    {
-        if (!ImGui.CollapsingHeader("Combat", ImGuiTreeNodeFlags.DefaultOpen)) return;
-        if (!ImGui.BeginTable("CombatControls", 2, ImGuiTableFlags.SizingFixedFit)) return;
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Attack:");
-        ImGui.TableNextColumn();
-        ImGui.Checkbox("##attackEnabled", ref inputAttackRangeEnabled);
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Attack Range:");
-        ImGui.TableNextColumn();
-        ImGui.BeginDisabled(!inputAttackRangeEnabled);
-        ImGui.InputFloat("##attackRange", ref inputAttackRange, 0.1f, 1.0f, "%.2f");
-        ImGui.EndDisabled();
-
-        ImGui.TableNextColumn();
-        ImGui.Text("Attack Delay (us):");
-        ImGui.TableNextColumn();
-        ImGui.BeginDisabled(!inputAttackRangeEnabled);
-        ImGui.InputInt("##attackDelayUs", ref inputAttackDelayUs);
-        if (inputAttackDelayUs < 0) inputAttackDelayUs = 0;
-        ImGui.EndDisabled();
-
-        ImGui.EndTable();
-    }
-
-    /// <summary>
     ///     Renders the save/cancel controls at the bottom of the editor.
     /// </summary>
     private void RenderEditorControls()
@@ -453,13 +421,6 @@ public class ItemTemplateEditorTab
     {
         selectedDefinition.UseRange = inputUseRangeEnabled ? inputUseRange : null;
         selectedDefinition.EquipmentType = inputEquippableEnabled ? inputEquipmentType : null;
-        selectedDefinition.AttackDetails = inputAttackRangeEnabled
-            ? new AttackDetails
-            {
-                AttackRange = inputAttackRange,
-                AttackDelayUs = (uint)inputAttackDelayUs
-            }
-            : null;
         templateEntityDataClient.SetTemplateEntity(definition, entityData);
     }
 
@@ -487,9 +448,6 @@ public class ItemTemplateEditorTab
             inputUseRange = selectedDefinition.UseRange ?? 0f;
             inputEquippableEnabled = selectedDefinition.EquipmentType.HasValue;
             inputEquipmentType = selectedDefinition.EquipmentType ?? EquipmentType.Weapon;
-            inputAttackRangeEnabled = selectedDefinition.AttackDetails.HasValue;
-            inputAttackRange = selectedDefinition.AttackDetails?.AttackRange ?? 0f;
-            inputAttackDelayUs = (int)(selectedDefinition.AttackDetails?.AttackDelayUs ?? 0);
         }
         else
         {
@@ -497,9 +455,6 @@ public class ItemTemplateEditorTab
             inputUseRange = 0f;
             inputEquippableEnabled = false;
             inputEquipmentType = EquipmentType.Weapon;
-            inputAttackRangeEnabled = false;
-            inputAttackRange = 0f;
-            inputAttackDelayUs = 0;
         }
     }
 

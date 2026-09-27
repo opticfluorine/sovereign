@@ -23,6 +23,7 @@ using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems.Combat;
 using Sovereign.EngineCore.Systems.Vitals;
 using Sovereign.EngineCore.Timing;
@@ -47,6 +48,7 @@ internal sealed class AttackHandler
     private readonly IEventSender eventSender;
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<AttackHandler> logger;
+    private readonly LoggingUtil loggingUtil;
     private readonly NonBlockWorldSegmentIndexer nonBlockIndexer;
     private readonly OrientationComponentCollection orientations;
     private readonly ParentComponentCollection parents;
@@ -67,6 +69,7 @@ internal sealed class AttackHandler
         CombatDamageCalculator damageCalculator,
         CombatInternalController internalController,
         IEventSender eventSender,
+        LoggingUtil loggingUtil,
         IOptions<CombatOptions> options,
         ILogger<AttackHandler> logger)
     {
@@ -82,6 +85,7 @@ internal sealed class AttackHandler
         this.damageCalculator = damageCalculator;
         this.internalController = internalController;
         this.eventSender = eventSender;
+        this.loggingUtil = loggingUtil;
         this.options = options.Value;
         this.logger = logger;
     }
@@ -94,13 +98,14 @@ internal sealed class AttackHandler
     {
         if (!IsRateLimitOk(actorId))
         {
-            logger.LogDebug("Attack by {ActorId} was rate limited.", actorId);
+            logger.LogDebug("Attack by {Actor} was rate limited.", loggingUtil.FormatEntity(actorId));
             return;
         }
 
         if (!kinematics.TryGetValue(actorId, out var actorKinematics))
         {
-            logger.LogError("Attack by unpositioned actor {ActorId} was rejected.", actorId);
+            logger.LogError("Attack by unpositioned actor {Actor} was rejected.",
+                loggingUtil.FormatEntity(actorId));
             return;
         }
 
