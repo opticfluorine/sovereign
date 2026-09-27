@@ -156,10 +156,13 @@ public sealed class WorldGenPlanJobRunner
         {
             var plan = pipeline.Plan(profile, profileName, seed, originX, originY, previewPath,
                 phase => system.SetJobStatus(WorldGenerationJobStatus.Planning, phase));
-            services.RecordCompletedPlan(plan);
-            system.SetJobStatus(WorldGenerationJobStatus.Idle, "Plan complete");
+            // Send the completion reply before recording the plan: waiters use the recorded
+            // plan as the signal that the job finished, so all completion chat must already
+            // be visible (and thread-safely recorded) when LastCompletedPlan becomes set.
             chat.SendSystemMessage(
                 plan.Statistics.Format() + "\nPreview: " + plan.PreviewPath, senderEntityId);
+            system.SetJobStatus(WorldGenerationJobStatus.Idle, "Plan complete");
+            services.RecordCompletedPlan(plan);
         }
         catch (Exception e)
         {

@@ -166,7 +166,7 @@ public class TestWorldGenChatCommandHandler
 
         handler.Handle("plan 1", SenderEntityId);
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
-        sender.SentEvents.Clear();
+        sender.Reset();
 
         handler.Handle("preview", SenderEntityId);
 

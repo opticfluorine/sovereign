@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.WorldGen;
@@ -62,13 +63,46 @@ internal sealed class FakeEventLoop : IEventLoop
 internal sealed class FakeEventSender : IEventSender
 {
     /// <summary>
+    ///     Lock guarding the recorded event list; senders may run on background threads.
+    /// </summary>
+    private readonly Lock accessLock = new();
+
+    /// <summary>
     ///     Events that have been sent through this fake.
     /// </summary>
-    public List<Event> SentEvents { get; } = new();
+    private readonly List<Event> sentEvents = new();
+
+    /// <summary>
+    ///     Snapshot of the recorded events, safe to read while a background job is sending.
+    /// </summary>
+    public IReadOnlyList<Event> SentEvents
+    {
+        get
+        {
+            lock (accessLock)
+            {
+                return new List<Event>(sentEvents);
+            }
+        }
+    }
 
     public void SendEvent(Event ev)
     {
-        SentEvents.Add(ev);
+        lock (accessLock)
+        {
+            sentEvents.Add(ev);
+        }
+    }
+
+    /// <summary>
+    ///     Clears all recorded events.
+    /// </summary>
+    public void Reset()
+    {
+        lock (accessLock)
+        {
+            sentEvents.Clear();
+        }
     }
 
     public bool TryGetOutgoingEvent(out Event? ev)
@@ -84,27 +118,59 @@ internal sealed class FakeEventSender : IEventSender
 internal sealed class StubWorldGenPipeline : IWorldGenPipeline
 {
     /// <summary>
+    ///     Lock guarding test-visible state; <see cref="Plan"/> runs on a background task.
+    /// </summary>
+    private readonly Lock accessLock = new();
+
+    /// <summary>
     ///     Optional gate that the pipeline waits on before completing.
     /// </summary>
     public ManualResetEventSlim? Gate { get; init; }
 
+    private bool started;
+
     /// <summary>
     ///     Whether the pipeline has been invoked.
     /// </summary>
-    public bool Started { get; private set; }
+    public bool Started
+    {
+        get
+        {
+            lock (accessLock)
+            {
+                return started;
+            }
+        }
+    }
+
+    private readonly List<string> seenPhases = new();
 
     /// <summary>
     ///     Phases reported through the progress callback.
     /// </summary>
-    public List<string> SeenPhases { get; } = new();
+    public IReadOnlyList<string> SeenPhases
+    {
+        get
+        {
+            lock (accessLock)
+            {
+                return new List<string>(seenPhases);
+            }
+        }
+    }
 
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
         int originY, string previewPath, Action<string>? progress)
     {
-        Started = true;
-        foreach (var phase in new[] { "Terrain", "Hydrology", "Preview" })
+        List<string> phases = new() { "Terrain", "Hydrology", "Preview" };
+        lock (accessLock)
         {
-            SeenPhases.Add(phase);
+            started = true;
+            seenPhases.AddRange(phases);
+        }
+
+        foreach (var phase in phases)
+        {
             progress?.Invoke(phase);
         }
 
