@@ -54,4 +54,44 @@ internal static class TestProfiles
             Caves = new CaveOptions { ShaftsPerLevelPair = 3, SurfaceMouths = 2 }
         };
     }
+
+    /// <summary>
+    ///     Creates the 128x128 baseline profile used by pipeline tests. Cave data is parsed
+    ///     but unused until the cave generation card.
+    /// </summary>
+    /// <returns>Profile.</returns>
+    public static WorldGenProfile CreateSmall128()
+    {
+        return new WorldGenProfile
+        {
+            Width = 128,
+            Height = 128,
+            SeaLevelZ = 12,
+            SurfaceMaxZ = 28,
+            RockFloorZ = -63,
+            BedrockZ = -64,
+            StoneBands = new List<StoneBand>
+            {
+                new() { FromZ = -16, ToZ = -1, Template = "Shale" },
+                new() { FromZ = -40, ToZ = -17, Template = "Granite" },
+                new() { FromZ = -63, ToZ = -41, Template = "Basalt" }
+            },
+            CaveLevels = new List<CaveLevel>
+            {
+                new() { FloorZ = -32, Headroom = 2 }
+            },
+            Rivers = new RiverOptions { MaxCount = 8, MinLength = 16 }
+        };
+    }
+
+    /// <summary>
+    ///     Creates the 128x128 baseline profile without river options; river stages are skipped.
+    /// </summary>
+    /// <returns>Profile.</returns>
+    public static WorldGenProfile CreateSmall128WithoutRivers()
+    {
+        var profile = CreateSmall128();
+        profile.Rivers = null;
+        return profile;
+    }
 }

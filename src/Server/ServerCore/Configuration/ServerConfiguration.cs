@@ -268,3 +268,15 @@ public sealed class ModerationOptions
     /// </summary>
     public int DefaultMuteTimeoutMinutes { get; set; } = 5;
 }
+
+/// <summary>
+///     Full description of the world generation configuration.
+/// </summary>
+public sealed class WorldGenOptions
+{
+    /// <summary>
+    ///     Directory for world generation scratch output such as preview images, or empty to
+    ///     use the default system temporary directory.
+    /// </summary>
+    public string ScratchDirectory { get; set; } = "";
+}

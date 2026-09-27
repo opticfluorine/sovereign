@@ -80,6 +80,8 @@ public static class ServerServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(WorldOptions)}"));
         services.Configure<ModerationOptions>(
             configuration.GetSection($"Sovereign:{nameof(ModerationOptions)}"));
+        services.Configure<WorldGenOptions>(
+            configuration.GetSection($"Sovereign:{nameof(WorldGenOptions)}"));
 
         return services;
     }
@@ -195,6 +197,9 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldGenerationServices>();
         services.TryAddSingleton<WorldGenerationController>();
         services.TryAddSingleton<WorldGenChatCommandHandler>();
+        services.TryAddSingleton<WorldGenPlanJobRunner>();
+        services.TryAddSingleton<WorldGenScratch>();
+        services.TryAddSingleton<IWorldGenPipeline, WorldGenPipeline>();
         services.TryAddSingleton<ProfileLoader>();
         services.TryAddSingleton<ProfileValidator>();
 

@@ -180,14 +180,7 @@ public sealed class WorldGenChatCommandHandler
             }
         }
 
-        try
-        {
-            controller.Plan(seed, profileName, origin);
-        }
-        catch (NotImplementedException)
-        {
-            SendNotImplemented("plan", senderEntityId);
-        }
+        controller.Plan(seed, profileName, origin, senderEntityId);
     }
 
     /// <summary>
@@ -196,16 +189,22 @@ public sealed class WorldGenChatCommandHandler
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnStatus(ulong senderEntityId)
     {
-        internalController.SendSystemMessage($"World generation status: {services.JobStatus}.", senderEntityId);
+        var message = services.LastStatusMessage is null
+            ? $"World generation status: {services.JobStatus}."
+            : $"World generation status: {services.JobStatus} ({services.LastStatusMessage}).";
+        internalController.SendSystemMessage(message, senderEntityId);
     }
 
     /// <summary>
-    ///     Handles the preview subcommand.
+    ///     Handles the preview subcommand by re-reporting the last completed plan's preview.
     /// </summary>
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnPreview(ulong senderEntityId)
     {
-        SendNotImplemented("preview", senderEntityId);
+        var plan = services.LastCompletedPlan;
+        internalController.SendSystemMessage(plan is null
+            ? "No world generation plan has completed this server session."
+            : $"Last plan preview (seed {plan.Seed}): {plan.PreviewPath}", senderEntityId);
     }
 
     /// <summary>
