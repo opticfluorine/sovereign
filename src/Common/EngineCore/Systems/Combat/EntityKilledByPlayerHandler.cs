@@ -15,13 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Logging;
 
 namespace Sovereign.EngineCore.Systems.Combat;
 
 /// <summary>
 ///     Handles kill credit when a player kills another entity.
 /// </summary>
-public class EntityKilledByPlayerHandler(ILogger<EntityKilledByPlayerHandler> logger)
+public class EntityKilledByPlayerHandler(ILogger<EntityKilledByPlayerHandler> logger, LoggingUtil loggingUtil)
 {
     /// <summary>
     ///     Credits the kill of a slain entity to a player.
@@ -30,7 +31,7 @@ public class EntityKilledByPlayerHandler(ILogger<EntityKilledByPlayerHandler> lo
     /// <param name="killerPlayerEntityId">Entity ID of the player credited with the kill.</param>
     public void HandleEntityKilledByPlayer(ulong victimEntityId, ulong killerPlayerEntityId)
     {
-        logger.LogInformation("Entity {VictimEntityId} was killed by player {KillerPlayerEntityId}.",
-            victimEntityId, killerPlayerEntityId);
+        logger.LogInformation("{Victim} was killed by {Killer}.",
+            loggingUtil.FormatEntity(victimEntityId), loggingUtil.FormatEntity(killerPlayerEntityId));
     }
 }
