@@ -103,6 +103,8 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     private const SqliteType PlayerFlagsParamType = SqliteType.Integer;
     private const string PlayerFlagsParamName = "player_flags";
 
+    private const string AttackDetailsColumnPrefix = "attack_";
+
     private readonly DatabaseOptions configuration;
     private readonly ILogger<SqlitePersistenceProvider> logger;
 
@@ -367,6 +369,12 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         ModifyPlayerFlagsComponentQuery =
             new SimpleSqliteModifyComponentQuery<PlayerFlag>(PlayerFlagsParamName, PlayerFlagsParamType, conn);
         RemovePlayerFlagsComponentQuery = new SimpleSqliteRemoveComponentQuery(PlayerFlagsParamName, conn);
+
+        // AttackDetails component.
+        var attackDetailsQueries = new AttackDetailsSqliteComponentQueries(AttackDetailsColumnPrefix, conn);
+        AddAttackDetailsComponentQuery = attackDetailsQueries;
+        ModifyAttackDetailsComponentQuery = attackDetailsQueries;
+        RemoveAttackDetailsComponentQuery = attackDetailsQueries;
     }
 
     public IAddComponentQuery<BlockTile> AddBlockTileQuery { get; }
@@ -474,6 +482,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IAddComponentQuery<PlayerFlag> AddPlayerFlagsComponentQuery { get; }
     public IModifyComponentQuery<PlayerFlag> ModifyPlayerFlagsComponentQuery { get; }
     public IRemoveComponentQuery RemovePlayerFlagsComponentQuery { get; }
+    public IAddComponentQuery<AttackDetails> AddAttackDetailsComponentQuery { get; }
+    public IModifyComponentQuery<AttackDetails> ModifyAttackDetailsComponentQuery { get; }
+    public IRemoveComponentQuery RemoveAttackDetailsComponentQuery { get; }
     public IPlayerExistsQuery PlayerExistsQuery { get; }
     public IGetAccountForPlayerQuery GetAccountForPlayerQuery { get; }
     public IListPlayersQuery ListPlayersQuery { get; }

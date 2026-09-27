@@ -47,6 +47,7 @@ public class NpcTemplateEditorTab
     private readonly AppearanceControlGroup appearanceControlGroup;
     private readonly BasicInformationControlGroup basicInformationControlGroup;
     private readonly BehaviorControlGroup behaviorControlGroup;
+    private readonly CombatControlGroup combatControlGroup;
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly DrawableComponentCollection drawables;
     private readonly EditorOptions editorOptions;
@@ -71,6 +72,7 @@ public class NpcTemplateEditorTab
         AnimatedSpriteComponentCollection animatedSprites, TemplateEntityDataClient templateEntityDataClient,
         BasicInformationControlGroup basicInformationControlGroup, AppearanceControlGroup appearanceControlGroup,
         EntityDataControlGroup entityDataControlGroup, BehaviorControlGroup behaviorControlGroup,
+        CombatControlGroup combatControlGroup,
         IOptions<RendererOptions> rendererOptions, DrawableComponentCollection drawables,
         IOptions<EditorOptions> editorOptions)
     {
@@ -86,6 +88,7 @@ public class NpcTemplateEditorTab
         this.templateEntityDataClient = templateEntityDataClient;
         this.entityDataControlGroup = entityDataControlGroup;
         this.behaviorControlGroup = behaviorControlGroup;
+        this.combatControlGroup = combatControlGroup;
         this.drawables = drawables;
         this.rendererOptions = rendererOptions.Value;
         this.editorOptions = editorOptions.Value;
@@ -238,6 +241,7 @@ public class NpcTemplateEditorTab
         behaviorControlGroup.Render(selectedDefinition);
         RenderNpcFlags();
         RenderStats();
+        combatControlGroup.Render(selectedDefinition);
         entityDataControlGroup.Render();
 
         ImGui.EndTable();

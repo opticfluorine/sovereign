@@ -537,4 +537,18 @@ public interface IEntityBuilder : IDisposable
     /// </summary>
     /// <returns>Builder.</returns>
     IEntityBuilder WithoutPlayerFlags();
+
+    /// <summary>
+    ///     Adds an AttackDetails component to the entity.
+    /// </summary>
+    /// <param name="attackDetails">Attack details.</param>
+    /// <returns>Builder.</returns>
+    [ScriptableEntityBuilderAction(nameof(AttackDetails))]
+    IEntityBuilder AttackDetails(AttackDetails attackDetails);
+
+    /// <summary>
+    ///     Removes the AttackDetails component if present.
+    /// </summary>
+    /// <returns>Builder.</returns>
+    IEntityBuilder WithoutAttackDetails();
 }

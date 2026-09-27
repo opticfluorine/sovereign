@@ -35,6 +35,7 @@ public class SqliteRetrieveAllTemplatesQuery : IRetrieveAllTemplatesQuery
                 pls_radius, pls_intensity, pls_color, pls_pos_x, pls_pos_y, pls_pos_z,
                 physics, bb_pos_x, bb_pos_y, bb_pos_z, bb_size_x, bb_size_y, bb_size_z, shadow_radius, entity_type, server_only,
                 stackable, quantity, item_use, npc_flags, use_range,
+                attack_range, attack_delay_us,
                 health_value, health_max_value, health_change_rate, health_change_interval,
                 stamina_value, stamina_max_value, stamina_change_rate, stamina_change_interval,
                 mana_value, mana_max_value, mana_change_rate, mana_change_interval,

@@ -7,6 +7,7 @@ to server-side scripts.
 :maxdepth: 1
 chat.md
 color.md
+combat.md
 components.md
 data.md
 dialogue.md

@@ -846,5 +846,31 @@ public enum EventId
 
     #endregion Server_Chat
 
+    #region Server_Combat
+
+    /// <summary>
+    ///     Sent to request that an actor perform an attack.
+    ///     Replicated in both directions; the actor ID is overwritten server-side.
+    /// </summary>
+    /// Associated details: AttackEventDetails
+    Server_Combat_Attack = 200900,
+
+    /// <summary>
+    ///     Sent when a player is killed by another entity.
+    ///     Server-internal; never crosses the network.
+    /// </summary>
+    /// Associated details: PlayerKilledEventDetails
+    [ScriptableEvent(nameof(PlayerKilledEventDetails))]
+    Server_Combat_PlayerKilled = 200901,
+
+    /// <summary>
+    ///     Sent when an entity is damaged by an attacker.
+    ///     Server-internal; never crosses the network.
+    /// </summary>
+    /// Associated details: DamagedByEventDetails
+    Server_Combat_DamagedBy = 200902,
+
+    #endregion Server_Combat
+
     #endregion Server
 }

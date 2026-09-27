@@ -60,7 +60,8 @@ public class EntityDebugGui(
     EquipmentTypeComponentCollection equipmentTypes,
     LevelComponentCollection levels,
     ExperienceComponentCollection experiences,
-    RadiantDataComponentCollection radiantDatas)
+    RadiantDataComponentCollection radiantDatas,
+    AttackDetailsComponentCollection attackDetails)
 {
     private string entityIdInput = "";
 
@@ -190,6 +191,12 @@ public class EntityDebugGui(
                             AddValueRow("Wisdom:", s.Wisdom);
                             AddValueRow("Charisma:", s.Charisma);
                             AddValueRow("Luck:", s.Luck);
+                        });
+                    AddCompoundRows("Attack Details:", entityId, attackDetails,
+                        a =>
+                        {
+                            AddValueRow("Attack Range:", a.AttackRange);
+                            AddValueRow("Attack Delay (us):", a.AttackDelayUs);
                         });
                     ImGui.EndTable();
                 }

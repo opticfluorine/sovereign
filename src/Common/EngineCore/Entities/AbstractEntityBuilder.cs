@@ -65,6 +65,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     private readonly LevelComponentCollection levels;
     private readonly ExperienceComponentCollection experiences;
     private readonly RadiantDataComponentCollection radiantDatas;
+    private readonly AttackDetailsComponentCollection attackDetails;
 
     private readonly IncrementalGuard.IncrementalGuardWeakLock weakLock;
     private bool isBlock;
@@ -106,6 +107,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         LevelComponentCollection levels,
         ExperienceComponentCollection experiences,
         RadiantDataComponentCollection radiantDatas,
+        AttackDetailsComponentCollection attackDetails,
         EntityTable entityTable)
     {
         this.entityId = entityId;
@@ -143,6 +145,7 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
         this.experiences = experiences;
         this.radiantDatas = radiantDatas;
         this.playerFlags = playerFlags;
+        this.attackDetails = attackDetails;
 
         if (entityId is >= EntityConstants.FirstTemplateEntityId and <= EntityConstants.LastTemplateEntityId)
         {
@@ -613,6 +616,18 @@ public abstract class AbstractEntityBuilder : IEntityBuilder
     public IEntityBuilder WithoutPlayerFlags()
     {
         playerFlags.RemoveComponent(entityId, load);
+        return this;
+    }
+
+    public IEntityBuilder AttackDetails(AttackDetails attackDetails)
+    {
+        this.attackDetails.AddOrUpdateComponent(entityId, attackDetails, load);
+        return this;
+    }
+
+    public IEntityBuilder WithoutAttackDetails()
+    {
+        attackDetails.RemoveComponent(entityId, load);
         return this;
     }
 

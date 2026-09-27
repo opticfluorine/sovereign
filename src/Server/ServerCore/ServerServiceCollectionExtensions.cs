@@ -34,6 +34,7 @@ using Sovereign.ServerCore.Logging;
 using Sovereign.ServerCore.Resources;
 using Sovereign.ServerCore.Systems.Data;
 using Sovereign.ServerCore.Systems.Dialogue;
+using Sovereign.ServerCore.Systems.Combat;
 using Sovereign.ServerCore.Systems.Interaction;
 using Sovereign.ServerCore.Systems.Movement;
 using Sovereign.ServerCore.Systems.Persistence;
@@ -94,6 +95,7 @@ public static class ServerServiceCollectionExtensions
         AddComponents(services);
         AddServerImplementations(services);
         AddDataSystem(services);
+        AddCombatSystem(services);
         AddDialogueSystem(services);
         AddInteractionSystem(services);
         AddPersistenceSystem(services);
@@ -128,6 +130,14 @@ public static class ServerServiceCollectionExtensions
     private static void AddDataSystem(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILuaLibrary, DataLuaLibrary>());
+    }
+
+    private static void AddCombatSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<AttackHandler>();
+        services.TryAddSingleton<CombatDamageCalculator>();
+        services.TryAddSingleton<CombatScripting>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, CombatSystem>());
     }
 
     private static void AddDialogueSystem(IServiceCollection services)
