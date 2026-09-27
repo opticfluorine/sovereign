@@ -43,8 +43,10 @@ using Sovereign.ServerCore.Systems.ServerManagement;
 using Sovereign.ServerCore.Systems.TemplateEntity;
 using Sovereign.ServerCore.Systems.Time;
 using Sovereign.ServerCore.Systems.WorldEdit;
+using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.ServerCore.Systems.WorldManagement;
 using Sovereign.ServerCore.Timing;
+using Sovereign.WorldGen;
 
 namespace Sovereign.ServerCore;
 
@@ -100,6 +102,7 @@ public static class ServerServiceCollectionExtensions
         AddTemplateEntitySystem(services);
         AddTimeSystem(services);
         AddWorldEditSystem(services);
+        AddWorldGenerationSystem(services);
         AddWorldManagementSystem(services);
         AddScriptingSystem(services);
 
@@ -184,6 +187,20 @@ public static class ServerServiceCollectionExtensions
     private static void AddWorldEditSystem(IServiceCollection services)
     {
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldEditSystem>());
+    }
+
+    private static void AddWorldGenerationSystem(IServiceCollection services)
+    {
+        services.TryAddSingleton<WorldGenerationSystem>();
+        services.TryAddSingleton<WorldGenerationServices>();
+        services.TryAddSingleton<WorldGenerationController>();
+        services.TryAddSingleton<WorldGenChatCommandHandler>();
+        services.TryAddSingleton<ProfileLoader>();
+        services.TryAddSingleton<ProfileValidator>();
+
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<ISystem, WorldGenerationSystem>(s =>
+                s.GetRequiredService<WorldGenerationSystem>()));
     }
 
     private static void AddWorldManagementSystem(IServiceCollection services)

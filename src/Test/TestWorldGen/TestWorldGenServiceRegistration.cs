@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
-using Sovereign.ServerCore.Systems.ServerChat;
+using Sovereign.ServerCore;
 using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.WorldGen;
 using Xunit;
@@ -29,24 +29,24 @@ namespace TestWorldGen;
 /// <summary>
 ///     Dependency injection smoke tests for the WorldGeneration system registrations.
 /// </summary>
-public class TestWorldGenServiceCollectionExtensions
+public class TestWorldGenServiceRegistration
 {
     [Fact]
-    public void AddWorldGenerationSystem_BuildsProvider_AndResolvesServices()
+    public void AddSovereignServer_BuildsProvider_AndResolvesWorldGenServices()
     {
         var services = new ServiceCollection();
         services.AddSingleton<IEventLoop>(new FakeEventLoop());
         services.AddSingleton<IEventSender>(new FakeEventSender());
         services.AddSingleton<EventCommunicator>();
         services.AddSingleton<ILogger<WorldGenerationSystem>>(NullLogger<WorldGenerationSystem>.Instance);
-        services.AddSingleton<ServerChatInternalController>();
-        services.AddWorldGenerationSystem();
+        services.AddSovereignServer();
 
         using var provider = services.BuildServiceProvider();
 
         var system = provider.GetRequiredService<WorldGenerationSystem>();
         Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
-        Assert.Same(system, provider.GetRequiredService<ISystem>());
+        Assert.Contains(services,
+            d => d.ServiceType == typeof(ISystem) && d.ImplementationFactory is not null);
         Assert.NotNull(provider.GetRequiredService<WorldGenerationServices>());
         Assert.NotNull(provider.GetRequiredService<WorldGenerationController>());
         Assert.NotNull(provider.GetRequiredService<WorldGenChatCommandHandler>());

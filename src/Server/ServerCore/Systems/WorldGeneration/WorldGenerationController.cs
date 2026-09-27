@@ -20,26 +20,11 @@ using Sovereign.EngineCore.Components.Types;
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
 /// <summary>
-///     Public API for the WorldGeneration system, consumed by the chat command processor.
+///     Public API for sending requests to the WorldGeneration system, consumed by the chat
+///     command processor.
 /// </summary>
 public class WorldGenerationController
 {
-    private readonly WorldGenerationServices services;
-
-    public WorldGenerationController(WorldGenerationServices services)
-    {
-        this.services = services;
-    }
-
-    /// <summary>
-    ///     Gets a string describing the current world generation job status.
-    /// </summary>
-    /// <returns>Current job status string, e.g. "Idle".</returns>
-    public string Status()
-    {
-        return services.JobStatus.ToString();
-    }
-
     /// <summary>
     ///     Requests a new world generation plan.
     /// </summary>

@@ -31,7 +31,6 @@ using Sovereign.Persistence;
 using Sovereign.Server;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Lua;
-using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.ServerNetwork;
 using Sovereign.ServerNetwork.Network.Rest;
 
@@ -59,7 +58,6 @@ builder.Services
     .AddSovereignCoreHostedServices()
     .AddSovereignNetworkCore()
     .AddSovereignServer()
-    .AddWorldGenerationSystem()
     .AddSovereignServerNetwork()
     .AddSovereignPersistence()
     .AddSovereignAccounts()

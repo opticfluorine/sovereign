@@ -87,12 +87,14 @@ public sealed class WorldGenChatCommandHandler
     private const string GeneralUsage = "Usage: /worldgen <plan|status|preview|commit|replace|abort>";
 
     private readonly WorldGenerationController controller;
+    private readonly WorldGenerationServices services;
     private readonly ServerChatInternalController internalController;
 
     public WorldGenChatCommandHandler(WorldGenerationController controller,
-        ServerChatInternalController internalController)
+        WorldGenerationServices services, ServerChatInternalController internalController)
     {
         this.controller = controller;
+        this.services = services;
         this.internalController = internalController;
     }
 
@@ -194,7 +196,7 @@ public sealed class WorldGenChatCommandHandler
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnStatus(ulong senderEntityId)
     {
-        internalController.SendSystemMessage($"World generation status: {controller.Status()}.", senderEntityId);
+        internalController.SendSystemMessage($"World generation status: {services.JobStatus}.", senderEntityId);
     }
 
     /// <summary>

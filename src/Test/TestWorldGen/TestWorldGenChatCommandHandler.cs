@@ -175,16 +175,16 @@ public class TestWorldGenChatCommandHandler
     }
 
     /// <summary>
-    ///     Creates a handler backed by a real controller stub and a recording event sender.
+    ///     Creates a handler backed by a real system and a recording event sender.
     /// </summary>
     /// <returns>Handler and the event sender that received chat messages.</returns>
     private static (WorldGenChatCommandHandler Handler, FakeEventSender Sender) CreateHandler()
     {
         var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
             NullLogger<WorldGenerationSystem>.Instance);
-        var controller = new WorldGenerationController(new WorldGenerationServices(system));
         var sender = new FakeEventSender();
-        var handler = new WorldGenChatCommandHandler(controller, new ServerChatInternalController(sender));
+        var handler = new WorldGenChatCommandHandler(new WorldGenerationController(),
+            new WorldGenerationServices(system), new ServerChatInternalController(sender));
 
         return (handler, sender);
     }
