@@ -16,6 +16,7 @@
         <ProjectReference Include="..\..\Common\ScriptingGenerators\ScriptingGenerators.csproj"
                           OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\..\Common\WorldGen\WorldGen.csproj"/>
     </ItemGroup>
 
 </Project>

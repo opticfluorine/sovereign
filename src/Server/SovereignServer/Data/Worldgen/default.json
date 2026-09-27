@@ -1,0 +1,26 @@
+{
+  "width": 2048,
+  "height": 2048,
+  "seaLevelZ": 12,
+  "surfaceMaxZ": 28,
+  "rockFloorZ": -63,
+  "bedrockZ": -64,
+  "stoneBands": [
+    { "fromZ": -16, "toZ": -1, "template": "Shale" },
+    { "fromZ": -40, "toZ": -17, "template": "Granite" },
+    { "fromZ": -63, "toZ": -41, "template": "Basalt" }
+  ],
+  "caveLevels": [
+    { "floorZ": -16, "headroom": 2 },
+    { "floorZ": -32, "headroom": 2 },
+    { "floorZ": -48, "headroom": 2 }
+  ],
+  "rivers": {
+    "maxCount": 40,
+    "minLength": 64
+  },
+  "caves": {
+    "shaftsPerLevelPair": 3,
+    "surfaceMouths": 2
+  }
+}
