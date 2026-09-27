@@ -18,6 +18,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using Sovereign.WorldGen;
+using Sovereign.WorldGen.Terrain;
 using Xunit;
 
 namespace TestWorldGen;
@@ -39,10 +40,24 @@ public class TestWorldGenPipeline
     ///
     ///     To regenerate after an intentional algorithm change: run this test once and read
     ///     the actual hash from the assertion failure message, then update this constant.
-    ///     The pipeline is deterministic, so the hash is stable across runs on a given runtime.
+    ///     The preview PNG uses stored (uncompressed) deflate blocks per RFC 1951, which are
+    ///     fully specified by the format, so the hash is stable across machines and runtime
+    ///     versions. Generated on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenPreviewSha256 =
-        "4CF2E2F70BE8379BD5CD6CFFFDCA1EA75253DC88D28308BE51536E0D5DD3B568";
+        "8831E816C5D6CC179104A669250A38CA484C2281506446552D43211915B63EDD";
+
+    /// <summary>
+    ///     SHA-256 hash of the golden 128x128 heightmap: the TerrainMap heights serialized
+    ///     row-major as 32-bit little-endian integers.
+    ///
+    ///     Pinned independently of the preview hash so that a cross-machine mismatch
+    ///     distinguishes drift in the generation math (this hash) from drift in the
+    ///     preview encoding (the preview hash). To regenerate: run this test once and
+    ///     read the actual hash from the assertion failure message.
+    /// </summary>
+    private const string GoldenHeightsSha256 =
+        "640904D9B5CB6A8B8EB24A9A20256E93A1317D2F599C8DA429EF9963CBAA3305";
 
     [Fact]
     public void Plan_SameSeedAndProfile_ProducesIdenticalHeightsAndPreview()
@@ -85,24 +100,48 @@ public class TestWorldGenPipeline
 
         try
         {
-            new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
-            var actual = Sha256(File.ReadAllBytes(path));
+            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            var actualPreview = Sha256(File.ReadAllBytes(path));
+            var actualHeights = Sha256(HeightsBytes(plan.Terrain));
 
-            if (GoldenPreviewSha256.StartsWith("REPLACE"))
-            {
-                Assert.Fail(
-                    $"Golden hash is not set; copy this value into GoldenPreviewSha256: {actual}");
-            }
-
-            Assert.True(string.Equals(actual, GoldenPreviewSha256, StringComparison.OrdinalIgnoreCase),
-                $"Golden preview hash mismatch: expected {GoldenPreviewSha256}, actual {actual}. " +
-                "If the generation algorithms changed intentionally, regenerate the constant " +
-                "as described in its documentation.");
+            Assert.True(string.Equals(actualHeights, GoldenHeightsSha256, StringComparison.OrdinalIgnoreCase),
+                $"Golden heights hash mismatch: expected {GoldenHeightsSha256}, actual {actualHeights}. " +
+                "The generation math has drifted from the pinned baseline. If the change was " +
+                "intentional, regenerate the constant as described in its documentation.");
+            Assert.True(string.Equals(actualPreview, GoldenPreviewSha256, StringComparison.OrdinalIgnoreCase),
+                $"Golden preview hash mismatch: expected {GoldenPreviewSha256}, actual {actualPreview}. " +
+                "The preview encoding has drifted from the pinned baseline (the heightmap hash " +
+                "passed, so the math is intact). If the change was intentional, regenerate the " +
+                "constant as described in its documentation.");
         }
         finally
         {
             File.Delete(path);
         }
+    }
+
+    /// <summary>
+    ///     Serializes the heightmap row-major as 32-bit little-endian integers for hashing.
+    /// </summary>
+    /// <param name="map">Terrain map to serialize.</param>
+    /// <returns>Serialized bytes.</returns>
+    private static byte[] HeightsBytes(TerrainMap map)
+    {
+        var bytes = new byte[map.Width * map.Height * sizeof(int)];
+        for (var y = 0; y < map.Height; ++y)
+        {
+            for (var x = 0; x < map.Width; ++x)
+            {
+                var offset = (y * map.Width + x) * sizeof(int);
+                var value = map.Heights[x, y];
+                bytes[offset] = (byte)value;
+                bytes[offset + 1] = (byte)(value >> 8);
+                bytes[offset + 2] = (byte)(value >> 16);
+                bytes[offset + 3] = (byte)(value >> 24);
+            }
+        }
+
+        return bytes;
     }
 
     [Fact]

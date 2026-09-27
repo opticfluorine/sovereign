@@ -58,7 +58,11 @@ public static class PngWriter
         WriteChunk(stream, "IHDR", HeaderData(width, height));
 
         using var compressed = new MemoryStream();
-        using (var zlib = new ZLibStream(compressed, CompressionLevel.Optimal, true))
+        // NoCompression pins the deflate output to RFC 1951 stored blocks, which are fully
+        // specified by the format. Compressed output depends on the zlib implementation and
+        // version (match-finding strategy, block splitting), which differs across .NET builds
+        // and would break the cross-machine determinism contract tested by the golden hash.
+        using (var zlib = new ZLibStream(compressed, CompressionLevel.NoCompression, true))
         {
             WriteFilteredRows(zlib, width, height, rgb);
         }
