@@ -39,6 +39,7 @@ using Sovereign.Persistence.Players;
 using Sovereign.ServerCore.Components;
 using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.ServerChat;
+using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.ServerNetwork.Network.ServerNetwork;
 
 namespace Sovereign.ServerNetwork.Systems.ServerChat;
@@ -147,6 +148,11 @@ public class AdminChatProcessor : IChatProcessor
     /// </summary>
     private const string ListBans = "listbans";
 
+    /// <summary>
+    ///     Command name for /worldgen.
+    /// </summary>
+    private const string WorldGen = "worldgen";
+
     private readonly AccountComponentCollection accounts;
     ///     Command name for /gcworld.
     /// </summary>
@@ -186,12 +192,14 @@ public class AdminChatProcessor : IChatProcessor
     private readonly ScriptingController scriptingController;
     private readonly ScriptingServices scriptingServices;
     private readonly WorldManagementController worldManagementController;
+    private readonly WorldGenChatCommandHandler worldGenChatCommandHandler;
     private readonly ServerNetworkController networkController;
 
     public AdminChatProcessor(AdminTagCollection admins, ServerChatInternalController internalController,
         PlayerRoleCheck playerRoleCheck, PlayerNameComponentIndexer playerNameIndex,
         NameComponentValidator nameValidator, PersistencePlayerServices persistencePlayerServices,
         LoggingUtil loggingUtil, NameComponentCollection names, WorldManagementController worldManagementController,
+        WorldGenChatCommandHandler worldGenChatCommandHandler,
         IEventSender eventSender, BlockController blockController, IBlockServices blockServices,
         BlockTemplateNameComponentIndexer blockTemplateNames, EntityTable entityTable,
         IDataController dataController, IDataServices dataServices,
@@ -211,6 +219,7 @@ public class AdminChatProcessor : IChatProcessor
         this.loggingUtil = loggingUtil;
         this.names = names;
         this.worldManagementController = worldManagementController;
+        this.worldGenChatCommandHandler = worldGenChatCommandHandler;
         this.eventSender = eventSender;
         this.blockController = blockController;
         this.blockServices = blockServices;
@@ -254,7 +263,13 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand { Command = ListBans, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = GcWorld, HelpSummary = "", IncludeInHelp = false },
         new ChatCommand { Command = Teleport, HelpSummary = "", IncludeInHelp = false },
-        new ChatCommand { Command = TeleportTo, HelpSummary = "", IncludeInHelp = false }
+        new ChatCommand { Command = TeleportTo, HelpSummary = "", IncludeInHelp = false },
+        new ChatCommand
+        {
+            Command = WorldGen,
+            HelpSummary = "Manage world generation: /worldgen plan|status|preview|commit|replace|abort.",
+            IncludeInHelp = true
+        }
     };
 
     public void ProcessChat(string command, string message, ulong senderEntityId)
@@ -365,6 +380,10 @@ public class AdminChatProcessor : IChatProcessor
 
             case TeleportTo:
                 OnTeleportTo(message, senderEntityId);
+                break;
+
+            case WorldGen:
+                OnWorldGen(message, senderEntityId);
                 break;
         }
     }
@@ -1203,6 +1222,16 @@ public class AdminChatProcessor : IChatProcessor
         var targetPosition = kinematics[targetEntityId].Position;
         movementController.Teleport(eventSender, senderEntityId, targetPosition);
         internalController.SendSystemMessage($"You have been teleported to {playerName}.", senderEntityId);
+    }
+
+    /// <summary>
+    ///     Handles the /worldgen command.
+    /// </summary>
+    /// <param name="message">Remaining message.</param>
+    /// <param name="senderEntityId">Sender entity ID.</param>
+    private void OnWorldGen(string message, ulong senderEntityId)
+    {
+        worldGenChatCommandHandler.Handle(message, senderEntityId);
     }
 
     /// <summary>

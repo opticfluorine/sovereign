@@ -4,6 +4,10 @@
 
 ### September
 
+#### 27 September 2026
+
+* Add the world generation skeleton. A new `Sovereign.WorldGen` class library introduces the world generation profile model loaded from `Data/Worldgen/<name>.json`, with strict schema enforcement (unknown properties and malformed JSON fail loudly with precise error locations) and semantic validation of dimensions, Z ordering, stone band coverage, cave levels, and river and cave options; a matching sample profile ships at `Data/Worldgen/default.json`. A new server WorldGeneration system holds the single world generation job slot (`Idle`/`Planning`/`Committing`) and is wired into the server's dependency injection container. New `/worldgen` admin chat commands are available: `/worldgen plan <seed> [--profile <name>] [--at <x>,<y>]`, `/worldgen status`, `/worldgen preview`, `/worldgen commit [seed]`, `/worldgen replace <seed> <seed>`, and `/worldgen abort`; `/worldgen status` is fully functional and reports the current job status, while the remaining subcommands parse and reply "not yet implemented" until generation arrives in later cards.
+
 #### 21 September 2026
 
 * Add a new `SovereignClientMcp` utility that exposes a Model Context Protocol (MCP) stdio server for debugging a running client with AI coding agents. The server provides a single `run_client_script` tool that runs a Lua script with functions to capture screenshots (saved as PNG files), query the client's input state, inject SDL keyboard and mouse events, and quit the client, and returns the script's messages, screenshot paths, and any error as a JSON object. The server connects to the client debug interface over its MessagePack-over-LiteNetLib protocol (default `127.0.0.1:12821`, configurable with `--host` and `--port`, with `--screenshots-dir` controlling the screenshot output directory).
