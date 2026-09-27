@@ -25,17 +25,25 @@ namespace Sovereign.ServerCore.Systems.WorldGeneration;
 /// </summary>
 public class WorldGenerationController
 {
+    private readonly WorldGenPlanJobRunner planRunner;
+
+    public WorldGenerationController(WorldGenPlanJobRunner planRunner)
+    {
+        this.planRunner = planRunner;
+    }
+
     /// <summary>
-    ///     Requests a new world generation plan.
+    ///     Requests a new world generation plan. The job slot must be Idle; profile loading,
+    ///     validation, and job startup happen synchronously, and the plan itself is computed on
+    ///     a background task. Replies are sent to the requesting entity.
     /// </summary>
     /// <param name="seed">World generation seed.</param>
     /// <param name="profileName">World generation profile name, or null for the default profile.</param>
     /// <param name="origin">Origin of the generated world region, or null for the default origin.</param>
-    /// <exception cref="NotImplementedException">World generation planning is implemented in a
-    /// later worldgen card.</exception>
-    public void Plan(ulong seed, string? profileName, GridPosition? origin)
+    /// <param name="senderEntityId">Entity to reply to.</param>
+    public void Plan(ulong seed, string? profileName, GridPosition? origin, ulong senderEntityId)
     {
-        throw new NotImplementedException("worldgen plan is implemented in a later worldgen card");
+        planRunner.BeginPlan(seed, profileName, origin, senderEntityId);
     }
 
     /// <summary>
@@ -50,12 +58,13 @@ public class WorldGenerationController
     }
 
     /// <summary>
-    ///     Requests that any in-progress world generation job be aborted.
+    ///     Requests that any in-progress world generation job be aborted. Aborting a running
+    ///     pipeline is not yet implemented; the request is always rejected.
     /// </summary>
     /// <exception cref="NotImplementedException">World generation abort is implemented in a
     /// later worldgen card.</exception>
     public void Abort()
     {
-        throw new NotImplementedException("worldgen abort is implemented in a later worldgen card");
+        throw new NotImplementedException("abort is not yet implemented");
     }
 }

@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.WorldGen;
+
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
 /// <summary>
-///     Provides a public API for accessing world generation job state.
+///     Provides a public API for accessing world generation job state and completed plans.
 /// </summary>
 public class WorldGenerationServices
 {
@@ -37,4 +39,18 @@ public class WorldGenerationServices
     ///     Gets the last human-readable status message reported for the job slot.
     /// </summary>
     public string? LastStatusMessage => system.LastStatusMessage;
+
+    /// <summary>
+    ///     Gets the last plan completed in this server session, or null if none has completed.
+    /// </summary>
+    public WorldGenPlan? LastCompletedPlan { get; private set; }
+
+    /// <summary>
+    ///     Records a completed world generation plan for later re-reporting.
+    /// </summary>
+    /// <param name="plan">Completed plan.</param>
+    public void RecordCompletedPlan(WorldGenPlan plan)
+    {
+        LastCompletedPlan = plan;
+    }
 }

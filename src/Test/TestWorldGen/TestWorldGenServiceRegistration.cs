@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.ServerCore;
+using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.WorldGen;
 using Xunit;
@@ -39,6 +40,9 @@ public class TestWorldGenServiceRegistration
         services.AddSingleton<IEventSender>(new FakeEventSender());
         services.AddSingleton<EventCommunicator>();
         services.AddSingleton<ILogger<WorldGenerationSystem>>(NullLogger<WorldGenerationSystem>.Instance);
+        services.AddSingleton<ILogger<WorldGenPlanJobRunner>>(NullLogger<WorldGenPlanJobRunner>.Instance);
+        services.AddOptions();
+        services.Configure<WorldGenOptions>(_ => { });
         services.AddSovereignServer();
 
         using var provider = services.BuildServiceProvider();
@@ -50,6 +54,9 @@ public class TestWorldGenServiceRegistration
         Assert.NotNull(provider.GetRequiredService<WorldGenerationServices>());
         Assert.NotNull(provider.GetRequiredService<WorldGenerationController>());
         Assert.NotNull(provider.GetRequiredService<WorldGenChatCommandHandler>());
+        Assert.NotNull(provider.GetRequiredService<WorldGenPlanJobRunner>());
+        Assert.NotNull(provider.GetRequiredService<WorldGenScratch>());
+        Assert.NotNull(provider.GetRequiredService<IWorldGenPipeline>());
         Assert.NotNull(provider.GetRequiredService<ProfileLoader>());
         Assert.NotNull(provider.GetRequiredService<ProfileValidator>());
     }
