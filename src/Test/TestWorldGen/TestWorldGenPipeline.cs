@@ -15,10 +15,12 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Terrain;
 using Xunit;
@@ -378,6 +380,178 @@ public class TestWorldGenPipeline
         {
             File.Delete(path);
         }
+    }
+
+    [Fact]
+    public void Plan_WithCaveLevels_ProducesCaveMapAndCavePreviews()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.Caves = new CaveOptions { ShaftsPerLevelPair = 2, SurfaceMouths = 2 };
+        var path = TempPreviewPath("caves");
+        WorldGenPlan? plan = null;
+
+        try
+        {
+            plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+
+            Assert.NotNull(plan.Caves);
+            var cave = plan.Caves!;
+            Assert.Single(cave.Levels);
+            Assert.True(cave.LevelOpenCounts[0] > 0, "The cave level should contain open cells.");
+            Assert.NotNull(plan.Statistics.Caves);
+            Assert.Contains("Cave level 1", plan.Statistics.Format());
+
+            var cavePreview = Assert.Single(plan.CavePreviewPaths);
+            Assert.True(File.Exists(cavePreview), "The cave preview PNG should exist.");
+            Assert.Contains("caves_", cavePreview);
+
+            // The surface preview is byte-identical to the 3b golden image: caves must not
+            // perturb surface pixels.
+            Assert.Equal(GoldenPreviewSha256, Sha256(File.ReadAllBytes(path)));
+        }
+        finally
+        {
+            File.Delete(path);
+            if (plan is not null)
+            {
+                foreach (var cavePreview in plan.CavePreviewPaths)
+                {
+                    File.Delete(cavePreview);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void Plan_WithCaves_IsDeterministic()
+    {
+        var profile = TestProfiles.CreateSmall128Biomes();
+        profile.Caves = new CaveOptions { ShaftsPerLevelPair = 2, SurfaceMouths = 1 };
+        var firstPath = TempPreviewPath("cavedet1");
+        var secondPath = TempPreviewPath("cavedet2");
+
+        try
+        {
+            var first = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, firstPath, null);
+            var second = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, secondPath, null);
+
+            Assert.Equal(HashCaveMap(first.Caves!), HashCaveMap(second.Caves!));
+            Assert.Equal(Sha256(File.ReadAllBytes(firstPath)), Sha256(File.ReadAllBytes(secondPath)));
+            Assert.Equal(first.CavePreviewPaths.Count, second.CavePreviewPaths.Count);
+            for (var i = 0; i < first.CavePreviewPaths.Count; ++i)
+            {
+                Assert.Equal(Sha256(File.ReadAllBytes(first.CavePreviewPaths[i])),
+                    Sha256(File.ReadAllBytes(second.CavePreviewPaths[i])));
+            }
+        }
+        finally
+        {
+            File.Delete(firstPath);
+            File.Delete(secondPath);
+            foreach (var path in new[] { firstPath, secondPath })
+            {
+                var directory = Path.GetDirectoryName(path)!;
+                var prefix = Path.GetFileNameWithoutExtension(path);
+                foreach (var file in Directory.GetFiles(directory, prefix + "*"))
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public void Plan_WithoutCaveLevels_ProducesNoCaveOutputs()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.CaveLevels = null;
+        profile.Caves = null;
+        var path = TempPreviewPath("nocaves");
+
+        try
+        {
+            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+
+            Assert.Null(plan.Caves);
+            Assert.Empty(plan.CavePreviewPaths);
+            Assert.Null(plan.Statistics.Caves);
+            Assert.DoesNotContain("Cave level", plan.Statistics.Format());
+            Assert.Equal(GoldenPreviewSha256, Sha256(File.ReadAllBytes(path)));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    /// <summary>
+    ///     SHA-256 hash of the golden 128x128 cave preview PNG for the shallowest cave
+    ///     level, produced with the test baseline profile, its single cave level, and the
+    ///     fixed seed above.
+    ///
+    ///     To regenerate after an intentional change: run this test once and read the
+    ///     actual hash from the assertion failure message, then update this constant.
+    ///     Pinned for the worldgen caves card on x64 Debian, .NET 10.0.12.
+    /// </summary>
+    private const string GoldenCavePreviewSha256 =
+        "4528946F5BE074B15DF952686EE2C835244E2198C4DB13F38330DC30B7381F35";
+
+    [Fact]
+    public void Plan_CaveGoldenPreview_MatchesHash()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.Caves = new CaveOptions();
+        var path = TempPreviewPath("cavegolden");
+        WorldGenPlan? plan = null;
+
+        try
+        {
+            plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            var cavePreview = Assert.Single(plan.CavePreviewPaths);
+            var actual = Sha256(File.ReadAllBytes(cavePreview));
+
+            Assert.True(string.Equals(actual, GoldenCavePreviewSha256,
+                    StringComparison.OrdinalIgnoreCase),
+                $"Golden cave preview hash mismatch: expected {GoldenCavePreviewSha256}, " +
+                $"actual {actual}. If the change (e.g. a palette or shading edit) was " +
+                "intentional, regenerate the constant as described in its documentation.");
+        }
+        finally
+        {
+            File.Delete(path);
+            if (plan is not null)
+            {
+                foreach (var cavePreview in plan.CavePreviewPaths) File.Delete(cavePreview);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Serializes a cave map's open, floor, and carve arrays row-major for hashing.
+    /// </summary>
+    /// <param name="caves">Cave map to serialize.</param>
+    /// <returns>Serialized bytes.</returns>
+    private static byte[] HashCaveMap(CaveMap caves)
+    {
+        var bytes = new List<byte>();
+        foreach (var level in caves.Levels)
+        {
+            for (var y = 0; y < caves.Height; ++y)
+            {
+                for (var x = 0; x < caves.Width; ++x)
+                {
+                    bytes.Add(level.Open[x, y] ? (byte)1 : (byte)0);
+                    bytes.Add(level.CarveHeight[x, y]);
+                    var value = level.FloorZ[x, y];
+                    bytes.Add((byte)value);
+                    bytes.Add((byte)(value >> 8));
+                    bytes.Add((byte)(value >> 16));
+                    bytes.Add((byte)(value >> 24));
+                }
+            }
+        }
+
+        return bytes.ToArray();
     }
 
     /// <summary>

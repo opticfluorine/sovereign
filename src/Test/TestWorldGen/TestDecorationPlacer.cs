@@ -119,11 +119,42 @@ public class TestDecorationPlacer
     /// <param name="map">Terrain map.</param>
     /// <param name="biomes">Biome map.</param>
     /// <param name="options">Biome options.</param>
+    /// <param name="mouthColumns">Surface mouth columns to keep clear, or null.</param>
     /// <returns>Placements.</returns>
     private static IReadOnlyList<DecorationPlacement> Place(TerrainMap map, BiomeMap biomes,
-        BiomeOptions options)
+        BiomeOptions options, IReadOnlyList<(int X, int Y)>? mouthColumns = null)
     {
-        return new DecorationPlacer(Seed).Apply(map, biomes, options).Placements;
+        return new DecorationPlacer(Seed).Apply(map, biomes, options, mouthColumns).Placements;
+    }
+
+    [Fact]
+    public void Apply_MouthColumns_ExcludeSurroundingDecorations()
+    {
+        var map = TestTerrainMaps.Create(Size, Size);
+        var biomes = FlatWorld(map);
+        var options = Options(Pool(weight: 1.0, minSpacing: 1));
+        var mouthColumns = new List<(int X, int Y)>
+        {
+            (10, 10), (11, 10), (10, 11), (11, 11)
+        };
+
+        var withoutMouths = Place(map, biomes, options);
+        var withMouths = Place(map, biomes, options, mouthColumns);
+
+        // The zone around the mouth would otherwise hold decorations.
+        Assert.Contains(withoutMouths,
+            p => Math.Max(Math.Abs(p.X - 10), Math.Abs(p.Y - 10)) <= 4);
+
+        foreach (var placement in withMouths)
+        {
+            foreach (var (mx, my) in mouthColumns)
+            {
+                var distance = Math.Max(Math.Abs(placement.X - mx), Math.Abs(placement.Y - my));
+                Assert.True(distance > 2,
+                    $"Placement at ({placement.X},{placement.Y}) sits within 2 cells of " +
+                    $"mouth column ({mx},{my}).");
+            }
+        }
     }
 
     [Fact]

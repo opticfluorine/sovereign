@@ -41,6 +41,11 @@ public sealed class DecorationPlacerResult
 /// </summary>
 public sealed class DecorationPlacer
 {
+    /// <summary>
+    ///     Exclusion radius in cells around cave mouth columns.
+    /// </summary>
+    private const int MouthExclusionRadius = 2;
+
     private readonly ulong seed;
 
     /// <summary>
@@ -63,11 +68,15 @@ public sealed class DecorationPlacer
     /// <param name="map">Terrain map with heights and water flags populated.</param>
     /// <param name="biomes">Classified biome map.</param>
     /// <param name="options">Biome options.</param>
+    /// <param name="mouthColumns">Surface mouth columns to keep clear, or null when the
+    ///     plan has no caves.</param>
     /// <returns>Placements in scan order.</returns>
-    public DecorationPlacerResult Apply(TerrainMap map, BiomeMap biomes, BiomeOptions options)
+    public DecorationPlacerResult Apply(TerrainMap map, BiomeMap biomes, BiomeOptions options,
+        IReadOnlyList<(int X, int Y)>? mouthColumns = null)
     {
         var pools = ResolvePools(options);
         var placements = new List<DecorationPlacement>();
+        var mouthExclusions = BuildMouthExclusions(mouthColumns);
 
         for (var y = 0; y < map.Height; ++y)
         {
@@ -86,6 +95,7 @@ public sealed class DecorationPlacer
                     // The first successful draw is the sole candidate for the column; a
                     // rejected candidate is not retried against the rest of the pool.
                     if (IsExcluded(map, options, biome, decoration, x, y)) break;
+                    if (mouthExclusions?.Contains(Encode(x, y)) == true) break;
                     if (ViolatesSpacing(decoration, x, y)) break;
 
                     placements.Add(new DecorationPlacement
@@ -137,6 +147,42 @@ public sealed class DecorationPlacer
         }
 
         return pools;
+    }
+
+    /// <summary>
+    ///     Builds the set of columns excluded by proximity to a surface mouth: every column
+    ///     within the mouth exclusion radius of a mouth column.
+    /// </summary>
+    /// <param name="mouthColumns">Surface mouth columns, or null.</param>
+    /// <returns>Encoded excluded columns, or null when there are no mouths.</returns>
+    private static HashSet<long>? BuildMouthExclusions(IReadOnlyList<(int X, int Y)>? mouthColumns)
+    {
+        if (mouthColumns is not { Count: > 0 }) return null;
+
+        var exclusions = new HashSet<long>();
+        foreach (var (mx, my) in mouthColumns)
+        {
+            for (var dy = -MouthExclusionRadius; dy <= MouthExclusionRadius; ++dy)
+            {
+                for (var dx = -MouthExclusionRadius; dx <= MouthExclusionRadius; ++dx)
+                {
+                    exclusions.Add(Encode(mx + dx, my + dy));
+                }
+            }
+        }
+
+        return exclusions;
+    }
+
+    /// <summary>
+    ///     Encodes a column position as a single long for set membership.
+    /// </summary>
+    /// <param name="x">Column X coordinate.</param>
+    /// <param name="y">Column Y coordinate.</param>
+    /// <returns>Encoded position.</returns>
+    private static long Encode(int x, int y)
+    {
+        return (long)x << 32 | (uint)y;
     }
 
     /// <summary>

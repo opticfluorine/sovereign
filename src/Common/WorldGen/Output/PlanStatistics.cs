@@ -87,6 +87,16 @@ public sealed class PlanStatistics
     public required long BiomesMs { get; init; }
 
     /// <summary>
+    ///     Cave stage wall time in milliseconds; zero when the profile has no cave levels.
+    /// </summary>
+    public long CavesMs { get; init; }
+
+    /// <summary>
+    ///     Statistics of the generated cave system. Null if the profile has no cave levels.
+    /// </summary>
+    public CaveStats? Caves { get; init; }
+
+    /// <summary>
     ///     Fraction of the footprint classified as each biome, ordered by biome ID. Null if
     ///     the profile has no biomes section.
     /// </summary>
@@ -121,11 +131,23 @@ public sealed class PlanStatistics
                 $"LongestStraightRiverRun: {LongestStraightRiverRun}");
         AppendBiomeLines(builder);
         AppendDecorationLines(builder);
+        AppendCaveLines(builder);
         builder.Append(
             $"  Terrain: {FormatSeconds(TerrainMs)}  Hydrology: {FormatSeconds(HydrologyMs)}  " +
-            $"Biomes: {FormatSeconds(BiomesMs)}  Preview: {FormatSeconds(PreviewMs)}  " +
-            $"Total: {FormatSeconds(TotalMs)}");
+            $"Biomes: {FormatSeconds(BiomesMs)}  Caves: {FormatSeconds(CavesMs)}  " +
+            $"Preview: {FormatSeconds(PreviewMs)}  Total: {FormatSeconds(TotalMs)}");
         return builder.ToString();
+    }
+
+    /// <summary>
+    ///     Appends the cave statistics block, or nothing when the plan carries no cave data.
+    /// </summary>
+    /// <param name="builder">Builder to append to.</param>
+    private void AppendCaveLines(StringBuilder builder)
+    {
+        if (Caves is null) return;
+
+        builder.AppendLine(Caves.Format());
     }
 
     /// <summary>

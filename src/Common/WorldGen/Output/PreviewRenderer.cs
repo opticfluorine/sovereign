@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Terrain;
 
@@ -73,6 +74,11 @@ public sealed class PreviewRenderer
     ///     Maximum preview dimension in pixels.
     /// </summary>
     private const int MaxPreviewDimension = 1024;
+
+    /// <summary>
+    ///    Surface cave mouth dot color.
+    /// </summary>
+    private static readonly (byte R, byte G, byte B) MouthDotColor = (220, 40, 40);
 
     /// <summary>
     ///     Deep ocean color.
@@ -150,9 +156,13 @@ public sealed class PreviewRenderer
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
     /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
+    /// <param name="mouthDots">Surface cave mouth columns to mark with red dots, or null.
+    ///     Dots are applied only after the surface image is complete and never alter any
+    ///     other pixel.</param>
     /// <returns>Rendered preview image.</returns>
     public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, BiomeMap? biomes)
+        WorldGenProfile profile, BiomeMap? biomes,
+        IReadOnlyList<(int X, int Y)>? mouthDots = null)
     {
         var factor = DownscaleFactor(map);
         var outWidth = (map.Width + factor - 1) / factor;
@@ -160,8 +170,31 @@ public sealed class PreviewRenderer
         var pixels = RenderFull(map, continentalness, profile, biomes);
 
         if (factor > 1) pixels = Downscale(pixels, map.Width, map.Height, outWidth, outHeight, factor);
+        if (mouthDots is { Count: > 0 }) DrawMouthDots(pixels, outWidth, outHeight, factor, mouthDots);
 
         return new PreviewImage { Width = outWidth, Height = outHeight, Pixels = pixels };
+    }
+
+    /// <summary>
+    ///     Draws small red dots at the downscaled positions of the surface mouth columns.
+    /// </summary>
+    /// <param name="pixels">Rendered pixels, updated in place.</param>
+    /// <param name="width">Image width in pixels.</param>
+    /// <param name="height">Image height in pixels.</param>
+    /// <param name="factor">Box downscale factor applied to the image.</param>
+    /// <param name="mouthDots">Surface mouth columns.</param>
+    private static void DrawMouthDots(byte[] pixels, int width, int height, int factor,
+        IReadOnlyList<(int X, int Y)> mouthDots)
+    {
+        foreach (var (mx, my) in mouthDots)
+        {
+            var px = Math.Min(mx / factor, width - 1);
+            var py = Math.Min(my / factor, height - 1);
+            var offset = (py * width + px) * 3;
+            pixels[offset] = MouthDotColor.R;
+            pixels[offset + 1] = MouthDotColor.G;
+            pixels[offset + 2] = MouthDotColor.B;
+        }
     }
 
     /// <summary>
@@ -292,8 +325,8 @@ public sealed class PreviewRenderer
     /// <param name="outHeight">Output height.</param>
     /// <param name="factor">Box factor.</param>
     /// <returns>Downscaled pixels.</returns>
-    private static byte[] Downscale(byte[] pixels, int width, int height, int outWidth, int outHeight,
-        int factor)
+    internal static byte[] Downscale(byte[] pixels, int width, int height, int outWidth,
+        int outHeight, int factor)
     {
         var output = new byte[outWidth * outHeight * 3];
         for (var oy = 0; oy < outHeight; ++oy)
