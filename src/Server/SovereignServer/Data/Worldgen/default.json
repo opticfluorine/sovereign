@@ -21,7 +21,9 @@
   },
   "caves": {
     "shaftsPerLevelPair": 3,
-    "surfaceMouths": 2
+    "surfaceMouths": 2,
+    "porosity": 0.28,
+    "maxMouthDepthZ": 48
   },
   "terrain": {
     "continentalnessWavelengthFactor": 0.9,

@@ -86,6 +86,16 @@ public sealed class ProfileValidator
     private const int MinMouthMinLandDistance = 4;
 
     /// <summary>
+    ///     Minimum allowed surface mouth depth in Z blocks.
+    /// </summary>
+    private const int MinMaxMouthDepthZ = 8;
+
+    /// <summary>
+    ///     Maximum allowed surface mouth depth in Z blocks.
+    /// </summary>
+    private const int MaxMaxMouthDepthZ = 96;
+
+    /// <summary>
     ///     Maximum allowed mouth exclusion radius for water, in blocks.
     /// </summary>
     private const int MaxMouthMinLandDistance = 256;
@@ -385,6 +395,10 @@ public sealed class ProfileValidator
             issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
                 $"caves.mouthMinLandDistance ({caves.MouthMinLandDistance}) must be between " +
                 $"{MinMouthMinLandDistance} and {MaxMouthMinLandDistance}."));
+        if (caves.MaxMouthDepthZ is < MinMaxMouthDepthZ or > MaxMaxMouthDepthZ)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"caves.maxMouthDepthZ ({caves.MaxMouthDepthZ}) must be between " +
+                $"{MinMaxMouthDepthZ} and {MaxMaxMouthDepthZ}."));
     }
 
     /// <summary>

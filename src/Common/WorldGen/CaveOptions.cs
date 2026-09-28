@@ -25,7 +25,12 @@ public sealed class CaveOptions
     /// <summary>
     ///     Default fraction of a cave level's area that is open.
     /// </summary>
-    public const double DefaultPorosity = 0.34;
+    public const double DefaultPorosity = 0.28;
+
+    /// <summary>
+    ///     Default maximum surface-to-floor depth of a cave mouth in Z blocks.
+    /// </summary>
+    public const int DefaultMaxMouthDepthZ = 48;
 
     /// <summary>
     ///     Default corridor carve width in blocks.
@@ -51,6 +56,12 @@ public sealed class CaveOptions
     ///     Fraction of a cave level's area that is open, in [0.1, 0.6].
     /// </summary>
     public double Porosity { get; set; } = DefaultPorosity;
+
+    /// <summary>
+    ///     Maximum surface-to-floor depth of a surface cave mouth in Z blocks, in
+    ///     [8, 96]: sites deeper than this are skipped.
+    /// </summary>
+    public int MaxMouthDepthZ { get; set; } = DefaultMaxMouthDepthZ;
 
     /// <summary>
     ///     Corridor carve width in blocks, in [1, 4].

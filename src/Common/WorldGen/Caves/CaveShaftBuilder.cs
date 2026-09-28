@@ -68,11 +68,6 @@ public sealed class CaveShaftBuilder
     private const int MouthHeadroom = 2;
 
     /// <summary>
-    ///     Maximum Z distance between the surface and the cave floor for a mouth site.
-    /// </summary>
-    private const int MouthMaxDepthZ = 12;
-
-    /// <summary>
     ///     Ring walk offsets around a shaft center, in rotation order.
     /// </summary>
     private static readonly (int Dx, int Dy)[] RingWalk =
@@ -252,7 +247,7 @@ public sealed class CaveShaftBuilder
 
         var floorZ = level.FloorZ[x, y];
         var surfaceZ = terrain.Heights[x, y];
-        return surfaceZ - floorZ <= MouthMaxDepthZ;
+        return surfaceZ - floorZ <= options.MaxMouthDepthZ;
     }
 
     /// <summary>

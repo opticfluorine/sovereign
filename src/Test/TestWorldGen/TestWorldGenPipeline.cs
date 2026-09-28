@@ -494,7 +494,7 @@ public class TestWorldGenPipeline
     ///     Pinned for the worldgen caves card on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenCavePreviewSha256 =
-        "26C28ED922F59F4D6E9484256EB8608B461605C80214137B65F8952FA0F1729E";
+        "4528946F5BE074B15DF952686EE2C835244E2198C4DB13F38330DC30B7381F35";
 
     [Fact]
     public void Plan_CaveGoldenPreview_MatchesHash()
