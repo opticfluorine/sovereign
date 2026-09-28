@@ -316,13 +316,14 @@ public sealed class CaveShaftBuilder
     }
 
     /// <summary>
-    ///     Enumerates the jittered site scan grid in row-major grid order. The jitter stream
-    ///     is drawn eagerly so the scan order is fully deterministic.
+    ///     Enumerates the jittered site scan grid in seeded shuffle order. Shuffling
+    ///     distributes selected sites across the whole footprint instead of clustering
+    ///     them at the scan origin; the shuffle is deterministic for a given state.
     /// </summary>
     /// <param name="width">Map width in blocks.</param>
     /// <param name="height">Map height in blocks.</param>
     /// <param name="state">Jitter stream state; advanced with each drawn jitter.</param>
-    /// <returns>Site coordinates.</returns>
+    /// <returns>Site coordinates in visitation order.</returns>
     private static List<(int X, int Y)> SiteScan(int width, int height, ref ulong state)
     {
         var sites = new List<(int X, int Y)>();
@@ -336,6 +337,13 @@ public sealed class CaveShaftBuilder
                 var y = Math.Clamp(gy * SiteGridSpacing + jy, 1, height - 2);
                 sites.Add((x, y));
             }
+        }
+
+        // Fisher-Yates shuffle on the same stream: deterministic, unbiased ordering.
+        for (var i = sites.Count - 1; i > 0; --i)
+        {
+            var j = (int)(SeedDerivation.Next(ref state) % (ulong)(i + 1));
+            (sites[i], sites[j]) = (sites[j], sites[i]);
         }
 
         return sites;
