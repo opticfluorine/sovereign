@@ -96,14 +96,20 @@ public sealed class SeededNoise
     private const float WarpOffset = 31.416f;
 
     /// <summary>
-    ///     Magnitude of the inner domain warp in noise-space.
+    ///     Default magnitude of the inner domain warp in noise-space.
     /// </summary>
-    private const float InnerWarpAmplitude = 0.75f;
+    private const float DefaultInnerWarpAmplitude = 0.35f;
 
     /// <summary>
-    ///     Magnitude of the outer domain warp in noise-space.
+    ///     Default magnitude of the outer domain warp in noise-space.
     /// </summary>
-    private const float OuterWarpAmplitude = 0.85f;
+    private const float DefaultOuterWarpAmplitude = 0.40f;
+
+    /// <summary>
+    ///     Number of octaves in each warp-field fBm. Kept fine-grained so that warp shapes
+    ///     coastlines rather than map-scale geometry.
+    /// </summary>
+    private const int WarpOctaves = 3;
 
     /// <summary>
     ///     Skew factor for the simplex grid.
@@ -231,21 +237,25 @@ public sealed class SeededNoise
     /// <param name="y">Y coordinate in blocks.</param>
     /// <param name="wavelength">Wavelength of the base octave in blocks.</param>
     /// <param name="octaves">Number of octaves in the outer fBm.</param>
+    /// <param name="warpAmplitudeInner">Magnitude of the inner warp in noise-space.</param>
+    /// <param name="warpAmplitudeOuter">Magnitude of the outer warp in noise-space.</param>
     /// <returns>Warped fBm value in approximately [-1, 1].</returns>
-    public float DomainWarpedFbm(float x, float y, float wavelength, int octaves)
+    public float DomainWarpedFbm(float x, float y, float wavelength, int octaves,
+        float warpAmplitudeInner = DefaultInnerWarpAmplitude,
+        float warpAmplitudeOuter = DefaultOuterWarpAmplitude)
     {
         var nx = x / wavelength;
         var ny = y / wavelength;
 
-        var qx = FbmNorm(nx, ny, 2);
-        var qy = FbmNorm(nx + WarpOffset, ny + WarpOffset, 2);
-        var wx = nx + InnerWarpAmplitude * qx;
-        var wy = ny + InnerWarpAmplitude * qy;
+        var qx = FbmNorm(nx, ny, WarpOctaves);
+        var qy = FbmNorm(nx + WarpOffset, ny + WarpOffset, WarpOctaves);
+        var wx = nx + warpAmplitudeInner * qx;
+        var wy = ny + warpAmplitudeInner * qy;
 
-        var rx = FbmNorm(wx + WarpOffset, wy, 2);
-        var ry = FbmNorm(wx, wy + WarpOffset, 2);
-        var vx = wx + OuterWarpAmplitude * rx;
-        var vy = wy + OuterWarpAmplitude * ry;
+        var rx = FbmNorm(wx + WarpOffset, wy, WarpOctaves);
+        var ry = FbmNorm(wx, wy + WarpOffset, WarpOctaves);
+        var vx = wx + warpAmplitudeOuter * rx;
+        var vy = wy + warpAmplitudeOuter * ry;
 
         return FbmNorm(vx, vy, octaves);
     }

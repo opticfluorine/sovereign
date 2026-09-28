@@ -47,7 +47,7 @@ public class TestWorldGenPipeline
     ///     versions. Generated on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenPreviewSha256 =
-        "8831E816C5D6CC179104A669250A38CA484C2281506446552D43211915B63EDD";
+        "35CF4EE3A6F06406C3360DD0C073BE93DD2D70FF93093F7C383326E05908DFB3";
 
     /// <summary>
     ///     SHA-256 hash of the golden 128x128 heightmap: the TerrainMap heights serialized
@@ -56,10 +56,12 @@ public class TestWorldGenPipeline
     ///     Pinned independently of the preview hash so that a cross-machine mismatch
     ///     distinguishes drift in the generation math (this hash) from drift in the
     ///     preview encoding (the preview hash). To regenerate: run this test once and
-    ///     read the actual hash from the assertion failure message.
+    ///     read the actual hash from the assertion failure message. Regenerated for the
+    ///     worldgen surface tuning card (terrain section, reduced warp amplitudes, extra
+    ///     continentalness octave, contrast stretch) on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenHeightsSha256 =
-        "640904D9B5CB6A8B8EB24A9A20256E93A1317D2F599C8DA429EF9963CBAA3305";
+        "7C972F970465185C3DBC80607A6BE824CDD784E78D27371F509B678A23FD55AE";
 
     /// <summary>
     ///     SHA-256 hash of the golden 128x128 preview PNG produced with the biome-enabled
@@ -72,7 +74,7 @@ public class TestWorldGenPipeline
     ///     hash from the assertion failure message, then update this constant.
     /// </summary>
     private const string GoldenBiomesPreviewSha256 =
-        "12369AA6FC9468DE389533F44835BD35A788A928597360F24F36E957BB3ACE07";
+        "D088771A7F2A2E893D9A0D5DCEF1077D239A44F765BE1BFCD51742CD193A642A";
 
     [Fact]
     public void Plan_SameSeedAndProfile_ProducesIdenticalHeightsAndPreview()
@@ -162,11 +164,12 @@ public class TestWorldGenPipeline
     [Fact]
     public void Plan_ReportsSaneStatistics()
     {
+        var profile = TestProfiles.CreateSmall128();
         var path = TempPreviewPath("stats");
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(TestProfiles.CreateSmall128(), "test128", Seed,
+            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed,
                 5, -7, path, null);
 
             var stats = plan.Statistics;
@@ -176,6 +179,7 @@ public class TestWorldGenPipeline
             Assert.True(stats.LandCells > 0, "The plan should contain land.");
             Assert.True(stats.WaterCells > 0, "The plan should contain water.");
             Assert.True(stats.RiverCount > 0, "The plan should contain rivers.");
+            Assert.InRange(stats.LongestStraightRiverRun, 0, profile.Terrain.MaxStraightRiverRun);
             Assert.True(stats.TotalMs >= 0);
 
             Assert.Equal(Seed, plan.Seed);

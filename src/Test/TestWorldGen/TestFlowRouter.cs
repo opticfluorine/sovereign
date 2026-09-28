@@ -77,6 +77,77 @@ public class TestFlowRouter
         Assert.Equal(16, routing.Accumulation[15, 0]);
     }
 
+    [Fact]
+    public void Route_DistinctSlopes_IsSeedIndependent()
+    {
+        var heights = new int[16, 16];
+        for (var y = 0; y < 16; ++y)
+        {
+            for (var x = 0; x < 16; ++x)
+            {
+                heights[x, y] = 200 - 3 * x - 2 * y;
+            }
+        }
+
+        var first = new FlowRouter(1).Route(heights);
+        var second = new FlowRouter(0x9E3779B97F4A7C15UL).Route(heights);
+
+        for (var y = 0; y < 16; ++y)
+        {
+            for (var x = 0; x < 16; ++x)
+            {
+                Assert.Equal(first.Receiver[x, y], second.Receiver[x, y]);
+            }
+        }
+    }
+
+    [Fact]
+    public void Route_FilledPlateauTies_JitterVariesRoutingAcrossSeeds()
+    {
+        // Checkerboard-tied surface: from even-parity cells, the east and south neighbors
+        // tie at unit drop and the southeast diagonal is strictly worse, so the choice is
+        // decided by the per-cell descent jitter alone. Under scan-order or fill-order
+        // tie-breaking every cell would pick the same direction and the route would run
+        // dead straight; with jitter, tied cells must route differently across seeds.
+        const int size = 24;
+        var heights = new int[size, size];
+        for (var y = 0; y < size; ++y)
+        {
+            for (var x = 0; x < size; ++x)
+            {
+                heights[x, y] = 100 - (x + y) + (x % 2 == 1 && y % 2 == 1 ? 1 : 0);
+            }
+        }
+
+        const int seedCount = 8;
+        var routings = new FlowRouting[seedCount];
+        for (var i = 0; i < seedCount; ++i)
+        {
+            routings[i] = new FlowRouter((ulong)i + 1).Route(heights);
+        }
+
+        var varied = false;
+        for (var y = 0; y < size && !varied; ++y)
+        {
+            for (var x = 0; x < size && !varied; ++x)
+            {
+                for (var i = 1; i < seedCount; ++i)
+                {
+                    if (routings[0].Receiver[x, y] != routings[i].Receiver[x, y])
+                    {
+                        varied = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        Assert.True(varied, "The descent jitter should vary routing across seeds on tied flats.");
+
+        // Jitter must not change the steepest-descent property on the tied surface.
+        AssertSteepestDescent(heights, routings[0], size, size, seedCount);
+    }
+
     /// <summary>
     ///     Asserts that each interior route descends the steepest available slope, weighting
     ///     diagonal steps like the router does.

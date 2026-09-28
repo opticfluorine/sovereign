@@ -204,6 +204,7 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
                 WaterCells = 1,
                 RiverCount = 0,
                 LakeCount = 0,
+                LongestStraightRiverRun = 0,
                 TerrainMs = 0,
                 HydrologyMs = 0,
                 BiomesMs = 0,

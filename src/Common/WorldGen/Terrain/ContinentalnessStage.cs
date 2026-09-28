@@ -72,38 +72,27 @@ public sealed class ContinentalnessResult
 public sealed class ContinentalnessStage
 {
     /// <summary>
-    ///     Fraction of the observed field range below which cells are deep ocean.
-    /// </summary>
-    private const float ThresholdOcean = 0.40f;
-
-    /// <summary>
-    ///     Fraction of the observed field range below which cells are shelf.
-    /// </summary>
-    private const float ThresholdCoast = 0.48f;
-
-    /// <summary>
-    ///     Fraction of the observed field range above which cells are inland.
-    /// </summary>
-    private const float ThresholdInland = 0.62f;
-
-    /// <summary>
     ///     Bands the continentalness field.
     /// </summary>
     /// <param name="fields">Sampled terrain fields.</param>
     /// <param name="width">Footprint width in blocks.</param>
     /// <param name="height">Footprint height in blocks.</param>
+    /// <param name="terrain">Terrain generation options.</param>
     /// <returns>Banded classification.</returns>
-    public ContinentalnessResult Apply(TerrainFields fields, int width, int height)
+    public ContinentalnessResult Apply(TerrainFields fields, int width, int height,
+        TerrainOptions terrain)
     {
         var classes = new ContinentalClass[width, height];
+        var thresholdOcean = terrain.Thresholds.Ocean;
+        var thresholdCoast = terrain.Thresholds.Coast;
 
         System.Threading.Tasks.Parallel.For(0, height, y =>
         {
             for (var x = 0; x < width; ++x)
             {
                 var value = fields.Continentalness[x, y];
-                classes[x, y] = value < ThresholdOcean ? ContinentalClass.DeepOcean
-                    : value < ThresholdCoast ? ContinentalClass.Shelf
+                classes[x, y] = value < thresholdOcean ? ContinentalClass.DeepOcean
+                    : value < thresholdCoast ? ContinentalClass.Shelf
                     : ContinentalClass.Land;
             }
         });
@@ -111,9 +100,9 @@ public sealed class ContinentalnessStage
         return new ContinentalnessResult
         {
             Classes = classes,
-            ThresholdOcean = ThresholdOcean,
-            ThresholdCoast = ThresholdCoast,
-            ThresholdInland = ThresholdInland
+            ThresholdOcean = thresholdOcean,
+            ThresholdCoast = thresholdCoast,
+            ThresholdInland = terrain.Thresholds.Inland
         };
     }
 }

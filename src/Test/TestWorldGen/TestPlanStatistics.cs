@@ -46,6 +46,7 @@ public class TestPlanStatistics
             WaterCells = 8192,
             RiverCount = 4,
             LakeCount = 2,
+            LongestStraightRiverRun = 37,
             TerrainMs = 1000,
             HydrologyMs = 500,
             BiomesMs = 250,
@@ -64,6 +65,7 @@ public class TestPlanStatistics
 
         Assert.Contains("Biomes: not configured", text);
         Assert.Contains("Decorations: not configured", text);
+        Assert.Contains("LongestStraightRiverRun: 37", text);
         Assert.DoesNotContain("Biome ", text);
     }
 

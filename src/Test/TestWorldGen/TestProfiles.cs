@@ -57,7 +57,10 @@ internal static class TestProfiles
 
     /// <summary>
     ///     Creates the 128x128 baseline profile used by pipeline tests. Cave data is parsed
-    ///     but unused until the cave generation card.
+    ///     but unused until the cave generation card. The terrain section retunes the field
+    ///     for the small footprint: the shipped wavelength and thresholds, calibrated at the
+    ///     2048x2048 reference footprint, leave the border falloff dominant at this size and
+    ///     the map too archipelagic for river drainage.
     /// </summary>
     /// <returns>Profile.</returns>
     public static WorldGenProfile CreateSmall128()
@@ -80,7 +83,13 @@ internal static class TestProfiles
             {
                 new() { FloorZ = -32, Headroom = 2 }
             },
-            Rivers = new RiverOptions { MaxCount = 8, MinLength = 16 }
+            Rivers = new RiverOptions { MaxCount = 8, MinLength = 16 },
+            Terrain = new TerrainOptions
+            {
+                ContinentalnessWavelengthFactor = 1f,
+                Thresholds = new ContinentalnessThresholdOptions
+                    { Ocean = 0.30f, Coast = 0.38f, Inland = 0.55f }
+            }
         };
     }
 

@@ -88,12 +88,14 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         var landCells = 0;
         int riverCount;
         int lakeCount;
+        int longestStraightRiverRun;
 
         Report(progress, "Terrain: sampling noise fields");
         terrainClock.Start();
         var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
-            SubSeed(seed, "TerrainFields"));
-        var continentalness = new ContinentalnessStage().Apply(fields, profile.Width, profile.Height);
+            SubSeed(seed, "TerrainFields"), profile.Terrain);
+        var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
+            profile.Height, profile.Terrain);
         terrainClock.Stop();
 
         Report(progress, "Terrain: shaping surface");
@@ -129,6 +131,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             .Extract(map, filled, sills, routing, profile);
         riverCount = extraction.RiverCount;
         lakeCount = extraction.LakeCount;
+        longestStraightRiverRun = extraction.LongestStraightRiverRun;
         hydrologyClock.Stop();
 
         BiomeMap? biomeMap = null;
@@ -166,6 +169,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             WaterCells = (int)(CellCount(profile) - landCells),
             RiverCount = riverCount,
             LakeCount = lakeCount,
+            LongestStraightRiverRun = longestStraightRiverRun,
             TerrainMs = terrainClock.ElapsedMilliseconds,
             HydrologyMs = hydrologyClock.ElapsedMilliseconds,
             BiomesMs = biomesClock.ElapsedMilliseconds,

@@ -38,7 +38,10 @@ public sealed class FlowRouting
 /// <summary>
 ///     Routes flow over a filled height field with D8 steepest descent receivers and
 ///     computes flow accumulation in a single pass over cells sorted by descending
-///     filled height. Ties in descent steepness are broken by a seeded hash.
+///     filled height. The descent score of each candidate receiver carries a tiny
+///     deterministic per-cell jitter that breaks the priority-flood spill-order bias
+///     on filled flats without changing which neighbor is steepest when a real slope
+///     difference exists.
 /// </summary>
 public sealed class FlowRouter
 {
@@ -47,7 +50,14 @@ public sealed class FlowRouter
     /// </summary>
     private const float DiagonalWeight = 0.70710678118654752f;
 
+    /// <summary>
+    ///     Maximum magnitude of the per-cell descent score jitter, in blocks. Well below
+    ///     one block so that real slope differences dominate.
+    /// </summary>
+    private const double JitterAmplitude = 1e-4;
+
     private readonly ulong seed;
+    private readonly ulong jitterSeed;
 
     /// <summary>
     ///     Creates a flow router.
@@ -56,6 +66,7 @@ public sealed class FlowRouter
     public FlowRouter(ulong seed)
     {
         this.seed = seed;
+        jitterSeed = SeedDerivation.DeriveSubSeed(seed, "FlowRouting.Jitter");
     }
 
     /// <summary>
@@ -95,7 +106,8 @@ public sealed class FlowRouter
     }
 
     /// <summary>
-    ///     Finds the steepest descent receiver of a cell, breaking ties by seeded hash.
+    ///     Finds the steepest descent receiver of a cell, breaking near-ties by per-cell
+    ///     jitter and exact ties by seeded hash.
     /// </summary>
     /// <param name="filledHeights">Filled height field.</param>
     /// <param name="x">Cell X coordinate.</param>
@@ -106,7 +118,7 @@ public sealed class FlowRouter
     private int ReceiverOf(int[,] filledHeights, int x, int y, int width, int height)
     {
         var h = filledHeights[x, y];
-        var bestSlope = 0.0;
+        var bestScore = 0.0;
         var bestHash = 0UL;
         var best = -1;
 
@@ -120,12 +132,13 @@ public sealed class FlowRouter
             if (drop <= 0.0) continue;
 
             var slope = drop * (direction < 4 ? 1.0 : DiagonalWeight);
-            if (slope < bestSlope) continue;
+            var score = slope + JitterOf(nx, ny);
+            if (score < bestScore) continue;
 
             var hash = HashOf(nx, ny);
-            if (slope > bestSlope || hash > bestHash)
+            if (score > bestScore || hash > bestHash)
             {
-                bestSlope = slope;
+                bestScore = score;
                 bestHash = hash;
                 best = ny * width + nx;
             }
@@ -177,6 +190,18 @@ public sealed class FlowRouter
     private ulong HashOf(int x, int y)
     {
         return SeedDerivation.SplitMix64(seed ^ ((ulong)(uint)x << 32 | (uint)y));
+    }
+
+    /// <summary>
+    ///     Computes the jittered component of the descent score toward a candidate receiver.
+    /// </summary>
+    /// <param name="x">Candidate receiver X coordinate.</param>
+    /// <param name="y">Candidate receiver Y coordinate.</param>
+    /// <returns>Jitter in [0, <see cref="JitterAmplitude" />).</returns>
+    private double JitterOf(int x, int y)
+    {
+        var hash = SeedDerivation.SplitMix64(jitterSeed ^ ((ulong)(uint)x << 32 | (uint)y));
+        return JitterAmplitude * (hash >> 11) * (1.0 / 9007199254740992.0);
     }
 
     /// <summary>

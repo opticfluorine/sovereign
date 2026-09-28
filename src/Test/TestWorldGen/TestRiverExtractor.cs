@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Hydrology;
 using Sovereign.WorldGen.Noise;
@@ -140,6 +142,117 @@ public class TestRiverExtractor
         Assert.Equal(0, plan.Statistics.RiverCount);
     }
 
+    [Fact]
+    public void Extract_OverlongStraightRun_TrimsToEndpointsAndReportsRun()
+    {
+        // 300 east steps followed by an alternating northeast/southeast zigzag: the straight
+        // run (300 cells) exceeds the 96-cell maximum and is trimmed to its endpoints, while
+        // the zigzag is untouched. The river survives with 22 retained cells (>= minLength).
+        var path = new List<(int X, int Y)>();
+        for (var x = 0; x < 300; ++x) path.Add((x, 8));
+        for (var i = 0; i < 20; ++i)
+        {
+            path.Add((300 + i, i % 2 == 0 ? 7 : 8));
+        }
+
+        var (map, filled, sills, routing, profile, result) =
+            BuildSynthetic(path, (383, 8));
+
+        Assert.Equal(1, result.RiverCount);
+        Assert.Equal(2, result.LongestStraightRiverRun);
+
+        Assert.False(map.IsRiver[1, 8]);
+        Assert.False(map.IsRiver[298, 8]);
+        Assert.True(map.IsRiver[0, 8]);
+        Assert.True(map.IsRiver[299, 8]);
+        foreach (var (x, y) in path.Skip(300))
+        {
+            Assert.True(map.IsRiver[x, y], $"Winding cell ({x},{y}) should remain river.");
+        }
+
+        // The retained path holds exactly the expected cells.
+        var riverCells = 0;
+        for (var y = 0; y < profile.Height; ++y)
+        {
+            for (var x = 0; x < profile.Width; ++x)
+            {
+                if (map.IsRiver[x, y]) ++riverCells;
+            }
+        }
+
+        Assert.Equal(22, riverCells);
+    }
+
+    [Fact]
+    public void Extract_RiverLeftBelowMinLengthByTrimming_DropsOut()
+    {
+        // A 300-cell straight run trims to 2 cells, below the minimum length, so the
+        // river drops out entirely.
+        var path = new List<(int X, int Y)>();
+        for (var x = 0; x < 300; ++x) path.Add((x, 8));
+
+        var (map, filled, sills, routing, profile, result) =
+            BuildSynthetic(path, (383, 8));
+
+        Assert.Equal(0, result.RiverCount);
+        Assert.Equal(0, result.LongestStraightRiverRun);
+        AssertRiverFlagsAbsent(map, profile.Width, profile.Height);
+    }
+
+    [Fact]
+    public void Extract_WindingRiver_IsUntouched()
+    {
+        // A fully winding river has no run longer than two cells and must keep every cell.
+        var path = new List<(int X, int Y)> { (0, 8) };
+        for (var i = 0; i < 30; ++i)
+        {
+            var (x, y) = path[^1];
+            path.Add(i % 2 == 0 ? (x + 1, y - 1) : (x + 1, y + 1));
+        }
+
+        var (map, filled, sills, routing, profile, result) =
+            BuildSynthetic(path, (383, 8));
+
+        Assert.Equal(1, result.RiverCount);
+        Assert.Equal(2, result.LongestStraightRiverRun);
+        foreach (var (x, y) in path)
+        {
+            Assert.True(map.IsRiver[x, y], $"River cell ({x},{y}) was trimmed.");
+        }
+    }
+
+    [Fact]
+    public void Extract_KnownStraightRun_MetricMatchesFilterDefinition()
+    {
+        // Zigzag, a 50-cell north run (below the 96-cell maximum, so untrimmed), then
+        // zigzag again: the metric must report the known 51-cell run (50 steps plus the
+        // pivot cell).
+        var path = new List<(int X, int Y)> { (100, 60) };
+        for (var i = 0; i < 6; ++i)
+        {
+            var (x, y) = path[^1];
+            path.Add(i % 2 == 0 ? (x + 1, y - 1) : (x + 1, y + 1));
+        }
+
+        var (zx, zy) = path[^1];
+        for (var i = 1; i <= 50; ++i) path.Add((zx, zy - i));
+        for (var i = 0; i < 6; ++i)
+        {
+            var (x, y) = path[^1];
+            path.Add(i % 2 == 0 ? (x + 1, y + 1) : (x + 1, y - 1));
+        }
+
+        var (map, filled, sills, routing, profile, result) =
+            BuildSynthetic(path, (383, 8));
+
+        Assert.Equal(1, result.RiverCount);
+        Assert.Equal(51, result.LongestStraightRiverRun);
+        foreach (var (x, y) in path)
+        {
+            Assert.True(map.IsRiver[x, y], $"River cell ({x},{y}) was trimmed.");
+        }
+    }
+
     /// <summary>
     ///     Asserts that no river, width, or bank flags are set on the map.
     /// </summary>
@@ -160,11 +273,11 @@ public class TestRiverExtractor
     ///     Builds a shaped terrain surface with routing for extraction.
     /// </summary>
     private static (TerrainMap Map, int[,] Filled, FlowRouting Routing, WorldGenProfile Profile)
-        BuildSurface(WorldGenProfile profile)
-    {
+        BuildSurface(WorldGenProfile profile)    {
         var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
-            SeedDerivation.DeriveSubSeed(Seed, "TerrainFields"));
-        var continentalness = new ContinentalnessStage().Apply(fields, profile.Width, profile.Height);
+            SeedDerivation.DeriveSubSeed(Seed, "TerrainFields"), profile.Terrain);
+        var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
+            profile.Height, profile.Terrain);
         var shape = new TerrainShapeStage().Apply(fields, continentalness, profile,
             SeedDerivation.DeriveSubSeed(Seed, "TerrainShape"));
         var filled = FillSurface(shape.Map);
@@ -190,6 +303,98 @@ public class TestRiverExtractor
         var sills = (int[,])map.Heights.Clone();
         DepressionFill.Fill(sills, useEpsilon: false);
         return sills;
+    }
+
+    /// <summary>
+    ///     Builds a flat synthetic surface whose flow routing follows the given path into the
+    ///     ocean cell at the given mouth, then extracts rivers over it.
+    /// </summary>
+    /// <param name="path">River path in downstream order.</param>
+    /// <param name="mouth">Ocean cell that the last path cell drains into.</param>
+    /// <returns>The map, fill surfaces, routing, profile, and extraction result.</returns>
+    private static (TerrainMap Map, int[,] Filled, int[,] Sills, FlowRouting Routing,
+        WorldGenProfile Profile, RiverExtractionResult Result) BuildSynthetic(
+        IReadOnlyList<(int X, int Y)> path, (int X, int Y) mouth)
+    {
+        const int width = 384;
+        const int height = 80;
+
+        var map = new TerrainMap
+        {
+            Width = width,
+            Height = height,
+            Heights = new int[width, height],
+            IsOcean = new bool[width, height],
+            IsCliff = new bool[width, height],
+            IsBeach = new bool[width, height],
+            IsRiver = new bool[width, height],
+            RiverWidth = new int[width, height],
+            IsBank = new bool[width, height],
+            IsLake = new bool[width, height],
+            LakeSurfaceZ = new int[width, height]
+        };
+
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                map.Heights[x, y] = 20;
+            }
+        }
+
+        for (var x = 380; x < width; ++x)
+        {
+            for (var y = 0; y < height; ++y)
+            {
+                map.Heights[x, y] = 0;
+                map.IsOcean[x, y] = true;
+            }
+        }
+
+        var receiver = new int[width, height];
+        var accumulation = new int[width, height];
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                receiver[x, y] = -1;
+                accumulation[x, y] = 1;
+            }
+        }
+
+        foreach (var (x, y) in path)
+        {
+            receiver[x, y] = mouth.Y * width + mouth.X;
+            accumulation[x, y] = 4096;
+        }
+
+        for (var i = 0; i < path.Count - 1; ++i)
+        {
+            var (x, y) = path[i];
+            var next = path[i + 1];
+            receiver[x, y] = next.Y * width + next.X;
+        }
+
+        var routing = new FlowRouting { Receiver = receiver, Accumulation = accumulation };
+        var profile = new WorldGenProfile
+        {
+            Width = width,
+            Height = height,
+            SeaLevelZ = 12,
+            SurfaceMaxZ = 28,
+            RockFloorZ = -63,
+            BedrockZ = -64,
+            StoneBands = new List<StoneBand>
+            {
+                new() { FromZ = -63, ToZ = -1, Template = "Basalt" }
+            },
+            Rivers = new RiverOptions { MaxCount = 8, MinLength = 16 }
+        };
+
+        var filled = (int[,])map.Heights.Clone();
+        var sills = (int[,])map.Heights.Clone();
+        var result = new RiverExtractor(Seed).Extract(map, filled, sills, routing, profile);
+        return (map, filled, sills, routing, profile, result);
     }
 
     /// <summary>
