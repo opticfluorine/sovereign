@@ -33,10 +33,12 @@ public class TestPlanStatistics
     /// <param name="biomePercentages">Biome fractions, or null for an unconfigured plan.</param>
     /// <param name="decorationCounts">Decoration counts, or null for an unconfigured plan.</param>
     /// <param name="decorationsTotal">Total decoration count.</param>
+    /// <param name="caves">Cave statistics, or null for an unconfigured plan.</param>
     /// <returns>Plan statistics.</returns>
     private static PlanStatistics Statistics(
         IReadOnlyDictionary<BiomeId, double>? biomePercentages = null,
-        IReadOnlyDictionary<string, int>? decorationCounts = null, int decorationsTotal = 0)
+        IReadOnlyDictionary<string, int>? decorationCounts = null, int decorationsTotal = 0,
+        CaveStats? caves = null)
     {
         return new PlanStatistics
         {
@@ -50,11 +52,42 @@ public class TestPlanStatistics
             TerrainMs = 1000,
             HydrologyMs = 500,
             BiomesMs = 250,
+            CavesMs = caves is null ? 0 : 750,
             PreviewMs = 100,
-            TotalMs = 1850,
+            TotalMs = caves is null ? 1850 : 2600,
             BiomePercentages = biomePercentages,
             DecorationCounts = decorationCounts,
-            DecorationsTotal = decorationsTotal
+            DecorationsTotal = decorationsTotal,
+            Caves = caves
+        };
+    }
+
+    /// <summary>
+    ///     Creates cave statistics for one level.
+    /// </summary>
+    /// <returns>Cave statistics.</returns>
+    private static CaveStats CaveStatistics()
+    {
+        return new CaveStats
+        {
+            Levels = new List<CaveLevelStats>
+            {
+                new()
+                {
+                    Level = 1,
+                    BaseFloorZ = -16,
+                    OpenCells = 1399,
+                    OpenFraction = 0.3416,
+                    ConfiguredPorosity = 0.34,
+                    RepairCorridorCells = 42,
+                    ComponentsBeforeRepair = 5,
+                    ComponentsAfterRepair = 1,
+                    ShaftCount = 3,
+                    MouthCount = 2
+                }
+            },
+            WaterProximityViolations = 0,
+            Warnings = new List<string> { "level 1 tuned hot." }
         };
     }
 
@@ -99,5 +132,27 @@ public class TestPlanStatistics
             new SortedDictionary<string, int>()).Format();
 
         Assert.Contains("Decorations: 0 total", text);
+    }
+
+    [Fact]
+    public void Format_WithCaves_PrintsOneLinePerLevelPlusAuditAndWarnings()
+    {
+        var text = Statistics(caves: CaveStatistics()).Format();
+
+        Assert.Contains("Cave level 1 (floor -16): 34.2% open (1399 cells), repair 42, " +
+                        "components 5->1, shafts 3, mouths 2", text);
+        Assert.Contains("Cave water-proximity audit: 0 violations", text);
+        Assert.Contains("Cave warning: level 1 tuned hot.", text);
+        Assert.Contains("Caves: 0.8 s", text);
+    }
+
+    [Fact]
+    public void Format_WithoutCaves_PrintsNoCaveLines()
+    {
+        var text = Statistics().Format();
+
+        Assert.DoesNotContain("Cave level", text);
+        Assert.DoesNotContain("Cave warning", text);
+        Assert.DoesNotContain("water-proximity audit", text);
     }
 }

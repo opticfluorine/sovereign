@@ -157,6 +157,40 @@ public class TestProfileLoader
         Assert.Contains("bogus", exception.Message);
     }
 
+    [Fact]
+    public void Load_PartialCavesSection_FillsMissingKeysWithDefaults()
+    {
+        using var scope = new TempProfileDirectory();
+        scope.WriteProfile("caves", @"{
+  ""width"": 2048,
+  ""height"": 2048,
+  ""seaLevelZ"": 12,
+  ""surfaceMaxZ"": 28,
+  ""rockFloorZ"": -63,
+  ""bedrockZ"": -64,
+  ""stoneBands"": [
+    { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
+  ],
+  ""caveLevels"": [
+    { ""floorZ"": -32, ""headroom"": 2 }
+  ],
+  ""caves"": {
+    ""porosity"": 0.4
+  }
+}");
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        var profile = loader.Load("caves");
+
+        var caves = profile.Caves;
+        Assert.NotNull(caves);
+        Assert.Equal(0.4, caves!.Porosity);
+        Assert.Equal(CaveOptions.DefaultMinTunnelWidth, caves.MinTunnelWidth);
+        Assert.Equal(CaveOptions.DefaultMouthMinLandDistance, caves.MouthMinLandDistance);
+        Assert.Equal(0, caves.ShaftsPerLevelPair);
+        Assert.Equal(0, caves.SurfaceMouths);
+    }
+
     /// <summary>
     ///     Asserts that the terrain options carry the shipped defaults.
     /// </summary>

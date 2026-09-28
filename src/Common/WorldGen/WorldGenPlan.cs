@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Terrain;
 
@@ -67,6 +68,17 @@ public sealed class WorldGenPlan
     ///     biomes section.
     /// </summary>
     public IReadOnlyList<DecorationPlacement>? Decorations { get; init; }
+
+    /// <summary>
+    ///     Carved cave map of the plan. Null if the profile has no cave levels.
+    /// </summary>
+    public CaveMap? Caves { get; init; }
+
+    /// <summary>
+    ///     Absolute paths of the rendered cave preview images, one per cave level in
+    ///     top-to-bottom order. Empty if the profile has no cave levels.
+    /// </summary>
+    public IReadOnlyList<string> CavePreviewPaths { get; init; } = new List<string>();
 
     /// <summary>
     ///     Summary statistics of the plan.

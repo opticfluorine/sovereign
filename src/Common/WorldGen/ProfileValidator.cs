@@ -61,6 +61,36 @@ public sealed class ProfileValidator
     private const int MaxCaveCount = 64;
 
     /// <summary>
+    ///     Minimum allowed cave porosity.
+    /// </summary>
+    private const double MinCavePorosity = 0.1;
+
+    /// <summary>
+    ///     Maximum allowed cave porosity.
+    /// </summary>
+    private const double MaxCavePorosity = 0.6;
+
+    /// <summary>
+    ///     Minimum allowed corridor carve width in blocks.
+    /// </summary>
+    private const int MinTunnelWidth = 1;
+
+    /// <summary>
+    ///     Maximum allowed corridor carve width in blocks.
+    /// </summary>
+    private const int MaxTunnelWidth = 4;
+
+    /// <summary>
+    ///     Minimum allowed mouth exclusion radius for water, in blocks.
+    /// </summary>
+    private const int MinMouthMinLandDistance = 4;
+
+    /// <summary>
+    ///     Maximum allowed mouth exclusion radius for water, in blocks.
+    /// </summary>
+    private const int MaxMouthMinLandDistance = 256;
+
+    /// <summary>
     ///     Maximum allowed river count.
     /// </summary>
     private const int MaxRiverCount = 500;
@@ -327,11 +357,34 @@ public sealed class ProfileValidator
 
         ValidateCaveCount("shaftsPerLevelPair", caves.ShaftsPerLevelPair, issues);
         ValidateCaveCount("surfaceMouths", caves.SurfaceMouths, issues);
+        ValidateCaveTunings(caves, issues);
 
         var hasCaveLevels = profile.CaveLevels is { Count: > 0 };
         if (!hasCaveLevels && (caves.ShaftsPerLevelPair != 0 || caves.SurfaceMouths != 0))
             issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
                 "caves must be absent or all-zero when caveLevels is empty."));
+    }
+
+    /// <summary>
+    ///     Validates the cave generation tuning options: porosity, tunnel width, and the
+    ///     mouth water exclusion radius.
+    /// </summary>
+    /// <param name="caves">Cave options to validate.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateCaveTunings(CaveOptions caves, List<ProfileValidationIssue> issues)
+    {
+        if (caves.Porosity is < MinCavePorosity or > MaxCavePorosity)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"caves.porosity ({caves.Porosity}) must be between {MinCavePorosity} " +
+                $"and {MaxCavePorosity}."));
+        if (caves.MinTunnelWidth is < MinTunnelWidth or > MaxTunnelWidth)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"caves.minTunnelWidth ({caves.MinTunnelWidth}) must be between " +
+                $"{MinTunnelWidth} and {MaxTunnelWidth}."));
+        if (caves.MouthMinLandDistance is < MinMouthMinLandDistance or > MaxMouthMinLandDistance)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"caves.mouthMinLandDistance ({caves.MouthMinLandDistance}) must be between " +
+                $"{MinMouthMinLandDistance} and {MaxMouthMinLandDistance}."));
     }
 
     /// <summary>

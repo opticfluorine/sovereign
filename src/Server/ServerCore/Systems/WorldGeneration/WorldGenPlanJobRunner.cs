@@ -159,8 +159,13 @@ public sealed class WorldGenPlanJobRunner
             // Send the completion reply before recording the plan: waiters use the recorded
             // plan as the signal that the job finished, so all completion chat must already
             // be visible (and thread-safely recorded) when LastCompletedPlan becomes set.
-            chat.SendSystemMessage(
-                plan.Statistics.Format() + "\nPreview: " + plan.PreviewPath, senderEntityId);
+            var reply = plan.Statistics.Format() + "\nPreview: " + plan.PreviewPath;
+            foreach (var cavePreviewPath in plan.CavePreviewPaths)
+            {
+                reply += "\nPreview: " + cavePreviewPath;
+            }
+
+            chat.SendSystemMessage(reply, senderEntityId);
             system.SetJobStatus(WorldGenerationJobStatus.Idle, "Plan complete");
             services.RecordCompletedPlan(plan);
         }

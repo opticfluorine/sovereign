@@ -17,7 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Hydrology;
 using Sovereign.WorldGen.Noise;
@@ -27,8 +29,8 @@ using Sovereign.WorldGen.Terrain;
 namespace Sovereign.WorldGen;
 
 /// <summary>
-///     Sequences the terrain, hydrology, biome, and preview stages of a world generation
-///     plan.
+///     Sequences the terrain, hydrology, biome, cave, and preview stages of a world
+///     generation plan.
 /// </summary>
 public interface IWorldGenPipeline
 {
@@ -48,10 +50,10 @@ public interface IWorldGenPipeline
 }
 
 /// <summary>
-///     Runs the terrain, hydrology, biome, and preview stages of a world generation plan in
-///     sequence. All stages derive their sub-seeds deterministically from the root seed; the
-///     same root seed and profile always produce a byte-identical heightmap, biome map,
-///     material assignment, decoration list, and preview PNG.
+///     Runs the terrain, hydrology, biome, cave, and preview stages of a world generation
+///     plan in sequence. All stages derive their sub-seeds deterministically from the root
+///     seed; the same root seed and profile always produce a byte-identical heightmap,
+///     biome map, material assignment, cave map, decoration list, and preview PNGs.
 /// </summary>
 public sealed class WorldGenPipeline : IWorldGenPipeline
 {
@@ -76,13 +78,14 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// <param name="previewPath">Absolute path to which the preview PNG is written.</param>
     /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
     /// <returns>The completed plan.</returns>
-    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX, int originY,
-        string previewPath, Action<string>? progress)
+    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, string previewPath, Action<string>? progress)
     {
         var total = Stopwatch.StartNew();
         var terrainClock = new Stopwatch();
         var hydrologyClock = new Stopwatch();
         var biomesClock = new Stopwatch();
+        var cavesClock = new Stopwatch();
         var previewClock = new Stopwatch();
 
         var landCells = 0;
@@ -137,6 +140,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         BiomeMap? biomeMap = null;
         ColumnMaterials? materials = null;
         IReadOnlyList<DecorationPlacement> decorations = new List<DecorationPlacement>();
+        CaveStageResult? caves = null;
 
         if (profile.Biomes is { } biomes)
         {
@@ -146,17 +150,47 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
 
             Report(progress, "Biomes: assigning materials");
             materials = new MaterialStage().Apply(map, biomeMap, biomes, SubSeed(seed, "MaterialJitter"));
+            biomesClock.Stop();
+        }
 
+        // Caves run after the biome stages and before decoration placement so that
+        // decorations can keep clear of surface mouths.
+        if (profile.CaveLevels is { Count: > 0 })
+        {
+            Report(progress, "Caves: generating levels");
+            cavesClock.Start();
+            caves = new CaveStage().Apply(profile, map, biomeMap, seed);
+            cavesClock.Stop();
+        }
+
+        if (biomeMap is not null && profile.Biomes is { } biomePlacement)
+        {
             Report(progress, "Biomes: placing decorations");
+            biomesClock.Start();
             decorations = new DecorationPlacer(SubSeed(seed, "Decorations"))
-                .Apply(map, biomeMap, biomes).Placements;
+                .Apply(map, biomeMap, biomePlacement, caves?.Map.Mouths).Placements;
             biomesClock.Stop();
         }
 
         Report(progress, "Rendering preview");
         previewClock.Start();
-        var preview = new PreviewRenderer().Render(map, continentalness, profile, biomeMap);
+        var preview = new PreviewRenderer().Render(map, continentalness, profile, biomeMap,
+            caves?.Map.Mouths);
         PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
+
+        var cavePreviewPaths = new List<string>();
+        if (caves is not null)
+        {
+            var cavePreviews = new CavePreviewRenderer().Render(caves.Map);
+            for (var i = 0; i < cavePreviews.Count; ++i)
+            {
+                var path = CavePreviewPath(previewPath, i + 1);
+                PngWriter.WritePng(path, cavePreviews[i].Width, cavePreviews[i].Height,
+                    cavePreviews[i].Pixels);
+                cavePreviewPaths.Add(path);
+            }
+        }
+
         previewClock.Stop();
 
         total.Stop();
@@ -173,11 +207,13 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             TerrainMs = terrainClock.ElapsedMilliseconds,
             HydrologyMs = hydrologyClock.ElapsedMilliseconds,
             BiomesMs = biomesClock.ElapsedMilliseconds,
+            CavesMs = cavesClock.ElapsedMilliseconds,
             PreviewMs = previewClock.ElapsedMilliseconds,
             TotalMs = total.ElapsedMilliseconds,
             BiomePercentages = biomeMap is null ? null : BiomePercentages(biomeMap),
             DecorationCounts = biomeMap is null ? null : DecorationCounts(decorations),
-            DecorationsTotal = decorations.Count
+            DecorationsTotal = decorations.Count,
+            Caves = caves?.Stats
         };
 
         return new WorldGenPlan
@@ -190,9 +226,35 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             Biomes = biomeMap,
             Materials = materials,
             Decorations = biomeMap is null ? null : decorations,
+            Caves = caves?.Map,
+            CavePreviewPaths = cavePreviewPaths,
             Statistics = statistics,
             PreviewPath = previewPath
         };
+    }
+
+    /// <summary>
+    ///     Derives the preview path of one cave level from the main preview path. The
+    ///     "preview_" filename prefix is replaced with "caves_" and the level number is
+    ///     appended; other names fall back to a caves suffix.
+    /// </summary>
+    /// <param name="previewPath">Absolute path of the main preview image.</param>
+    /// <param name="levelNumber">One-based cave level number.</param>
+    /// <returns>Absolute path for the cave preview image.</returns>
+    private static string CavePreviewPath(string previewPath, int levelNumber)
+    {
+        var directory = Path.GetDirectoryName(previewPath) ?? ".";
+        var file = Path.GetFileNameWithoutExtension(previewPath);
+        if (file.StartsWith("preview_", StringComparison.Ordinal))
+        {
+            file = "caves_" + file["preview_".Length..] + $"_{levelNumber}";
+        }
+        else
+        {
+            file = $"{file}_caves_{levelNumber}";
+        }
+
+        return Path.Combine(directory, file + ".png");
     }
 
     /// <summary>

@@ -247,6 +247,55 @@ public class TestProfileValidator
     }
 
     [Fact]
+    public void Validate_PartialCavesSection_UsesDefaultsAndIsValid()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Caves = new CaveOptions
+        {
+            ShaftsPerLevelPair = 0,
+            SurfaceMouths = 0,
+            Porosity = 0.5
+        };
+
+        Assert.Empty(validator.Validate(profile));
+        Assert.Equal(CaveOptions.DefaultMinTunnelWidth, profile.Caves.MinTunnelWidth);
+        Assert.Equal(CaveOptions.DefaultMouthMinLandDistance, profile.Caves.MouthMinLandDistance);
+    }
+
+    [Fact]
+    public void Validate_CavePorosityOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Caves!.Porosity = 0.05;
+        AssertHasError(validator.Validate(profile), "porosity");
+
+        profile.Caves.Porosity = 0.9;
+        AssertHasError(validator.Validate(profile), "porosity");
+    }
+
+    [Fact]
+    public void Validate_CaveMinTunnelWidthOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Caves!.MinTunnelWidth = 0;
+        AssertHasError(validator.Validate(profile), "minTunnelWidth");
+
+        profile.Caves.MinTunnelWidth = 5;
+        AssertHasError(validator.Validate(profile), "minTunnelWidth");
+    }
+
+    [Fact]
+    public void Validate_CaveMouthMinLandDistanceOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Caves!.MouthMinLandDistance = 3;
+        AssertHasError(validator.Validate(profile), "mouthMinLandDistance");
+
+        profile.Caves.MouthMinLandDistance = 300;
+        AssertHasError(validator.Validate(profile), "mouthMinLandDistance");
+    }
+
+    [Fact]
     public void Validate_RiverCountOutOfRange_IsError()
     {
         var profile = TestProfiles.CreateValid();
