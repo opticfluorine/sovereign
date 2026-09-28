@@ -24,7 +24,7 @@
     "surfaceMouths": 2
   },
   "terrain": {
-    "continentalnessWavelengthFactor": 1.75,
+    "continentalnessWavelengthFactor": 0.9,
     "continentalnessOctaves": 6,
     "warpAmplitudeInner": 0.35,
     "warpAmplitudeOuter": 0.40,

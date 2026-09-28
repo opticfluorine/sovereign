@@ -25,7 +25,7 @@ public sealed class TerrainOptions
     /// <summary>
     ///     Base continentalness wavelength as a fraction of the larger footprint dimension.
     /// </summary>
-    public float ContinentalnessWavelengthFactor { get; set; } = 1.75f;
+    public float ContinentalnessWavelengthFactor { get; set; } = 0.9f;
 
     /// <summary>
     ///     Number of octaves in the continentalness fBm.

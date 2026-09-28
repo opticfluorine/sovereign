@@ -163,7 +163,7 @@ public class TestProfileLoader
     /// <param name="terrain">Terrain options to assert.</param>
     private static void AssertTerrainDefaults(TerrainOptions terrain)
     {
-        Assert.Equal(1.75f, terrain.ContinentalnessWavelengthFactor);
+        Assert.Equal(0.9f, terrain.ContinentalnessWavelengthFactor);
         Assert.Equal(6, terrain.ContinentalnessOctaves);
         Assert.Equal(0.35f, terrain.WarpAmplitudeInner);
         Assert.Equal(0.40f, terrain.WarpAmplitudeOuter);
@@ -179,7 +179,7 @@ public class TestProfileLoader
     /// <param name="terrain">Terrain options to assert.</param>
     private static void AssertTerrainDefaultsExceptRun(TerrainOptions terrain)
     {
-        Assert.Equal(1.75f, terrain.ContinentalnessWavelengthFactor);
+        Assert.Equal(0.9f, terrain.ContinentalnessWavelengthFactor);
         Assert.Equal(6, terrain.ContinentalnessOctaves);
         Assert.Equal(0.35f, terrain.WarpAmplitudeInner);
         Assert.Equal(0.40f, terrain.WarpAmplitudeOuter);
