@@ -94,4 +94,93 @@ internal static class TestProfiles
         profile.Rivers = null;
         return profile;
     }
+
+    /// <summary>
+    ///     Creates the 128x128 baseline profile with a minimal biomes section: three table
+    ///     biomes, ocean and beach handled by terrain flags, one swamp configuration, and
+    ///     small decoration pools. Terrain parameters match <see cref="CreateSmall128" /> so
+    ///     that the heights golden hash is shared.
+    /// </summary>
+    /// <returns>Profile.</returns>
+    public static WorldGenProfile CreateSmall128Biomes()
+    {
+        var profile = CreateSmall128();
+        profile.Biomes = new BiomeOptions
+        {
+            SnowcapZ = 26,
+            AlpineZ = 23,
+            OceanFloorTemplate = "Gravel",
+            WaterFloorTemplate = "Sand",
+            Table = new BiomeTableOptions
+            {
+                Cold = new BiomeTableRow { Dry = "Taiga", Temperate = "Taiga", Wet = "Taiga" },
+                Mild = new BiomeTableRow { Dry = "Grassland", Temperate = "Grassland", Wet = "Grassland" },
+                Hot = new BiomeTableRow { Dry = "Savanna", Temperate = "Grassland", Wet = "Grassland" }
+            },
+            Swamp = new SwampOptions { Template = "Grass", MaxHeightZ = 14 },
+            Definitions = new Dictionary<string, BiomeDefinition>
+            {
+                ["Grassland"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Grass",
+                    SubSurfaceTemplate = "Dirt",
+                    SubSurfaceDepth = 4,
+                    Decorations = new List<DecorationOptions>
+                    {
+                        new() { Template = "OakTree", Weight = 0.02, MinSpacing = 5, MaxSlope = 1 },
+                        new() { Template = "Boulder", Weight = 0.005, MinSpacing = 7, MaxSlope = 2 }
+                    }
+                },
+                ["Taiga"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Grass",
+                    SubSurfaceTemplate = "Dirt",
+                    SubSurfaceDepth = 2,
+                    Decorations = new List<DecorationOptions>
+                    {
+                        new() { Template = "PineTree", Weight = 0.06, MinSpacing = 3, MaxSlope = 2 }
+                    }
+                },
+                ["Savanna"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Grass",
+                    SubSurfaceTemplate = "Sand",
+                    SubSurfaceDepth = 2,
+                    Decorations = new List<DecorationOptions>
+                    {
+                        new() { Template = "AcaciaTree", Weight = 0.01, MinSpacing = 6, MaxSlope = 1 }
+                    }
+                },
+                ["Beach"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Sand",
+                    SubSurfaceTemplate = "Sand",
+                    SubSurfaceDepth = 3
+                },
+                ["Swamp"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Grass",
+                    SubSurfaceTemplate = "Dirt",
+                    SubSurfaceDepth = 2,
+                    Decorations = new List<DecorationOptions>
+                    {
+                        new() { Template = "DeadBush", Weight = 0.04, MinSpacing = 4, MaxSlope = 1 }
+                    }
+                },
+                ["Alpine"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Shale",
+                    SubSurfaceTemplate = "Shale",
+                    SubSurfaceDepth = 1
+                },
+                ["Snowcap"] = new BiomeDefinition
+                {
+                    SurfaceTemplate = "Snow",
+                    SubSurfaceTemplate = "Shale",
+                    SubSurfaceDepth = 1
+                }
+            }
+        };
+        return profile;
+    }
 }

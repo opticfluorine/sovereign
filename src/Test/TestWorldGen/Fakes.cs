@@ -206,6 +206,7 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
                 LakeCount = 0,
                 TerrainMs = 0,
                 HydrologyMs = 0,
+                BiomesMs = 0,
                 PreviewMs = 0,
                 TotalMs = 0
             },

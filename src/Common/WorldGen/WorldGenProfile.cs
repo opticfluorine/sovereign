@@ -72,4 +72,10 @@ public sealed class WorldGenProfile
     ///     Cave generation options. Optional; null if absent from the profile.
     /// </summary>
     public CaveOptions? Caves { get; set; }
+
+    /// <summary>
+    ///     Biome, material, and decoration configuration. Optional; null if absent from the
+    ///     profile, in which case the pipeline skips the biome stages entirely.
+    /// </summary>
+    public BiomeOptions? Biomes { get; set; }
 }
