@@ -265,6 +265,108 @@ public class TestProfileValidator
     }
 
     [Fact]
+    public void Validate_DefaultTerrain_HasNoIssues()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain = new TerrainOptions();
+
+        AssertHasNoError(validator.Validate(profile), "terrain.");
+    }
+
+    [Fact]
+    public void Validate_TerrainBoundaryValues_HasNoIssues()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain = new TerrainOptions
+        {
+            ContinentalnessWavelengthFactor = 0.5f,
+            ContinentalnessOctaves = 3,
+            WarpAmplitudeInner = 0f,
+            WarpAmplitudeOuter = 1.5f,
+            Thresholds = new ContinentalnessThresholdOptions
+                { Ocean = 0.25f, Coast = 0.5f, Inland = 0.75f },
+            MaxStraightRiverRun = 16
+        };
+
+        AssertHasNoError(validator.Validate(profile), "terrain.");
+    }
+
+    [Fact]
+    public void Validate_WavelengthFactorOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain.ContinentalnessWavelengthFactor = 0.4f;
+
+        AssertHasError(validator.Validate(profile), "continentalnessWavelengthFactor");
+
+        profile.Terrain.ContinentalnessWavelengthFactor = 4.5f;
+        AssertHasError(validator.Validate(profile), "continentalnessWavelengthFactor");
+    }
+
+    [Fact]
+    public void Validate_ContinentOctavesOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain.ContinentalnessOctaves = 2;
+
+        AssertHasError(validator.Validate(profile), "continentalnessOctaves");
+
+        profile.Terrain.ContinentalnessOctaves = 10;
+        AssertHasError(validator.Validate(profile), "continentalnessOctaves");
+    }
+
+    [Fact]
+    public void Validate_WarpAmplitudeOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain.WarpAmplitudeInner = -0.1f;
+
+        AssertHasError(validator.Validate(profile), "warpAmplitudeinner");
+
+        profile.Terrain.WarpAmplitudeOuter = 1.6f;
+        AssertHasError(validator.Validate(profile), "warpAmplitudeouter");
+    }
+
+    [Fact]
+    public void Validate_ThresholdOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain.Thresholds.Ocean = 0f;
+
+        AssertHasError(validator.Validate(profile), "thresholds.ocean");
+
+        profile.Terrain.Thresholds.Ocean = 0.4f;
+        profile.Terrain.Thresholds.Coast = 1.0f;
+        AssertHasError(validator.Validate(profile), "thresholds.coast");
+    }
+
+    [Fact]
+    public void Validate_ThresholdOrderingViolated_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain.Thresholds = new ContinentalnessThresholdOptions
+            { Ocean = 0.5f, Coast = 0.48f, Inland = 0.62f };
+
+        AssertHasError(validator.Validate(profile), "ocean < coast < inland");
+
+        profile.Terrain.Thresholds = new ContinentalnessThresholdOptions
+            { Ocean = 0.40f, Coast = 0.48f, Inland = 0.42f };
+        AssertHasError(validator.Validate(profile), "ocean < coast < inland");
+    }
+
+    [Fact]
+    public void Validate_MaxStraightRiverRunOutOfRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Terrain.MaxStraightRiverRun = 15;
+
+        AssertHasError(validator.Validate(profile), "maxStraightRiverRun");
+
+        profile.Terrain.MaxStraightRiverRun = 4097;
+        AssertHasError(validator.Validate(profile), "maxStraightRiverRun");
+    }
+
+    [Fact]
     public void Validate_SurfaceFarAboveSea_IsWarning()
     {
         var profile = TestProfiles.CreateValid();
@@ -287,6 +389,18 @@ public class TestProfileValidator
     {
         Assert.Contains(issues, i => i.Severity == ProfileValidationSeverity.Error
                                      && i.Message.Contains(messageFragment, StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    ///     Asserts that no error issue message contains the given fragment.
+    /// </summary>
+    /// <param name="issues">Issues to search.</param>
+    /// <param name="messageFragment">Text that must not appear in any error message.</param>
+    private static void AssertHasNoError(IReadOnlyList<ProfileValidationIssue> issues,
+        string messageFragment)
+    {
+        Assert.DoesNotContain(issues, i => i.Severity == ProfileValidationSeverity.Error
+                                           && i.Message.Contains(messageFragment, StringComparison.Ordinal));
     }
 
     /// <summary>

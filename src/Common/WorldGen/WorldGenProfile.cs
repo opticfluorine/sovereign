@@ -78,4 +78,10 @@ public sealed class WorldGenProfile
     ///     profile, in which case the pipeline skips the biome stages entirely.
     /// </summary>
     public BiomeOptions? Biomes { get; set; }
+
+    /// <summary>
+    ///     Terrain generation tuning options. Never null; absent from the profile, every
+    ///     option keeps its shipped default.
+    /// </summary>
+    public TerrainOptions Terrain { get; set; } = new();
 }

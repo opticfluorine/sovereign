@@ -35,6 +35,12 @@ public sealed class RiverExtractionResult
     ///     Number of extracted lakes.
     /// </summary>
     public required int LakeCount { get; init; }
+
+    /// <summary>
+    ///     Longest maximal run of constant step direction over the extracted rivers, in
+    ///     cells, measured after straight-run trimming.
+    /// </summary>
+    public required int LongestStraightRiverRun { get; init; }
 }
 
 /// <summary>
@@ -91,12 +97,22 @@ public sealed class RiverExtractor
         var lakeCount = ExtractLakes(map, sillHeights, profile);
         if (profile.Rivers is not { } rivers)
         {
-            return new RiverExtractionResult { RiverCount = 0, LakeCount = lakeCount };
+            return new RiverExtractionResult
+            {
+                RiverCount = 0,
+                LakeCount = lakeCount,
+                LongestStraightRiverRun = 0
+            };
         }
 
-        var riverCount = ExtractRivers(map, routing, profile, rivers);
+        var (riverCount, longestStraightRun) = ExtractRivers(map, routing, profile, rivers);
         MarkBanks(map, profile.Width, profile.Height);
-        return new RiverExtractionResult { RiverCount = riverCount, LakeCount = lakeCount };
+        return new RiverExtractionResult
+        {
+            RiverCount = riverCount,
+            LakeCount = lakeCount,
+            LongestStraightRiverRun = longestStraightRun
+        };
     }
 
     /// <summary>
@@ -187,15 +203,18 @@ public sealed class RiverExtractor
     /// <summary>
     ///     Extracts rivers: maximal downstream paths of cells whose accumulation reaches the
     ///     river threshold, starting at cells with no above-threshold upstream. Rivers are
-    ///     filtered by the profile minimum length and capped at the profile maximum count.
+    ///     filtered by the profile minimum length and capped at the profile maximum count,
+    ///     then trimmed of overlong straight runs. Rivers left shorter than the minimum
+    ///     length by trimming drop out entirely.
     /// </summary>
     /// <param name="map">Terrain map to update.</param>
     /// <param name="routing">Flow routing over the filled surface.</param>
     /// <param name="profile">World generation profile.</param>
     /// <param name="rivers">River generation options.</param>
-    /// <returns>Number of extracted rivers.</returns>
-    private int ExtractRivers(TerrainMap map, FlowRouting routing, WorldGenProfile profile,
-        RiverOptions rivers)
+    /// <returns>The number of extracted rivers and the longest remaining straight run
+    /// in cells.</returns>
+    private (int RiverCount, int LongestStraightRun) ExtractRivers(TerrainMap map,
+        FlowRouting routing, WorldGenProfile profile, RiverOptions rivers)
     {
         var width = profile.Width;
         var height = profile.Height;
@@ -220,14 +239,139 @@ public sealed class RiverExtractor
         var selected = paths
             .OrderByDescending(p => p.Count)
             .ThenBy(p => HashKey(p[0]))
-            .Take(rivers.MaxCount);
+            .Take(rivers.MaxCount)
+            .ToList();
 
+        var trimmed = new HashSet<int>();
         foreach (var path in selected)
+        {
+            TrimStraightRuns(path, profile.Terrain.MaxStraightRiverRun, trimmed, width);
+        }
+
+        var survivors = new List<List<(int X, int Y)>>();
+        var longestStraightRun = 0;
+        foreach (var path in selected)
+        {
+            var retained = RetainedCells(path, trimmed, width);
+            if (retained.Count < rivers.MinLength) continue;
+
+            survivors.Add(retained);
+            longestStraightRun = Math.Max(longestStraightRun, LongestStraightRun(retained));
+        }
+
+        foreach (var path in survivors)
         {
             MarkRiver(map, routing, path, profile);
         }
 
-        return Math.Min(paths.Count, rivers.MaxCount);
+        return (survivors.Count, longestStraightRun);
+    }
+
+    /// <summary>
+    ///     Removes the interior cells of every maximal run of constant step direction longer
+    ///     than the maximum straight run, keeping the run endpoints.
+    /// </summary>
+    /// <param name="path">River path to trim.</param>
+    /// <param name="maxRun">Maximum allowed straight run in cells.</param>
+    /// <param name="trimmed">Flat indices of trimmed cells, updated in place.</param>
+    /// <param name="width">Footprint width.</param>
+    private static void TrimStraightRuns(List<(int X, int Y)> path, int maxRun,
+        HashSet<int> trimmed, int width)
+    {
+        if (path.Count < 2) return;
+
+        var runStartStep = 0;
+        var runDirection = StepDirection(path[0], path[1]);
+        for (var step = 1; step <= path.Count - 1; ++step)
+        {
+            var direction = step < path.Count - 1 ? StepDirection(path[step], path[step + 1]) : -1;
+            if (direction == runDirection) continue;
+
+            // The run covers steps runStartStep..step-1, i.e. cells runStartStep..step.
+            var runCells = step - runStartStep + 1;
+            if (runCells > maxRun)
+            {
+                for (var cell = runStartStep + 1; cell < step; ++cell)
+                {
+                    trimmed.Add(path[cell].Y * width + path[cell].X);
+                }
+            }
+
+            runStartStep = step;
+            runDirection = direction;
+        }
+    }
+
+    /// <summary>
+    ///     Filters the cells of a path that were removed by straight-run trimming.
+    /// </summary>
+    /// <param name="path">River path.</param>
+    /// <param name="trimmed">Flat indices of trimmed cells.</param>
+    /// <param name="width">Footprint width.</param>
+    /// <returns>The retained cells, in path order.</returns>
+    private static List<(int X, int Y)> RetainedCells(List<(int X, int Y)> path,
+        HashSet<int> trimmed, int width)
+    {
+        var retained = new List<(int X, int Y)>(path.Count);
+        foreach (var (x, y) in path)
+        {
+            if (!trimmed.Contains(y * width + x)) retained.Add((x, y));
+        }
+
+        return retained;
+    }
+
+    /// <summary>
+    ///     Computes the longest maximal run of constant step direction over a path, in cells,
+    ///     using the same definition as straight-run trimming.
+    /// </summary>
+    /// <param name="path">Path to measure.</param>
+    /// <returns>Longest straight run in cells.</returns>
+    private static int LongestStraightRun(List<(int X, int Y)> path)
+    {
+        if (path.Count == 0) return 0;
+
+        var longest = 1;
+        var runCells = 1;
+        var previousDirection = -1;
+        for (var i = 1; i < path.Count; ++i)
+        {
+            var direction = StepDirection(path[i - 1], path[i]);
+            if (direction >= 0)
+            {
+                runCells = direction == previousDirection ? runCells + 1 : 2;
+                longest = Math.Max(longest, runCells);
+            }
+            else
+            {
+                runCells = 1;
+            }
+
+            previousDirection = direction;
+        }
+
+        return longest;
+    }
+
+    /// <summary>
+    ///     Determines the D8 direction of the step between two cells.
+    /// </summary>
+    /// <param name="from">Step origin.</param>
+    /// <param name="to">Step destination.</param>
+    /// <returns>Direction index, or -1 if the cells are not adjacent.</returns>
+    private static int StepDirection((int X, int Y) from, (int X, int Y) to)
+    {
+        var dx = to.X - from.X;
+        var dy = to.Y - from.Y;
+        for (var direction = 0; direction < 8; ++direction)
+        {
+            if (FlowRouter.DirectionDx[direction] == dx && FlowRouter.DirectionDy[direction] == dy)
+            {
+                return direction;
+            }
+        }
+
+        return -1;
     }
 
     /// <summary>

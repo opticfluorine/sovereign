@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using Sovereign.WorldGen.Noise;
 
 namespace Sovereign.WorldGen.Hydrology;
 
@@ -23,15 +24,17 @@ namespace Sovereign.WorldGen.Hydrology;
 ///     Priority-flood fill (Barnes) of depressions in a height field so that every cell drains
 ///     to the border. Border heights are left unchanged, and fill only raises cells.
 ///     With epsilon enabled, every cell ends with a strictly descending drainage path to the
-///     border; with epsilon disabled, depressions are raised exactly to their sill level, which
-///     is the water plane of a lake.
+///     border; the epsilon increment varies per cell so that the flat surfaces left by the
+///     fill do not carry a uniform drainage gradient whose steepest descents would run in
+///     dead-straight lines for hundreds of cells. With epsilon disabled, depressions are
+///     raised exactly to their sill level, which is the water plane of a lake.
 /// </summary>
 public static class DepressionFill
 {
     /// <summary>
     ///     Fills depressions in the given height field in place so that every cell drains to the
-    ///     border, with epsilon increments along the fill path for flat spills. The epsilon
-    ///     lives only in the routing surface, never in the terrain map.
+    ///     border, with per-cell epsilon increments along the fill path for flat spills. The
+    ///     epsilon lives only in the routing surface, never in the terrain map.
     /// </summary>
     /// <param name="heights">Height field indexed [x, y], updated in place.</param>
     public static void Fill(int[,] heights)
@@ -95,9 +98,24 @@ public static class DepressionFill
     {
         if (visited[x, y]) return counter;
 
-        var spill = useEpsilon ? Math.Max(heights[x, y], filled + 1) : Math.Max(heights[x, y], filled);
+        var spill = useEpsilon ? Math.Max(heights[x, y], filled + EpsilonOf(x, y))
+            : Math.Max(heights[x, y], filled);
         heights[x, y] = spill;
         return Push(heap, visited, heights, x, y, counter);
+    }
+
+    /// <summary>
+    ///     Computes the epsilon increment of a cell: 1 or 2, chosen by a deterministic hash of
+    ///     the cell coordinates. The variation denies flat fills a uniform drainage gradient
+    ///     whose steepest descents would otherwise produce dead-straight rivers of hundreds of
+    ///     cells.
+    /// </summary>
+    /// <param name="x">Cell X coordinate.</param>
+    /// <param name="y">Cell Y coordinate.</param>
+    /// <returns>Epsilon increment in blocks.</returns>
+    private static int EpsilonOf(int x, int y)
+    {
+        return 1 + (int)(SeedDerivation.SplitMix64((ulong)(uint)x << 32 | (uint)y) & 1);
     }
 
     /// <summary>

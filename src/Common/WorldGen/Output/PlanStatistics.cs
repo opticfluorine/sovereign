@@ -56,6 +56,12 @@ public sealed class PlanStatistics
     public required int LakeCount { get; init; }
 
     /// <summary>
+    ///     Longest maximal run of constant step direction over the extracted rivers, in
+    ///     cells, measured after straight-run trimming.
+    /// </summary>
+    public required int LongestStraightRiverRun { get; init; }
+
+    /// <summary>
     ///     Terrain stages wall time in milliseconds.
     /// </summary>
     public required long TerrainMs { get; init; }
@@ -110,7 +116,9 @@ public sealed class PlanStatistics
         var builder = new StringBuilder()
             .AppendLine($"World generation plan ({Width}x{Height}):")
             .AppendLine($"  Land: {landPct:F1}%  Water: {waterPct:F1}%")
-            .AppendLine($"  Rivers: {RiverCount}  Lakes: {LakeCount}");
+            .AppendLine(
+                $"  Rivers: {RiverCount}  Lakes: {LakeCount}  " +
+                $"LongestStraightRiverRun: {LongestStraightRiverRun}");
         AppendBiomeLines(builder);
         AppendDecorationLines(builder);
         builder.Append(

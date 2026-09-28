@@ -65,6 +65,127 @@ public class TestProfileLoader
         Assert.Null(profile.CaveLevels);
         Assert.Null(profile.Rivers);
         Assert.Null(profile.Caves);
+        AssertTerrainDefaults(profile.Terrain);
+    }
+
+    [Fact]
+    public void Load_TerrainSection_ParsesToExpectedValues()
+    {
+        using var scope = new TempProfileDirectory();
+        scope.WriteProfile("terrain", @"{
+  ""width"": 2048,
+  ""height"": 1024,
+  ""seaLevelZ"": 12,
+  ""surfaceMaxZ"": 28,
+  ""rockFloorZ"": -63,
+  ""bedrockZ"": -64,
+  ""stoneBands"": [
+    { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
+  ],
+  ""terrain"": {
+    ""continentalnessWavelengthFactor"": 2.5,
+    ""continentalnessOctaves"": 7,
+    ""warpAmplitudeInner"": 0.2,
+    ""warpAmplitudeOuter"": 0.3,
+    ""thresholds"": { ""ocean"": 0.35, ""coast"": 0.5, ""inland"": 0.7 },
+    ""maxStraightRiverRun"": 64
+  }
+}");
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        var profile = loader.Load("terrain");
+
+        var terrain = profile.Terrain;
+        Assert.Equal(2.5f, terrain.ContinentalnessWavelengthFactor);
+        Assert.Equal(7, terrain.ContinentalnessOctaves);
+        Assert.Equal(0.2f, terrain.WarpAmplitudeInner);
+        Assert.Equal(0.3f, terrain.WarpAmplitudeOuter);
+        Assert.Equal(0.35f, terrain.Thresholds.Ocean);
+        Assert.Equal(0.5f, terrain.Thresholds.Coast);
+        Assert.Equal(0.7f, terrain.Thresholds.Inland);
+        Assert.Equal(64, terrain.MaxStraightRiverRun);
+    }
+
+    [Fact]
+    public void Load_PartialTerrainSection_FillsMissingKeysWithDefaults()
+    {
+        using var scope = new TempProfileDirectory();
+        scope.WriteProfile("partial", @"{
+  ""width"": 2048,
+  ""height"": 1024,
+  ""seaLevelZ"": 12,
+  ""surfaceMaxZ"": 28,
+  ""rockFloorZ"": -63,
+  ""bedrockZ"": -64,
+  ""stoneBands"": [
+    { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
+  ],
+  ""terrain"": {
+    ""maxStraightRiverRun"": 128
+  }
+}");
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        var profile = loader.Load("partial");
+
+        Assert.Equal(128, profile.Terrain.MaxStraightRiverRun);
+        AssertTerrainDefaultsExceptRun(profile.Terrain);
+    }
+
+    [Fact]
+    public void Load_UnknownTerrainKey_IsRejected()
+    {
+        using var scope = new TempProfileDirectory();
+        scope.WriteProfile("drifted", @"{
+  ""width"": 2048,
+  ""height"": 2048,
+  ""seaLevelZ"": 12,
+  ""surfaceMaxZ"": 28,
+  ""rockFloorZ"": -63,
+  ""bedrockZ"": -64,
+  ""stoneBands"": [
+    { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
+  ],
+  ""terrain"": {
+    ""bogus"": 1
+  }
+}");
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        var exception = Assert.Throws<ProfileLoadException>(() => loader.Load("drifted"));
+
+        Assert.Contains("bogus", exception.Message);
+    }
+
+    /// <summary>
+    ///     Asserts that the terrain options carry the shipped defaults.
+    /// </summary>
+    /// <param name="terrain">Terrain options to assert.</param>
+    private static void AssertTerrainDefaults(TerrainOptions terrain)
+    {
+        Assert.Equal(0.9f, terrain.ContinentalnessWavelengthFactor);
+        Assert.Equal(6, terrain.ContinentalnessOctaves);
+        Assert.Equal(0.35f, terrain.WarpAmplitudeInner);
+        Assert.Equal(0.40f, terrain.WarpAmplitudeOuter);
+        Assert.Equal(0.32f, terrain.Thresholds.Ocean);
+        Assert.Equal(0.40f, terrain.Thresholds.Coast);
+        Assert.Equal(0.52f, terrain.Thresholds.Inland);
+        Assert.Equal(96, terrain.MaxStraightRiverRun);
+    }
+
+    /// <summary>
+    ///     Asserts the terrain defaults except the maximum straight river run.
+    /// </summary>
+    /// <param name="terrain">Terrain options to assert.</param>
+    private static void AssertTerrainDefaultsExceptRun(TerrainOptions terrain)
+    {
+        Assert.Equal(0.9f, terrain.ContinentalnessWavelengthFactor);
+        Assert.Equal(6, terrain.ContinentalnessOctaves);
+        Assert.Equal(0.35f, terrain.WarpAmplitudeInner);
+        Assert.Equal(0.40f, terrain.WarpAmplitudeOuter);
+        Assert.Equal(0.32f, terrain.Thresholds.Ocean);
+        Assert.Equal(0.40f, terrain.Thresholds.Coast);
+        Assert.Equal(0.52f, terrain.Thresholds.Inland);
     }
 
     [Fact]
@@ -161,6 +282,7 @@ public class TestProfileLoader
         Assert.Equal(
             new HashSet<string> { "Taiga", "Forest", "Savanna", "Grassland", "Desert" },
             ReferencedTableBiomes(profile.Biomes!));
+        Assert.Equal(96, profile.Terrain.MaxStraightRiverRun);
         Assert.Contains("OakTree", profile.Biomes.Definitions["Grassland"].Decorations![0].Template);
     }
 

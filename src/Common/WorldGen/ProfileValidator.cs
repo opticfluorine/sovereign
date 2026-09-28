@@ -81,6 +81,41 @@ public sealed class ProfileValidator
     private const int MaxIntendedSurfaceAboveSea = 24;
 
     /// <summary>
+    ///     Minimum allowed continentalness wavelength factor.
+    /// </summary>
+    private const float MinWavelengthFactor = 0.5f;
+
+    /// <summary>
+    ///     Maximum allowed continentalness wavelength factor.
+    /// </summary>
+    private const float MaxWavelengthFactor = 4f;
+
+    /// <summary>
+    ///     Minimum allowed continentalness octave count.
+    /// </summary>
+    private const int MinContinentalnessOctaves = 3;
+
+    /// <summary>
+    ///     Maximum allowed continentalness octave count.
+    /// </summary>
+    private const int MaxContinentalnessOctaves = 9;
+
+    /// <summary>
+    ///     Maximum allowed domain warp amplitude.
+    /// </summary>
+    private const float MaxWarpAmplitude = 1.5f;
+
+    /// <summary>
+    ///     Minimum allowed maximum straight river run in cells.
+    /// </summary>
+    private const int MinMaxStraightRiverRun = 16;
+
+    /// <summary>
+    ///     Maximum allowed maximum straight river run in cells.
+    /// </summary>
+    private const int MaxMaxStraightRiverRun = 4096;
+
+    /// <summary>
     ///     Maximum allowed subsurface depth of a biome definition.
     /// </summary>
     private const int MaxSubSurfaceDepth = 16;
@@ -116,6 +151,7 @@ public sealed class ProfileValidator
         ValidateCaveOptions(profile, issues);
         ValidateRiverOptions(profile, issues);
         ValidateBiomeOptions(profile, issues);
+        ValidateTerrainOptions(profile, issues);
         return issues;
     }
 
@@ -328,6 +364,87 @@ public sealed class ProfileValidator
             issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
                 $"rivers.minLength ({rivers.MinLength}) must be between {MinRiverMinLength} " +
                 $"and {MaxRiverMinLength}."));
+    }
+
+    /// <summary>
+    ///     Validates the terrain section: wavelength factor, octave count, warp amplitudes,
+    ///     band thresholds, and the maximum straight river run.
+    /// </summary>
+    /// <param name="profile">Profile to validate.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateTerrainOptions(WorldGenProfile profile,
+        List<ProfileValidationIssue> issues)
+    {
+        var terrain = profile.Terrain;
+
+        if (terrain.ContinentalnessWavelengthFactor is < MinWavelengthFactor or > MaxWavelengthFactor)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"terrain.continentalnessWavelengthFactor " +
+                $"({terrain.ContinentalnessWavelengthFactor}) must be between " +
+                $"{MinWavelengthFactor} and {MaxWavelengthFactor}."));
+
+        if (terrain.ContinentalnessOctaves is < MinContinentalnessOctaves or > MaxContinentalnessOctaves)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"terrain.continentalnessOctaves ({terrain.ContinentalnessOctaves}) must be " +
+                $"between {MinContinentalnessOctaves} and {MaxContinentalnessOctaves}."));
+
+        ValidateWarpAmplitude("inner", terrain.WarpAmplitudeInner, issues);
+        ValidateWarpAmplitude("outer", terrain.WarpAmplitudeOuter, issues);
+        ValidateThresholds(terrain.Thresholds, issues);
+
+        if (terrain.MaxStraightRiverRun is < MinMaxStraightRiverRun or > MaxMaxStraightRiverRun)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"terrain.maxStraightRiverRun ({terrain.MaxStraightRiverRun}) must be between " +
+                $"{MinMaxStraightRiverRun} and {MaxMaxStraightRiverRun}."));
+    }
+
+    /// <summary>
+    ///     Validates a single domain warp amplitude.
+    /// </summary>
+    /// <param name="name">Amplitude name for error messages.</param>
+    /// <param name="value">Amplitude value.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateWarpAmplitude(string name, float value,
+        List<ProfileValidationIssue> issues)
+    {
+        if (value is < 0f or > MaxWarpAmplitude)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"terrain.warpAmplitude{name} ({value}) must be between 0 and " +
+                $"{MaxWarpAmplitude}."));
+    }
+
+    /// <summary>
+    ///     Validates the continentalness band thresholds: each lies in (0, 1) and the
+    ///     ordering <c>ocean &lt; coast &lt; inland</c> holds.
+    /// </summary>
+    /// <param name="thresholds">Thresholds to validate.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateThresholds(ContinentalnessThresholdOptions thresholds,
+        List<ProfileValidationIssue> issues)
+    {
+        ValidateThreshold("ocean", thresholds.Ocean, issues);
+        ValidateThreshold("coast", thresholds.Coast, issues);
+        ValidateThreshold("inland", thresholds.Inland, issues);
+
+        if (thresholds.Ocean < thresholds.Coast && thresholds.Coast < thresholds.Inland) return;
+
+        issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+            $"terrain.thresholds must satisfy ocean < coast < inland " +
+            $"(ocean {thresholds.Ocean}, coast {thresholds.Coast}, inland {thresholds.Inland})."));
+    }
+
+    /// <summary>
+    ///     Validates a single continentalness band threshold.
+    /// </summary>
+    /// <param name="name">Threshold name for error messages.</param>
+    /// <param name="value">Threshold value.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateThreshold(string name, float value,
+        List<ProfileValidationIssue> issues)
+    {
+        if (value is <= 0f or >= 1f)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"terrain.thresholds.{name} ({value}) must lie strictly between 0 and 1."));
     }
 
     /// <summary>

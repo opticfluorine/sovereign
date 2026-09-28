@@ -23,6 +23,14 @@
     "shaftsPerLevelPair": 3,
     "surfaceMouths": 2
   },
+  "terrain": {
+    "continentalnessWavelengthFactor": 0.9,
+    "continentalnessOctaves": 6,
+    "warpAmplitudeInner": 0.35,
+    "warpAmplitudeOuter": 0.40,
+    "thresholds": { "ocean": 0.32, "coast": 0.40, "inland": 0.52 },
+    "maxStraightRiverRun": 96
+  },
   "biomes": {
     "snowcapZ": 26,
     "alpineZ": 23,
