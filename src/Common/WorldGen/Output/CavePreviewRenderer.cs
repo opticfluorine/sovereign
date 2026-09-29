@@ -30,9 +30,9 @@ namespace Sovereign.WorldGen.Output;
 public sealed class CavePreviewRenderer
 {
     /// <summary>
-    ///     Maximum preview dimension in pixels.
+    ///     Maximum preview dimension in pixels supported by the renderer.
     /// </summary>
-    private const int MaxPreviewDimension = 1024;
+    private const int MaxPreviewDimension = PreviewOptions.MaxMaxDimension;
 
     /// <summary>
     ///     Radius in pixels of the shaft circle markers, scaled with the image.
@@ -76,13 +76,16 @@ public sealed class CavePreviewRenderer
     ///     Renders one preview image per cave level, in top-to-bottom level order.
     /// </summary>
     /// <param name="caves">Carved cave map.</param>
+    /// <param name="maxDimension">Longest allowed side of each rendered image in pixels;
+    /// longer footprints are box-downscaled to fit.</param>
     /// <returns>Preview images in level order.</returns>
-    public IReadOnlyList<PreviewImage> Render(CaveMap caves)
+    public IReadOnlyList<PreviewImage> Render(CaveMap caves,
+        int maxDimension = PreviewOptions.DefaultMaxDimension)
     {
         var images = new List<PreviewImage>(caves.Levels.Count);
         for (var i = 0; i < caves.Levels.Count; ++i)
         {
-            images.Add(RenderLevel(caves, i));
+            images.Add(RenderLevel(caves, i, maxDimension));
         }
 
         return images;
@@ -93,13 +96,15 @@ public sealed class CavePreviewRenderer
     /// </summary>
     /// <param name="caves">Carved cave map.</param>
     /// <param name="level">Level index.</param>
+    /// <param name="maxDimension">Longest allowed side of the rendered image in pixels.</param>
     /// <returns>Rendered preview image.</returns>
-    private PreviewImage RenderLevel(CaveMap caves, int level)
+    private PreviewImage RenderLevel(CaveMap caves, int level, int maxDimension)
     {
         var levelMap = caves.Levels[level];
-        var factor = Math.Max(caves.Width, caves.Height) <= MaxPreviewDimension
+        var cap = Math.Clamp(maxDimension, PreviewOptions.MinMaxDimension, MaxPreviewDimension);
+        var factor = Math.Max(caves.Width, caves.Height) <= cap
             ? 1
-            : (Math.Max(caves.Width, caves.Height) + MaxPreviewDimension - 1) / MaxPreviewDimension;
+            : (Math.Max(caves.Width, caves.Height) + cap - 1) / cap;
         var outWidth = (caves.Width + factor - 1) / factor;
         var outHeight = (caves.Height + factor - 1) / factor;
 

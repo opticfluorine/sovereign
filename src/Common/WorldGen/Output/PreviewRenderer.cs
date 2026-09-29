@@ -71,9 +71,9 @@ public sealed class PreviewRenderer
     private const float CliffTint = 0.7f;
 
     /// <summary>
-    ///     Maximum preview dimension in pixels.
+    ///     Maximum preview dimension in pixels supported by the renderer.
     /// </summary>
-    private const int MaxPreviewDimension = 1024;
+    private const int MaxPreviewDimension = PreviewOptions.MaxMaxDimension;
 
     /// <summary>
     ///    Surface cave mouth dot color.
@@ -137,7 +137,7 @@ public sealed class PreviewRenderer
     };
 
     /// <summary>
-    ///     Renders the preview image.
+    ///     Renders the preview image with the default maximum dimension.
     /// </summary>
     /// <param name="map">Terrain map to render.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
@@ -146,7 +146,7 @@ public sealed class PreviewRenderer
     public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
         WorldGenProfile profile)
     {
-        return Render(map, continentalness, profile, null);
+        return Render(map, continentalness, profile, PreviewOptions.DefaultMaxDimension);
     }
 
     /// <summary>
@@ -155,16 +155,19 @@ public sealed class PreviewRenderer
     /// <param name="map">Terrain map to render.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
+    /// <param name="maxDimension">Longest allowed side of the rendered image in pixels;
+    /// longer footprints are box-downscaled to fit.</param>
     /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
     /// <param name="mouthDots">Surface cave mouth columns to mark with red dots, or null.
     ///     Dots are applied only after the surface image is complete and never alter any
     ///     other pixel.</param>
     /// <returns>Rendered preview image.</returns>
     public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, BiomeMap? biomes,
+        WorldGenProfile profile, int maxDimension, BiomeMap? biomes = null,
         IReadOnlyList<(int X, int Y)>? mouthDots = null)
     {
-        var factor = DownscaleFactor(map);
+        var cap = Math.Clamp(maxDimension, PreviewOptions.MinMaxDimension, MaxPreviewDimension);
+        var factor = DownscaleFactor(map, cap);
         var outWidth = (map.Width + factor - 1) / factor;
         var outHeight = (map.Height + factor - 1) / factor;
         var pixels = RenderFull(map, continentalness, profile, biomes);
@@ -201,11 +204,12 @@ public sealed class PreviewRenderer
     ///     Computes the box-average downscale factor for a terrain map.
     /// </summary>
     /// <param name="map">Terrain map.</param>
+    /// <param name="maxDimension">Longest allowed side of the rendered image in pixels.</param>
     /// <returns>Factor such that the long side is at most the maximum preview dimension.</returns>
-    private static int DownscaleFactor(TerrainMap map)
+    private static int DownscaleFactor(TerrainMap map, int maxDimension)
     {
         var longSide = Math.Max(map.Width, map.Height);
-        return longSide <= MaxPreviewDimension ? 1 : (longSide + MaxPreviewDimension - 1) / MaxPreviewDimension;
+        return longSide <= maxDimension ? 1 : (longSide + maxDimension - 1) / maxDimension;
     }
 
     /// <summary>

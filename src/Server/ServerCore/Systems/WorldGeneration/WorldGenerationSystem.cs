@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.ServerCore.Configuration;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
@@ -29,11 +30,13 @@ namespace Sovereign.ServerCore.Systems.WorldGeneration;
 public class WorldGenerationSystem : ISystem
 {
     private readonly ILogger<WorldGenerationSystem> logger;
+    private readonly WorldGenScratch scratch;
 
     public WorldGenerationSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        ILogger<WorldGenerationSystem> logger)
+        WorldGenScratch scratch, ILogger<WorldGenerationSystem> logger)
     {
         EventCommunicator = eventCommunicator;
+        this.scratch = scratch;
         this.logger = logger;
 
         eventLoop.RegisterSystem(this);
@@ -58,6 +61,13 @@ public class WorldGenerationSystem : ISystem
 
     public void Initialize()
     {
+        // Staged plans are session-scoped: no boot-time staging recovery, just TTL cleanup
+        // of stale scratch directories. No job can be in progress at startup.
+        var removed = scratch.CleanupStaleDirectories();
+        if (removed > 0)
+        {
+            logger.LogInformation("Removed {Count} stale worldgen scratch entries.", removed);
+        }
     }
 
     public void Cleanup()

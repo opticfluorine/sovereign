@@ -89,6 +89,43 @@ public class TestProfileValidator
     }
 
     [Fact]
+    public void Validate_EmptyBedrockTemplate_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.BedrockTemplate = "  ";
+
+        AssertHasError(validator.Validate(profile), "bedrockTemplate");
+    }
+
+    [Fact]
+    public void Validate_PreviewDimensionBelowRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Preview = new PreviewOptions { MaxDimension = PreviewOptions.MinMaxDimension - 1 };
+
+        AssertHasError(validator.Validate(profile), "preview.maxDimension");
+    }
+
+    [Fact]
+    public void Validate_PreviewDimensionAboveRange_IsError()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Preview = new PreviewOptions { MaxDimension = PreviewOptions.MaxMaxDimension + 1 };
+
+        AssertHasError(validator.Validate(profile), "preview.maxDimension");
+    }
+
+    [Fact]
+    public void Validate_PreviewDimensionInRange_HasNoIssue()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Preview = new PreviewOptions { MaxDimension = PreviewOptions.MaxMaxDimension };
+
+        Assert.DoesNotContain(validator.Validate(profile),
+            i => i.Message.Contains("preview.maxDimension", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void Validate_StoneBandGap_IsError()
     {
         var profile = TestProfiles.CreateValid();

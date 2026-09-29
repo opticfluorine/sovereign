@@ -38,6 +38,7 @@ internal static class TestProfiles
             SurfaceMaxZ = 28,
             RockFloorZ = -63,
             BedrockZ = -64,
+            BedrockTemplate = "Bedrock",
             StoneBands = new List<StoneBand>
             {
                 new() { FromZ = -16, ToZ = -1, Template = "Shale" },
@@ -73,6 +74,7 @@ internal static class TestProfiles
             SurfaceMaxZ = 28,
             RockFloorZ = -63,
             BedrockZ = -64,
+            BedrockTemplate = "Bedrock",
             StoneBands = new List<StoneBand>
             {
                 new() { FromZ = -16, ToZ = -1, Template = "Shale" },
@@ -136,7 +138,7 @@ internal static class TestProfiles
                     SubSurfaceDepth = 4,
                     Decorations = new List<DecorationOptions>
                     {
-                        new() { Template = "OakTree", Weight = 0.02, MinSpacing = 5, MaxSlope = 1 },
+                        new() { Template = "Oak Tree", Weight = 0.02, MinSpacing = 5, MaxSlope = 1 },
                         new() { Template = "Boulder", Weight = 0.005, MinSpacing = 7, MaxSlope = 2 }
                     }
                 },
@@ -147,7 +149,7 @@ internal static class TestProfiles
                     SubSurfaceDepth = 2,
                     Decorations = new List<DecorationOptions>
                     {
-                        new() { Template = "PineTree", Weight = 0.06, MinSpacing = 3, MaxSlope = 2 }
+                        new() { Template = "Pine Tree", Weight = 0.06, MinSpacing = 3, MaxSlope = 2 }
                     }
                 },
                 ["Savanna"] = new BiomeDefinition
@@ -157,7 +159,7 @@ internal static class TestProfiles
                     SubSurfaceDepth = 2,
                     Decorations = new List<DecorationOptions>
                     {
-                        new() { Template = "AcaciaTree", Weight = 0.01, MinSpacing = 6, MaxSlope = 1 }
+                        new() { Template = "Acacia Tree", Weight = 0.01, MinSpacing = 6, MaxSlope = 1 }
                     }
                 },
                 ["Beach"] = new BiomeDefinition
@@ -173,7 +175,7 @@ internal static class TestProfiles
                     SubSurfaceDepth = 2,
                     Decorations = new List<DecorationOptions>
                     {
-                        new() { Template = "DeadBush", Weight = 0.04, MinSpacing = 4, MaxSlope = 1 }
+                        new() { Template = "Dead Bush", Weight = 0.04, MinSpacing = 4, MaxSlope = 1 }
                     }
                 },
                 ["Alpine"] = new BiomeDefinition

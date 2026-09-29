@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.EngineCore.Systems;
 using Sovereign.Persistence.Accounts;
+using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.Persistence.Bans;
 using Sovereign.Persistence.Data;
 using Sovereign.Persistence.Database;
@@ -25,6 +26,7 @@ using Sovereign.Persistence.Entities;
 using Sovereign.Persistence.Players;
 using Sovereign.Persistence.State;
 using Sovereign.Persistence.State.Trackers;
+using Sovereign.Persistence.WorldGen;
 using Sovereign.Persistence.Systems.Persistence;
 
 namespace Sovereign.Persistence;
@@ -48,9 +50,16 @@ public static class PersistenceServiceCollectionExtensions
         AddEntities(services);
         AddPlayers(services);
         AddState(services);
+        AddWorldGen(services);
         AddPersistenceSystem(services);
 
         return services;
+    }
+
+    private static void AddWorldGen(IServiceCollection services)
+    {
+        services.TryAddSingleton<IWorldGenCommitWriter, WorldGenCommitWriter>();
+        services.TryAddSingleton<IWorldGenWorldRegistryStore, WorldGenWorldRegistryStore>();
     }
 
     private static void AddAccounts(IServiceCollection services)

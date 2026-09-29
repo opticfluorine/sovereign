@@ -265,6 +265,69 @@ VALUES (0x7FFE000000000007, 'Sword', 1, 1);
 INSERT INTO Entity (id, name, entity_type, stackable)
 VALUES (0x7FFE000000000008, 'Shield', 1, NULL);
 
+-- Worldgen placeholder block template entities (entity_type NULL = block).
+-- Placeholder tiles reuse existing sprites; only template resolution matters today.
+-- Shale, Granite, Basalt: the default profile's three stone bands.
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE000000000009, 'Shale', 10, 9, 1);
+
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE00000000000A, 'Granite', 10, 9, 1);
+
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE00000000000B, 'Basalt', 10, 9, 1);
+
+-- Gravel: ocean floor in the default profile.
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE00000000000C, 'Gravel', 13, 12, 1);
+
+-- Snow and Snowcap: alpine and snowcap surfaces.
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE00000000000D, 'Snow', 3, 2, 1);
+
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE00000000000E, 'Snowcap', 3, 2, 1);
+
+-- Sandstone: desert subsurface in the default profile.
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE00000000000F, 'Sandstone', 7, 6, 1);
+
+-- Bedrock: the unmodifiable bottom layer of generated worlds.
+INSERT INTO Entity (id, name, front_tile_id, top_tile_id, cast_block_shadows)
+VALUES (0x7FFE000000000010, 'Bedrock', 13, 12, 1);
+
+-- Worldgen placeholder decoration NPC template entities (entity_type 0 = NPC).
+-- Each is a walk-through placeholder: no physics, no bounding box, no block shadows,
+-- and a placeholder sprite at tile index (0, 0). Profiles reference these by
+-- human-readable name; the mapping to template IDs is:
+--   Oak Tree    -> 0x7FFE000000000011
+--   Pine Tree   -> 0x7FFE000000000012
+--   Acacia Tree -> 0x7FFE000000000013
+--   Boulder     -> 0x7FFE000000000014
+--   Fern        -> 0x7FFE000000000015
+--   Cactus      -> 0x7FFE000000000016
+--   Dead Bush   -> 0x7FFE000000000017
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000011, 'Oak Tree', 0, 0, 0, 0);
+
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000012, 'Pine Tree', 0, 0, 0, 0);
+
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000013, 'Acacia Tree', 0, 0, 0, 0);
+
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000014, 'Boulder', 0, 0, 0, 0);
+
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000015, 'Fern', 0, 0, 0, 0);
+
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000016, 'Cactus', 0, 0, 0, 0);
+
+INSERT INTO Entity (id, name, entity_type, drawable_x, drawable_y, cast_block_shadows)
+VALUES (0x7FFE000000000017, 'Dead Bush', 0, 0, 0, 0);
+
 -- Initial block data at origin.
 INSERT INTO WorldSegmentBlockData
 VALUES (0, 0, 0,

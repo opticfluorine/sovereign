@@ -106,6 +106,8 @@ public static class ServerServiceCollectionExtensions
         AddWorldEditSystem(services);
         AddWorldGenerationSystem(services);
         AddWorldManagementSystem(services);
+        services.TryAddSingleton<ISegmentSubscriptionProbe>(s =>
+            s.GetRequiredService<WorldSegmentSubscriptionManager>());
         AddScriptingSystem(services);
 
         return services;
@@ -198,6 +200,9 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldGenerationController>();
         services.TryAddSingleton<WorldGenChatCommandHandler>();
         services.TryAddSingleton<WorldGenPlanJobRunner>();
+        services.TryAddSingleton<WorldGenCommitRunner>();
+        services.TryAddSingleton<WorldGenTemplateResolver>();
+        services.TryAddSingleton<IWorldGenTemplateSource, TemplateEntitySource>();
         services.TryAddSingleton<WorldGenScratch>();
         services.TryAddSingleton<IWorldGenPipeline, WorldGenPipeline>();
         services.TryAddSingleton<ProfileLoader>();

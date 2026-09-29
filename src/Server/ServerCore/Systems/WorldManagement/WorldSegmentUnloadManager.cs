@@ -159,6 +159,33 @@ public class WorldSegmentUnloadManager
     }
 
     /// <summary>
+    ///     Force-unloads the entities of the given world segments, discarding any pending
+    ///     block data updates so that the segments reload from the database on their next
+    ///     activation. Loaded segments are unloaded regardless of subscriber state.
+    /// </summary>
+    /// <param name="segmentIndices">World segment indices to unload.</param>
+    public void UnloadSegments(IEnumerable<GridPosition> segmentIndices)
+    {
+        var unloadCount = 0;
+        foreach (var segmentIndex in segmentIndices)
+        {
+            // Skip segments that are not currently loaded; their load may still be in flight.
+            if (!activationManager.IsWorldSegmentLoaded(segmentIndex)) continue;
+
+            // The database is about to become authoritative for this segment, so discard
+            // any pending in-memory block data updates instead of persisting them.
+            blockDataManager.DiscardPendingUpdates(segmentIndex);
+
+            UnloadSegment(segmentIndex);
+            subscriptionManager.ClearZeroSubscriberSegment(segmentIndex);
+            ++unloadCount;
+        }
+
+        if (unloadCount > 0)
+            logger.LogInformation("Force-unloaded entities for {Count} world segments.", unloadCount);
+    }
+
+    /// <summary>
     ///     Unloads all entities in the given world segment from server memory.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>

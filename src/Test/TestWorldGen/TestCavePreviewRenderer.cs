@@ -86,7 +86,8 @@ public class TestCavePreviewRenderer
         var renderer = new PreviewRenderer();
 
         var plain = renderer.Render(map, continentalness, profile);
-        var dotted = renderer.Render(map, continentalness, profile, null,
+        var dotted = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension, null,
             new List<(int X, int Y)> { (10, 10) });
 
         for (var y = 0; y < MapSize; ++y)

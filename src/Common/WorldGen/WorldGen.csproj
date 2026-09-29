@@ -8,4 +8,8 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\EngineCore\EngineCore.csproj"/>
+    </ItemGroup>
+
 </Project>

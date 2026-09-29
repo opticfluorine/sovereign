@@ -29,8 +29,8 @@ using Sovereign.WorldGen.Terrain;
 namespace Sovereign.WorldGen;
 
 /// <summary>
-///     Sequences the terrain, hydrology, biome, cave, and preview stages of a world
-///     generation plan.
+///     Sequences the terrain, hydrology, biome, cave, preview, and assembly stages of a
+///     world generation plan.
 /// </summary>
 public interface IWorldGenPipeline
 {
@@ -43,17 +43,23 @@ public interface IWorldGenPipeline
     /// <param name="originX">World X coordinate of the footprint origin.</param>
     /// <param name="originY">World Y coordinate of the footprint origin.</param>
     /// <param name="previewPath">Absolute path to which the preview PNG is written.</param>
+    /// <param name="stagingDirectory">Absolute path of the plan's staging directory, to
+    ///     which the segment blobs and staged decorations are written.</param>
+    /// <param name="resolvedTemplates">Profile template names resolved against the live
+    ///     template entity set.</param>
     /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
     /// <returns>The completed plan.</returns>
-    WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX, int originY,
-        string previewPath, Action<string>? progress);
+    WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, string previewPath, string stagingDirectory,
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress);
 }
 
 /// <summary>
-///     Runs the terrain, hydrology, biome, cave, and preview stages of a world generation
-///     plan in sequence. All stages derive their sub-seeds deterministically from the root
-///     seed; the same root seed and profile always produce a byte-identical heightmap,
-///     biome map, material assignment, cave map, decoration list, and preview PNGs.
+///     Runs the terrain, hydrology, biome, cave, preview, and assembly stages of a world
+///     generation plan in sequence. All stages derive their sub-seeds deterministically
+///     from the root seed; the same root seed and profile always produce a byte-identical
+///     heightmap, biome map, material assignment, cave map, decoration list, preview PNGs,
+///     and staged segment blobs.
 /// </summary>
 public sealed class WorldGenPipeline : IWorldGenPipeline
 {
@@ -76,10 +82,15 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// <param name="originX">World X coordinate of the footprint origin.</param>
     /// <param name="originY">World Y coordinate of the footprint origin.</param>
     /// <param name="previewPath">Absolute path to which the preview PNG is written.</param>
+    /// <param name="stagingDirectory">Absolute path of the plan's staging directory, to
+    ///     which the segment blobs and staged decorations are written.</param>
+    /// <param name="resolvedTemplates">Profile template names resolved against the live
+    ///     template entity set.</param>
     /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
     /// <returns>The completed plan.</returns>
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
-        int originY, string previewPath, Action<string>? progress)
+        int originY, string previewPath, string stagingDirectory,
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress)
     {
         var total = Stopwatch.StartNew();
         var terrainClock = new Stopwatch();
@@ -87,6 +98,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         var biomesClock = new Stopwatch();
         var cavesClock = new Stopwatch();
         var previewClock = new Stopwatch();
+        var assemblyClock = new Stopwatch();
 
         var landCells = 0;
         int riverCount;
@@ -174,14 +186,15 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
 
         Report(progress, "Rendering preview");
         previewClock.Start();
-        var preview = new PreviewRenderer().Render(map, continentalness, profile, biomeMap,
-            caves?.Map.Mouths);
+        var maxDimension = PreviewOptions.EffectiveMaxDimension(profile);
+        var preview = new PreviewRenderer().Render(map, continentalness, profile, maxDimension,
+            biomeMap, caves?.Map.Mouths);
         PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
 
         var cavePreviewPaths = new List<string>();
         if (caves is not null)
         {
-            var cavePreviews = new CavePreviewRenderer().Render(caves.Map);
+            var cavePreviews = new CavePreviewRenderer().Render(caves.Map, maxDimension);
             for (var i = 0; i < cavePreviews.Count; ++i)
             {
                 var path = CavePreviewPath(previewPath, i + 1);
@@ -192,6 +205,14 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         }
 
         previewClock.Stop();
+
+        Report(progress, "Assembling segments");
+        assemblyClock.Start();
+        var assembler = new SegmentAssembler(profile, map, materials, caves?.Map,
+            biomeMap is null ? null : decorations, resolvedTemplates, originX, originY,
+            stagingDirectory);
+        var assembly = assembler.Assemble(progress);
+        assemblyClock.Stop();
 
         total.Stop();
 
@@ -209,6 +230,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             BiomesMs = biomesClock.ElapsedMilliseconds,
             CavesMs = cavesClock.ElapsedMilliseconds,
             PreviewMs = previewClock.ElapsedMilliseconds,
+            AssemblyMs = assemblyClock.ElapsedMilliseconds,
             TotalMs = total.ElapsedMilliseconds,
             BiomePercentages = biomeMap is null ? null : BiomePercentages(biomeMap),
             DecorationCounts = biomeMap is null ? null : DecorationCounts(decorations),
@@ -220,8 +242,11 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         {
             Seed = seed,
             ProfileName = profileName,
+            Profile = profile,
             OriginX = originX,
             OriginY = originY,
+            ResolvedTemplates = resolvedTemplates,
+            StagingDirectory = stagingDirectory,
             Terrain = map,
             Biomes = biomeMap,
             Materials = materials,

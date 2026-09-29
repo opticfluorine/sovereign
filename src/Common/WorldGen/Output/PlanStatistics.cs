@@ -77,6 +77,11 @@ public sealed class PlanStatistics
     public required long PreviewMs { get; init; }
 
     /// <summary>
+    ///     Segment assembly wall time in milliseconds.
+    /// </summary>
+    public long AssemblyMs { get; init; }
+
+    /// <summary>
     ///     Total plan wall time in milliseconds.
     /// </summary>
     public required long TotalMs { get; init; }
@@ -135,7 +140,8 @@ public sealed class PlanStatistics
         builder.Append(
             $"  Terrain: {FormatSeconds(TerrainMs)}  Hydrology: {FormatSeconds(HydrologyMs)}  " +
             $"Biomes: {FormatSeconds(BiomesMs)}  Caves: {FormatSeconds(CavesMs)}  " +
-            $"Preview: {FormatSeconds(PreviewMs)}  Total: {FormatSeconds(TotalMs)}");
+            $"Preview: {FormatSeconds(PreviewMs)}  Assembly: {FormatSeconds(AssemblyMs)}  " +
+            $"Total: {FormatSeconds(TotalMs)}");
         return builder.ToString();
     }
 

@@ -38,6 +38,11 @@ public sealed class WorldGenPlan
     public required string ProfileName { get; init; }
 
     /// <summary>
+    ///     Validated profile used to generate the plan.
+    /// </summary>
+    public required WorldGenProfile Profile { get; init; }
+
+    /// <summary>
     ///     World X coordinate of footprint-local cell (0, 0).
     /// </summary>
     public required int OriginX { get; init; }
@@ -46,6 +51,17 @@ public sealed class WorldGenPlan
     ///     World Y coordinate of footprint-local cell (0, 0).
     /// </summary>
     public required int OriginY { get; init; }
+
+    /// <summary>
+    ///     Profile template names resolved against the live template entity set.
+    /// </summary>
+    public required WorldGenResolvedTemplates ResolvedTemplates { get; init; }
+
+    /// <summary>
+    ///     Absolute path of the staged plan directory holding the assembled segment
+    ///     blobs, staged decorations, and manifest. Empty if the plan has not been staged.
+    /// </summary>
+    public string StagingDirectory { get; init; } = "";
 
     /// <summary>
     ///     Terrain surface map of the plan.

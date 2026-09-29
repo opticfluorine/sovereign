@@ -34,6 +34,18 @@ public sealed class WorldGenScratch
     /// </summary>
     private const string DefaultScratchDirectoryName = "sovereign-worldgen";
 
+    /// <summary>
+    ///     Prefix of per-plan staging directories.
+    /// </summary>
+    public const string SessionDirectoryPrefix = "staging_";
+
+    /// <summary>
+    ///     Age at which a staging directory or preview image becomes stale and is removed
+    ///     by startup cleanup. Staged plans are session-scoped, so anything older than one
+    ///     day can only be debris of a lost server session.
+    /// </summary>
+    private static readonly TimeSpan StagingTtl = TimeSpan.FromHours(24);
+
     private readonly IOptions<WorldGenOptions> options;
 
     /// <summary>
@@ -71,5 +83,64 @@ public sealed class WorldGenScratch
     {
         var n = Interlocked.Increment(ref previewCount);
         return Path.Combine(ResolveDirectory(), $"preview_{seed}_{n}.png");
+    }
+
+    /// <summary>
+    ///     Resolves and creates a fresh staging directory for one staged plan.
+    /// </summary>
+    /// <param name="seed">World generation seed of the plan.</param>
+    /// <returns>Absolute path of the staging directory.</returns>
+    public string CreateSessionDirectory(ulong seed)
+    {
+        var directory = Path.Combine(ResolveDirectory(),
+            $"{SessionDirectoryPrefix}{seed}_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        return directory;
+    }
+
+    /// <summary>
+    ///     Deletes a staged plan's staging directory and all of its contents.
+    /// </summary>
+    /// <param name="path">Absolute path of the staging directory.</param>
+    public void DeleteSessionDirectory(string path)
+    {
+        if (Directory.Exists(Path.Combine(path, "segments"))) Directory.Delete(path, true);
+    }
+
+    /// <summary>
+    ///     Removes staging directories and preview images older than the staging TTL.
+    ///     Staged plans are session-scoped, so stale directories can only be debris of a
+    ///     lost server session; in particular, no job can be in progress when this runs.
+    /// </summary>
+    /// <returns>Number of entries removed.</returns>
+    public int CleanupStaleDirectories()
+    {
+        var directory = ResolveDirectory();
+        var removed = 0;
+        foreach (var entry in Directory.EnumerateFileSystemEntries(directory))
+        {
+            var name = Path.GetFileName(entry);
+            var isStaging = name.StartsWith(SessionDirectoryPrefix, StringComparison.Ordinal);
+            var isPreview = name.StartsWith("preview_", StringComparison.Ordinal)
+                            || name.StartsWith("caves_", StringComparison.Ordinal);
+            if (!isStaging && !isPreview) continue;
+
+            DateTime lastWrite;
+            try
+            {
+                lastWrite = Directory.GetLastWriteTimeUtc(entry);
+                if (DateTime.UtcNow - lastWrite < StagingTtl) continue;
+
+                if (Directory.Exists(entry)) Directory.Delete(entry, true);
+                else File.Delete(entry);
+                ++removed;
+            }
+            catch (Exception)
+            {
+                // A missing or locked entry is skipped; the next startup pass retries.
+            }
+        }
+
+        return removed;
     }
 }

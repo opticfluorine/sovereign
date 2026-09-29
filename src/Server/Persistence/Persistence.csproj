@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ServerCore\ServerCore.csproj"/>
+        <ProjectReference Include="..\..\Common\WorldGen\WorldGen.csproj"/>
     </ItemGroup>
 
 </Project>

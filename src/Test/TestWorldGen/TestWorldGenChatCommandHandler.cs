@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.WorldManagement;
 using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.WorldGeneration;
@@ -119,23 +120,25 @@ public class TestWorldGenChatCommandHandler
     }
 
     [Fact]
-    public void Handle_Commit_RespondsNotImplemented()
+    public void Handle_Commit_WithoutPlan_ReportsNoStagedPlan()
     {
         var (handler, sender, _, _) = CreateHandler();
 
         handler.Handle("commit", SenderEntityId);
 
-        GetSingleSystemMessage(sender).NotImplementedReply();
+        Assert.Contains("No staged world generation plan", GetSingleSystemMessage(sender),
+            StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Handle_Commit_WithSeed_ParsesAndRespondsNotImplemented()
+    public void Handle_Commit_WithSeedWithoutPlan_ReportsNoStagedPlan()
     {
         var (handler, sender, _, _) = CreateHandler();
 
         handler.Handle("commit 7", SenderEntityId);
 
-        GetSingleSystemMessage(sender).NotImplementedReply();
+        Assert.Contains("No staged world generation plan", GetSingleSystemMessage(sender),
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -175,13 +178,14 @@ public class TestWorldGenChatCommandHandler
     }
 
     [Fact]
-    public void Handle_Replace_ParsesAndRespondsNotImplemented()
+    public void Handle_Replace_WithoutPlan_ReportsNoStagedPlan()
     {
         var (handler, sender, _, _) = CreateHandler();
 
         handler.Handle("replace 1 2", SenderEntityId);
 
-        GetSingleSystemMessage(sender).NotImplementedReply();
+        Assert.Contains("No staged world generation plan", GetSingleSystemMessage(sender),
+            StringComparison.Ordinal);
     }
 
     [Fact]
@@ -233,19 +237,40 @@ public class TestWorldGenChatCommandHandler
     private static (WorldGenChatCommandHandler Handler, FakeEventSender Sender,
         WorldGenerationSystem System, WorldGenerationServices Services) CreateHandler()
     {
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
         var sender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
+        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
+            scratch, NullLogger<WorldGenerationSystem>.Instance);
+        var services = new WorldGenerationServices(system);
         var loader = new ProfileLoader(Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
         var runner = new WorldGenPlanJobRunner(system, services, new StubWorldGenPipeline(), loader,
-            new ProfileValidator(), scratch, new ServerChatInternalController(sender),
+            new ProfileValidator(), new WorldGenTemplateResolver(new FakeWorldGenTemplateSource()),
+            scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
-        var handler = new WorldGenChatCommandHandler(new WorldGenerationController(runner), services,
+        var commitRunner = CreateCommitRunner(system, services, scratch, sender);
+        var handler = new WorldGenChatCommandHandler(
+            new WorldGenerationController(runner, commitRunner), services,
             new ServerChatInternalController(sender));
 
         return (handler, sender, system, services);
+    }
+
+    /// <summary>
+    ///     Creates a commit runner backed by test doubles.
+    /// </summary>
+    /// <param name="system">Job slot system.</param>
+    /// <param name="services">World generation services.</param>
+    /// <param name="scratch">Scratch resolver.</param>
+    /// <param name="sender">Recording event sender.</param>
+    /// <returns>Commit runner.</returns>
+    private static WorldGenCommitRunner CreateCommitRunner(WorldGenerationSystem system,
+        WorldGenerationServices services, WorldGenScratch scratch, FakeEventSender sender)
+    {
+        return new WorldGenCommitRunner(system, services, scratch,
+            new FakeWorldGenRegistryStore(), new FakeWorldGenCommitWriter(),
+            new FakeSegmentSubscriptionProbe(), new WorldManagementController(), sender,
+            new ServerChatInternalController(sender), Options.Create(new WorldGenOptions()),
+            NullLogger<WorldGenCommitRunner>.Instance);
     }
 
     /// <summary>

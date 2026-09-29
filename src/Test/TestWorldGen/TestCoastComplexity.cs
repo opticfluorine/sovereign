@@ -51,7 +51,10 @@ public class TestCoastComplexity
         var profile = TestProfiles.CreateSmall128();
         var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0,
             System.IO.Path.Combine(System.IO.Path.GetTempPath(),
-                $"worldgen-test-coast-{Guid.NewGuid():N}.png"), null);
+                $"worldgen-test-coast-{Guid.NewGuid():N}.png"),
+            System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+                $"worldgen-test-coast-stage-{Guid.NewGuid():N}"),
+            TestResolvedTemplates.ForProfile(profile), null);
 
         var changes = CountBoundaryDirectionChanges(plan.Terrain.IsOcean, profile.Width,
             profile.Height);

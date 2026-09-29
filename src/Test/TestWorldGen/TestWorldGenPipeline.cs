@@ -20,6 +20,8 @@ using System.IO;
 using System.Security.Cryptography;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Noise;
+using Sovereign.WorldGen.Output;
 using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Terrain;
@@ -39,17 +41,44 @@ public class TestWorldGenPipeline
     private const ulong Seed = 12345;
 
     /// <summary>
-    ///     SHA-256 hash of the golden 128x128 preview PNG produced with the test baseline
-    ///     profile and the fixed seed above.
+    ///     Runs the full pipeline for a test profile against a fresh staging directory,
+    ///     which is removed when the plan completes.
+    /// </summary>
+    /// <param name="profile">Profile to run.</param>
+    /// <param name="profileName">Profile name.</param>
+    /// <param name="seed">World seed.</param>
+    /// <param name="originX">World X coordinate of the footprint origin.</param>
+    /// <param name="originY">World Y coordinate of the footprint origin.</param>
+    /// <param name="previewPath">Path for the preview image.</param>
+    /// <returns>The completed plan.</returns>
+    private static WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed,
+        int originX, int originY, string previewPath)
+    {
+        var staging = Path.Combine(Path.GetTempPath(), "worldgen-test-staging",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(staging);
+        try
+        {
+            return new WorldGenPipeline().Plan(profile, profileName, seed, originX, originY,
+                previewPath, staging, TestResolvedTemplates.ForProfile(profile), null);
+        }
+        finally
+        {
+            Directory.Delete(staging, true);
+        }
+    }
+
+    /// <summary>
+    ///     SHA-256 hash of the golden 128x128 preview pixel buffer (decoded RGB bytes)
+    ///     produced with the test baseline profile and the fixed seed above.
     ///
     ///     To regenerate after an intentional algorithm change: run this test once and read
     ///     the actual hash from the assertion failure message, then update this constant.
-    ///     The preview PNG uses stored (uncompressed) deflate blocks per RFC 1951, which are
-    ///     fully specified by the format, so the hash is stable across machines and runtime
-    ///     versions. Generated on x64 Debian, .NET 10.0.12.
+    ///     Hashing pixel buffers instead of PNG file bytes keeps PNG encoding choices (e.g.
+    ///     compression) out of the golden contract. Generated on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenPreviewSha256 =
-        "35CF4EE3A6F06406C3360DD0C073BE93DD2D70FF93093F7C383326E05908DFB3";
+        "7440B3C3F91752292F632A40D89C9CF81A51F56FD2AF24EC9E9681926466518A";
 
     /// <summary>
     ///     SHA-256 hash of the golden 128x128 heightmap: the TerrainMap heights serialized
@@ -66,9 +95,10 @@ public class TestWorldGenPipeline
         "7C972F970465185C3DBC80607A6BE824CDD784E78D27371F509B678A23FD55AE";
 
     /// <summary>
-    ///     SHA-256 hash of the golden 128x128 preview PNG produced with the biome-enabled
-    ///     test baseline profile (<see cref="TestProfiles.CreateSmall128Biomes" />) and the
-    ///     fixed seed above. The heights hash is shared with the biome-free profile.
+    ///     SHA-256 hash of the golden 128x128 preview pixel buffer (decoded RGB bytes)
+    ///     produced with the biome-enabled test baseline profile
+    ///     (<see cref="TestProfiles.CreateSmall128Biomes" />) and the fixed seed above. The
+    ///     heights hash is shared with the biome-free profile.
     ///
     ///     The biome preview palette is load-bearing for this hash: palette edits in
     ///     <see cref="Sovereign.WorldGen.Output.PreviewRenderer" /> are golden-hash edits.
@@ -76,7 +106,7 @@ public class TestWorldGenPipeline
     ///     hash from the assertion failure message, then update this constant.
     /// </summary>
     private const string GoldenBiomesPreviewSha256 =
-        "D088771A7F2A2E893D9A0D5DCEF1077D239A44F765BE1BFCD51742CD193A642A";
+        "1FB9C3F05CF4410BFEA45E13DC9CD87B3060BDEF96BEAA9575E21317088283D9";
 
     [Fact]
     public void Plan_SameSeedAndProfile_ProducesIdenticalHeightsAndPreview()
@@ -85,8 +115,8 @@ public class TestWorldGenPipeline
         var firstPath = TempPreviewPath("det1");
         var secondPath = TempPreviewPath("det2");
 
-        var first = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, firstPath, null);
-        var second = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, secondPath, null);
+        var first = Plan(profile, "test128", Seed, 0, 0, firstPath);
+        var second = Plan(profile, "test128", Seed, 0, 0, secondPath);
 
         try
         {
@@ -119,8 +149,11 @@ public class TestWorldGenPipeline
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
-            var actualPreview = Sha256(File.ReadAllBytes(path));
+            var plan = Plan(profile, "test128", Seed, 0, 0, path);
+            var image = PngReader.Read(path);
+            Assert.Equal(128, image.Width);
+            Assert.Equal(128, image.Height);
+            var actualPreview = Sha256(image.Pixels);
             var actualHeights = Sha256(HeightsBytes(plan.Terrain));
 
             Assert.True(string.Equals(actualHeights, GoldenHeightsSha256, StringComparison.OrdinalIgnoreCase),
@@ -137,6 +170,105 @@ public class TestWorldGenPipeline
         {
             File.Delete(path);
         }
+    }
+
+    [Fact]
+    public void Preview_PngWriterRoundTrip_PreservesPixels()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        var path = TempPreviewPath("roundtrip");
+
+        try
+        {
+            Plan(profile, "test128", Seed, 0, 0, path);
+            var decoded = PngReader.Read(path);
+
+            Assert.Equal(128, decoded.Width);
+            Assert.Equal(128, decoded.Height);
+            Assert.Equal(128 * 128 * 3, decoded.Pixels.Length);
+            Assert.NotEqual(new byte[decoded.Pixels.Length], decoded.Pixels);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Preview_PngWriterRoundTrip_MatchesRenderedPixels()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        var path = TempPreviewPath("roundtrip2");
+
+        try
+        {
+            var (map, continentalness) = BuildTerrain(profile);
+            var rendered = new PreviewRenderer().Render(map, continentalness, profile,
+                PreviewOptions.DefaultMaxDimension);
+
+            PngWriter.WritePng(path, rendered.Width, rendered.Height, rendered.Pixels);
+            var decoded = PngReader.Read(path);
+
+            Assert.Equal(rendered.Width, decoded.Width);
+            Assert.Equal(rendered.Height, decoded.Height);
+            Assert.Equal(rendered.Pixels, decoded.Pixels);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Preview_MaxDimensionKnob_GovernsOutputSize()
+    {
+        var downscaledProfile = TestProfiles.CreateSmall128();
+        downscaledProfile.Width = 512;
+        downscaledProfile.Height = 512;
+        downscaledProfile.Preview = new PreviewOptions { MaxDimension = 256 };
+
+        var fullProfile = TestProfiles.CreateSmall128();
+        fullProfile.Width = 512;
+        fullProfile.Height = 512;
+
+        var downscaledPath = TempPreviewPath("knob256");
+        var fullPath = TempPreviewPath("knobmax");
+
+        try
+        {
+            var downscaled = Plan(downscaledProfile, "test512", Seed, 0, 0, downscaledPath);
+            var full = Plan(fullProfile, "test512", Seed, 0, 0, fullPath);
+
+            Assert.Equal(512, downscaled.Statistics.Width);
+            var downscaledImage = PngReader.Read(downscaledPath);
+            var fullImage = PngReader.Read(fullPath);
+            Assert.Equal(256, downscaledImage.Width);
+            Assert.Equal(256, downscaledImage.Height);
+            Assert.Equal(512, fullImage.Width);
+            Assert.Equal(512, fullImage.Height);
+        }
+        finally
+        {
+            File.Delete(downscaledPath);
+            File.Delete(fullPath);
+        }
+    }
+
+    /// <summary>
+    ///     Runs the terrain stages for renderer tests.
+    /// </summary>
+    /// <param name="profile">Profile to run.</param>
+    /// <returns>Shaped terrain map and its continentalness classification.</returns>
+    private static (TerrainMap Map, ContinentalnessResult Continentalness) BuildTerrain(
+        WorldGenProfile profile)
+    {
+        var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
+            SeedDerivation.DeriveSubSeed(Seed, "TerrainFields"), profile.Terrain);
+        var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
+            profile.Height, profile.Terrain);
+        var map = new TerrainShapeStage().Apply(fields, continentalness, profile,
+            SeedDerivation.DeriveSubSeed(Seed, "TerrainShape")).Map;
+        return (map, continentalness);
     }
 
     /// <summary>
@@ -171,8 +303,7 @@ public class TestWorldGenPipeline
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed,
-                5, -7, path, null);
+            var plan = Plan(profile, "test128", Seed, 5, -7, path);
 
             var stats = plan.Statistics;
             Assert.Equal(128, stats.Width);
@@ -205,7 +336,7 @@ public class TestWorldGenPipeline
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            var plan = Plan(profile, "test128", Seed, 0, 0, path);
             var map = plan.Terrain;
 
             for (var y = 0; y < profile.Height; ++y)
@@ -230,7 +361,7 @@ public class TestWorldGenPipeline
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0, path, null);
+            var plan = Plan(profile, "test128biomes", Seed, 0, 0, path);
 
             Assert.NotNull(plan.Biomes);
             Assert.NotNull(plan.Materials);
@@ -289,10 +420,8 @@ public class TestWorldGenPipeline
 
         try
         {
-            var first = new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0,
-                firstPath, null);
-            var second = new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0,
-                secondPath, null);
+            var first = Plan(profile, "test128biomes", Seed, 0, 0, firstPath);
+            var second = Plan(profile, "test128biomes", Seed, 0, 0, secondPath);
 
             for (var y = 0; y < profile.Height; ++y)
             {
@@ -340,8 +469,11 @@ public class TestWorldGenPipeline
 
         try
         {
-            new WorldGenPipeline().Plan(profile, "test128biomes", Seed, 0, 0, path, null);
-            var actual = Sha256(File.ReadAllBytes(path));
+            Plan(profile, "test128biomes", Seed, 0, 0, path);
+            var image = PngReader.Read(path);
+            Assert.Equal(128, image.Width);
+            Assert.Equal(128, image.Height);
+            var actual = Sha256(image.Pixels);
 
             Assert.True(string.Equals(actual, GoldenBiomesPreviewSha256,
                     StringComparison.OrdinalIgnoreCase),
@@ -363,7 +495,7 @@ public class TestWorldGenPipeline
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            var plan = Plan(profile, "test128", Seed, 0, 0, path);
 
             Assert.Null(plan.Biomes);
             Assert.Null(plan.Materials);
@@ -374,7 +506,7 @@ public class TestWorldGenPipeline
             Assert.Contains("Biomes: not configured", plan.Statistics.Format());
 
             // The biome-free preview hash is unchanged from card 2.
-            Assert.Equal(GoldenPreviewSha256, Sha256(File.ReadAllBytes(path)));
+            Assert.Equal(GoldenPreviewSha256, Sha256(PngReader.Read(path).Pixels), ignoreCase: true);
         }
         finally
         {
@@ -392,7 +524,7 @@ public class TestWorldGenPipeline
 
         try
         {
-            plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            plan = Plan(profile, "test128", Seed, 0, 0, path);
 
             Assert.NotNull(plan.Caves);
             var cave = plan.Caves!;
@@ -407,7 +539,7 @@ public class TestWorldGenPipeline
 
             // The surface preview is byte-identical to the 3b golden image: caves must not
             // perturb surface pixels.
-            Assert.Equal(GoldenPreviewSha256, Sha256(File.ReadAllBytes(path)));
+            Assert.Equal(GoldenPreviewSha256, Sha256(PngReader.Read(path).Pixels), ignoreCase: true);
         }
         finally
         {
@@ -432,8 +564,8 @@ public class TestWorldGenPipeline
 
         try
         {
-            var first = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, firstPath, null);
-            var second = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, secondPath, null);
+            var first = Plan(profile, "test128", Seed, 0, 0, firstPath);
+            var second = Plan(profile, "test128", Seed, 0, 0, secondPath);
 
             Assert.Equal(HashCaveMap(first.Caves!), HashCaveMap(second.Caves!));
             Assert.Equal(Sha256(File.ReadAllBytes(firstPath)), Sha256(File.ReadAllBytes(secondPath)));
@@ -470,13 +602,13 @@ public class TestWorldGenPipeline
 
         try
         {
-            var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            var plan = Plan(profile, "test128", Seed, 0, 0, path);
 
             Assert.Null(plan.Caves);
             Assert.Empty(plan.CavePreviewPaths);
             Assert.Null(plan.Statistics.Caves);
             Assert.DoesNotContain("Cave level", plan.Statistics.Format());
-            Assert.Equal(GoldenPreviewSha256, Sha256(File.ReadAllBytes(path)));
+            Assert.Equal(GoldenPreviewSha256, Sha256(PngReader.Read(path).Pixels), ignoreCase: true);
         }
         finally
         {
@@ -494,7 +626,7 @@ public class TestWorldGenPipeline
     ///     Pinned for the worldgen caves card on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenCavePreviewSha256 =
-        "4528946F5BE074B15DF952686EE2C835244E2198C4DB13F38330DC30B7381F35";
+        "32E994AFDEF0BE6679C6ABD1734047335F7E37C0CBAE54AF61731E4A24EF88DA";
 
     [Fact]
     public void Plan_CaveGoldenPreview_MatchesHash()
@@ -506,9 +638,12 @@ public class TestWorldGenPipeline
 
         try
         {
-            plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0, path, null);
+            plan = Plan(profile, "test128", Seed, 0, 0, path);
             var cavePreview = Assert.Single(plan.CavePreviewPaths);
-            var actual = Sha256(File.ReadAllBytes(cavePreview));
+            var caveImage = PngReader.Read(cavePreview);
+            Assert.Equal(128, caveImage.Width);
+            Assert.Equal(128, caveImage.Height);
+            var actual = Sha256(caveImage.Pixels);
 
             Assert.True(string.Equals(actual, GoldenCavePreviewSha256,
                     StringComparison.OrdinalIgnoreCase),
