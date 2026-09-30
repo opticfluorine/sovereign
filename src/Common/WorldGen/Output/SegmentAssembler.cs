@@ -310,22 +310,6 @@ public sealed class SegmentAssembler
         var localOriginX = baseX - originX;
         var localOriginY = baseY - originY;
 
-        void Carve(int lx, int ly, int fromZ, int toZ)
-        {
-            var dx = lx - localOriginX;
-            var dy = ly - localOriginY;
-            if (dx < 0 || dx >= SegmentLength || dy < 0 || dy >= SegmentLength) return;
-            if (lx < 0 || lx >= profile.Width || ly < 0 || ly >= profile.Height) return;
-
-            var from = Math.Max(fromZ, baseZ);
-            var to = Math.Min(toZ, baseZ + SegmentLength - 1);
-            for (var z = from; z <= to; ++z)
-            {
-                if (z == profile.BedrockZ) continue;
-                grid[GridIndex(dx, dy, z - baseZ)] = 0;
-            }
-        }
-
         foreach (var level in caves.Levels)
         {
             var lyStart = Math.Max(0, localOriginY);
@@ -337,7 +321,8 @@ public sealed class SegmentAssembler
                 for (var lx = lxStart; lx <= lxEnd; ++lx)
                 {
                     if (!level.Open[lx, ly]) continue;
-                    Carve(lx, ly, level.FloorZ[lx, ly] + 1,
+                    Carve(grid, localOriginX, localOriginY, baseZ, lx, ly,
+                        level.FloorZ[lx, ly] + 1,
                         level.FloorZ[lx, ly] + level.CarveHeight[lx, ly]);
                 }
             }
@@ -364,14 +349,15 @@ public sealed class SegmentAssembler
                 }
             }
 
-            Carve(shaft.CenterX, shaft.CenterY, shaft.LowerFloorZ + 1,
-                shaft.UpperFloorZ + shaft.Headroom);
+            Carve(grid, localOriginX, localOriginY, baseZ, shaft.CenterX, shaft.CenterY,
+                shaft.LowerFloorZ + 1, shaft.UpperFloorZ + shaft.Headroom);
 
             foreach (var column in shaft.Columns)
             {
                 foreach (var stepZ in column.StepZs)
                 {
-                    Carve(column.X, column.Y, stepZ + 1, stepZ + shaft.Headroom);
+                    Carve(grid, localOriginX, localOriginY, baseZ, column.X, column.Y,
+                        stepZ + 1, stepZ + shaft.Headroom);
                 }
             }
         }
@@ -382,9 +368,39 @@ public sealed class SegmentAssembler
             {
                 for (var mx = mouth.X; mx <= mouth.X + 1; ++mx)
                 {
-                    Carve(mx, my, mouth.FloorZ + 1, mouth.SurfaceZ);
+                    Carve(grid, localOriginX, localOriginY, baseZ, mx, my,
+                        mouth.FloorZ + 1, mouth.SurfaceZ);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    ///     Carves an air column into a segment grid at a footprint-local column, clipped to
+    ///     the segment window and the footprint bounds. Bedrock is never carved.
+    /// </summary>
+    /// <param name="grid">Cell material grid to carve.</param>
+    /// <param name="localOriginX">Footprint-local X offset of the segment origin.</param>
+    /// <param name="localOriginY">Footprint-local Y offset of the segment origin.</param>
+    /// <param name="baseZ">World Z of the segment base plane.</param>
+    /// <param name="lx">Footprint-local X coordinate of the column.</param>
+    /// <param name="ly">Footprint-local Y coordinate of the column.</param>
+    /// <param name="fromZ">Lowest Z to carve.</param>
+    /// <param name="toZ">Highest Z to carve.</param>
+    private void Carve(byte[] grid, int localOriginX, int localOriginY, int baseZ,
+        int lx, int ly, int fromZ, int toZ)
+    {
+        var dx = lx - localOriginX;
+        var dy = ly - localOriginY;
+        if (dx < 0 || dx >= SegmentLength || dy < 0 || dy >= SegmentLength) return;
+        if (lx < 0 || lx >= profile.Width || ly < 0 || ly >= profile.Height) return;
+
+        var from = Math.Max(fromZ, baseZ);
+        var to = Math.Min(toZ, baseZ + SegmentLength - 1);
+        for (var z = from; z <= to; ++z)
+        {
+            if (z == profile.BedrockZ) continue;
+            grid[GridIndex(dx, dy, z - baseZ)] = 0;
         }
     }
 
@@ -472,93 +488,108 @@ public sealed class SegmentAssembler
         }
 
         return data;
+    }
 
-        void BakePlane(byte[] cells, int dz, WorldSegmentBlockData target)
+    /// <summary>
+    ///     Bakes one depth plane of a segment grid into its plane default and sparse
+    ///     exception lines.
+    /// </summary>
+    /// <param name="cells">Cell material grid of the segment.</param>
+    /// <param name="dz">Depth offset of the plane within the segment.</param>
+    /// <param name="target">Block data to fill.</param>
+    private void BakePlane(byte[] cells, int dz, WorldSegmentBlockData target)
+    {
+        var airCount = CellsPerPlane;
+        var leadingCount = 0;
+        var defaultBlock = new BlockData { BlockType = BlockDataType.Air };
+        var counts = new Dictionary<BlockData, int>();
+        var blocks = new List<(int Dx, int Dy, BlockData Data)>();
+
+        var planeBase = dz * CellsPerPlane;
+        for (var dy = 0; dy < SegmentLength; ++dy)
         {
-            var airCount = CellsPerPlane;
-            var leadingCount = 0;
-            var defaultBlock = new BlockData { BlockType = BlockDataType.Air };
-            var counts = new Dictionary<BlockData, int>();
-            var blocks = new List<(int Dx, int Dy, BlockData Data)>();
+            for (var dx = 0; dx < SegmentLength; ++dx)
+            {
+                var paletteIndex = cells[planeBase + dy * SegmentLength + dx];
+                if (paletteIndex == 0) continue;
 
-            var planeBase = dz * CellsPerPlane;
+                --airCount;
+                var blockData = new BlockData
+                {
+                    BlockType = BlockDataType.Template,
+                    TemplateIdOffset = palette[paletteIndex] - EntityConstants.FirstTemplateEntityId
+                };
+                blocks.Add((dx, dy, blockData));
+
+                var count = counts.GetValueOrDefault(blockData) + 1;
+                counts[blockData] = count;
+                if (count > leadingCount)
+                {
+                    leadingCount = count;
+                    defaultBlock = blockData;
+                }
+            }
+        }
+
+        if (airCount > leadingCount)
+        {
+            defaultBlock = new BlockData { BlockType = BlockDataType.Air };
+        }
+
+        target.DefaultsPerPlane[dz] = defaultBlock;
+        if (blocks.Count == 0 && defaultBlock.BlockType == BlockDataType.Air) return;
+
+        var plane = new WorldSegmentBlockDataPlane { OffsetZ = (byte)dz };
+        var lines = new WorldSegmentBlockDataLine?[SegmentLength];
+
+        foreach (var (dx, dy, block) in blocks)
+        {
+            if (!block.Equals(defaultBlock)) AddPlaneBlock(plane, lines, dx, dy, block);
+        }
+
+        if (defaultBlock.BlockType != BlockDataType.Air)
+        {
+            // Synthesize explicit air wherever the plane default is solid.
+            var filled = new bool[CellsPerPlane];
+            foreach (var (dx, dy, _) in blocks) filled[dy * SegmentLength + dx] = true;
+
+            var air = new BlockData { BlockType = BlockDataType.Air };
             for (var dy = 0; dy < SegmentLength; ++dy)
             {
                 for (var dx = 0; dx < SegmentLength; ++dx)
                 {
-                    var paletteIndex = cells[planeBase + dy * SegmentLength + dx];
-                    if (paletteIndex == 0) continue;
-
-                    --airCount;
-                    var blockData = new BlockData
-                    {
-                        BlockType = BlockDataType.Template,
-                        TemplateIdOffset = palette[paletteIndex] - EntityConstants.FirstTemplateEntityId
-                    };
-                    blocks.Add((dx, dy, blockData));
-
-                    var count = counts.GetValueOrDefault(blockData) + 1;
-                    counts[blockData] = count;
-                    if (count > leadingCount)
-                    {
-                        leadingCount = count;
-                        defaultBlock = blockData;
-                    }
+                    if (!filled[dy * SegmentLength + dx]) AddPlaneBlock(plane, lines, dx, dy, air);
                 }
             }
-
-            if (airCount > leadingCount)
-            {
-                defaultBlock = new BlockData { BlockType = BlockDataType.Air };
-            }
-
-            target.DefaultsPerPlane[dz] = defaultBlock;
-            if (blocks.Count == 0 && defaultBlock.BlockType == BlockDataType.Air) return;
-
-            var plane = new WorldSegmentBlockDataPlane { OffsetZ = (byte)dz };
-            var lines = new WorldSegmentBlockDataLine?[SegmentLength];
-            var hasBlocks = false;
-
-            void Add(int dx, int dy, BlockData block)
-            {
-                var line = lines[dy] ??= new WorldSegmentBlockDataLine
-                {
-                    OffsetY = (byte)dy,
-                    BlockData = new List<LinePositionedBlockData>()
-                };
-                if (line.BlockData.Count == 0) plane.Lines.Add(line);
-
-                line.BlockData.Add(new LinePositionedBlockData
-                {
-                    OffsetX = (byte)dx,
-                    Data = block
-                });
-                hasBlocks = true;
-            }
-
-            foreach (var (dx, dy, block) in blocks)
-            {
-                if (!block.Equals(defaultBlock)) Add(dx, dy, block);
-            }
-
-            if (defaultBlock.BlockType != BlockDataType.Air)
-            {
-                // Synthesize explicit air wherever the plane default is solid.
-                var filled = new bool[CellsPerPlane];
-                foreach (var (dx, dy, _) in blocks) filled[dy * SegmentLength + dx] = true;
-
-                var air = new BlockData { BlockType = BlockDataType.Air };
-                for (var dy = 0; dy < SegmentLength; ++dy)
-                {
-                    for (var dx = 0; dx < SegmentLength; ++dx)
-                    {
-                        if (!filled[dy * SegmentLength + dx]) Add(dx, dy, air);
-                    }
-                }
-            }
-
-            if (hasBlocks) target.DataPlanes.Add(plane);
         }
+
+        if (plane.Lines.Count > 0) target.DataPlanes.Add(plane);
+    }
+
+    /// <summary>
+    ///     Appends one positioned block or explicit air entry to a plane, creating the line
+    ///     on first use. Lines are added to the plane in ascending Y order.
+    /// </summary>
+    /// <param name="plane">Plane being built.</param>
+    /// <param name="lines">Line lookup by Y offset.</param>
+    /// <param name="dx">X offset within the plane.</param>
+    /// <param name="dy">Y offset within the plane.</param>
+    /// <param name="block">Block data to append.</param>
+    private static void AddPlaneBlock(WorldSegmentBlockDataPlane plane,
+        WorldSegmentBlockDataLine?[] lines, int dx, int dy, BlockData block)
+    {
+        var line = lines[dy] ??= new WorldSegmentBlockDataLine
+        {
+            OffsetY = (byte)dy,
+            BlockData = new List<LinePositionedBlockData>()
+        };
+        if (line.BlockData.Count == 0) plane.Lines.Add(line);
+
+        line.BlockData.Add(new LinePositionedBlockData
+        {
+            OffsetX = (byte)dx,
+            Data = block
+        });
     }
 
     /// <summary>
