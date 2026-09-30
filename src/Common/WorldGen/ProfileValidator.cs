@@ -196,6 +196,8 @@ public sealed class ProfileValidator
     /// </summary>
     private const float MaxAnchorJitter = 0.2f;
 
+    private const float MaxLayoutStrength = 3f;
+
     /// <summary>
     ///     Minimum allowed anchor count for the random preset.
     /// </summary>
@@ -234,8 +236,8 @@ public sealed class ProfileValidator
     }
 
     /// <summary>
-    ///     Validates the optional layout section: strength, preset and anchor mutual
-    ///     exclusion, anchor geometry and biases, and the random anchor count.
+    ///     Validates the optional layout section: strength, connectivity, preset and anchor
+    ///     mutual exclusion, anchor geometry and biases, and the random anchor count.
     /// </summary>
     /// <param name="profile">Profile to validate.</param>
     /// <param name="issues">List to append issues to.</param>
@@ -244,9 +246,18 @@ public sealed class ProfileValidator
     {
         if (profile.Layout is not { } layout) return;
 
-        if (layout.Strength is < 0f or > 1f)
+        if (layout.Strength is < 0f or > MaxLayoutStrength)
             issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
-                $"layout.strength ({layout.Strength}) must be between 0 and 1."));
+                $"layout.strength ({layout.Strength}) must be between 0 and {MaxLayoutStrength}."));
+
+        if (!Enum.IsDefined(layout.Connectivity))
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.connectivity ({layout.Connectivity}) is not a known value."));
+
+        if (layout.Connectivity == LayoutConnectivity.Strict && layout.Preset is not null)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Warning,
+                "layout.connectivity is strict but layout.preset is used; presets are " +
+                "best-effort by design. Use explicit anchors with strict connectivity."));
 
         if (layout.Preset is not null && !LayoutPresets.IsKnown(layout.Preset))
             issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,

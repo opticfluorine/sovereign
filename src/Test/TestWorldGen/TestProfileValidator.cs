@@ -761,12 +761,54 @@ public class TestProfileValidator
     public void Validate_LayoutStrengthOutOfRange_IsError()
     {
         var profile = CreateValidWithLayout();
-        profile.Layout!.Strength = 1.5f;
+        profile.Layout!.Strength = 3.5f;
 
         AssertHasError(validator.Validate(profile), "layout.strength");
 
         profile.Layout.Strength = -0.1f;
         AssertHasError(validator.Validate(profile), "layout.strength");
+    }
+
+    [Fact]
+    public void Validate_LayoutStrengthUpToThree_IsValid()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Strength = 3f;
+
+        Assert.Empty(validator.Validate(profile));
+    }
+
+    [Fact]
+    public void Validate_KnownLayoutConnectivity_IsValid()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Connectivity = LayoutConnectivity.Separate;
+
+        Assert.Empty(validator.Validate(profile));
+    }
+
+    [Fact]
+    public void Validate_UnknownLayoutConnectivity_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Connectivity = (LayoutConnectivity)99;
+
+        AssertHasError(validator.Validate(profile), "connectivity");
+    }
+
+    [Fact]
+    public void Validate_StrictConnectivityWithPreset_IsWarning()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors = null;
+        profile.Layout.Preset = "continents3";
+        profile.Layout.Connectivity = LayoutConnectivity.Strict;
+
+        var issues = validator.Validate(profile);
+
+        Assert.DoesNotContain(issues, i => i.Severity == ProfileValidationSeverity.Error);
+        Assert.Contains(issues, i => i.Severity == ProfileValidationSeverity.Warning
+                                     && i.Message.Contains("strict", StringComparison.Ordinal));
     }
 
     [Fact]

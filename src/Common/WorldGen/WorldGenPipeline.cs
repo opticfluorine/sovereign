@@ -18,6 +18,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
@@ -281,10 +283,14 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// </summary>
     private const int LayoutResampleAttempts = 2;
 
+    private const float LayoutForcedJitter = 0.02f;
+
     /// <summary>
     ///     Runs the terrain stages with a layout mask, resampling the anchor jitter when the
-    ///     layout is not fully honored. The best attempt is always accepted; the report
-    ///     carries a warning naming any unmatched anchors.
+    ///     layout is not fully honored. Attempts are ranked by distinct matched count, then
+    ///     total matched count, then mass-count proximity; the best attempt is accepted with a
+    ///     warning, unless strict connectivity is configured, in which case a failed layout
+    ///     raises <see cref="LayoutValidationException" />.
     /// </summary>
     /// <param name="profile">World generation profile.</param>
     /// <param name="seed">Root world seed.</param>
@@ -298,19 +304,35 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         var warnings = new List<string>();
         var maskStage = new LayoutMaskStage();
         var validator = new LayoutValidator();
+        var connectivity = options.Connectivity;
 
         TerrainFields bestFields = null!;
         ContinentalnessResult bestContinentalness = null!;
         TerrainShapeResult bestShape = null!;
         LayoutFields bestLayout = null!;
         LayoutValidationResult? bestValidation = null;
+        IReadOnlyList<ResolvedAnchor>? previousAnchors = null;
+        var attempts = 0;
 
         for (var attempt = 0; attempt <= LayoutResampleAttempts; ++attempt)
         {
             var layoutSeed = attempt == 0
                 ? SeedDerivation.DeriveSubSeed(seed, "Layout")
                 : SeedDerivation.DeriveSubSeed(seed, $"Layout.Resample{attempt}");
-            var layout = maskStage.Build(profile.Width, profile.Height, options, layoutSeed);
+            var forcedJitter = attempt == 0 ? 0f : LayoutForcedJitter;
+            var layout = maskStage.Build(profile.Width, profile.Height, options, layoutSeed,
+                forcedJitter);
+
+            // A forced jitter that resolved to the same anchors as the previous attempt
+            // produces identical terrain, so skip the remaining attempts.
+            if (attempt > 0
+                && LayoutMaskStage.AnchorsEquivalent(layout.Anchors, previousAnchors))
+            {
+                break;
+            }
+
+            previousAnchors = layout.Anchors;
+            ++attempts;
 
             Report(progress, attempt == 0
                 ? "Terrain: sampling noise fields"
@@ -322,8 +344,9 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             var shape = new TerrainShapeStage().Apply(fields, continentalness, profile,
                 SubSeed(seed, "TerrainShape"), layout);
 
-            var validation = validator.Validate(shape.Map, layout.Anchors, warnings);
-            if (bestValidation is null || validation.MatchedCount > bestValidation.MatchedCount)
+            var validation = validator.Validate(shape.Map, layout.Anchors, warnings, connectivity);
+            if (bestValidation is null
+                || LayoutValidator.CompareAttempts(validation, bestValidation) > 0)
             {
                 bestFields = fields;
                 bestContinentalness = continentalness;
@@ -335,23 +358,67 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             if (validation.Success) break;
         }
 
-        if (!bestValidation!.Success)
+        bestValidation!.Report.AttemptCount = attempts;
+
+        if (!bestValidation.Success)
         {
-            var unmatched = new List<string>();
-            foreach (var anchor in bestValidation.Report.Anchors)
+            var message = FormatLayoutFailure(bestValidation, attempts);
+            if (connectivity == LayoutConnectivity.Strict)
             {
-                if (anchor.Weight >= LayoutValidator.SignificantWeight && !anchor.Matched)
-                {
-                    unmatched.Add($"#{anchor.Index + 1} ({anchor.X:F2}, {anchor.Y:F2})");
-                }
+                throw new LayoutValidationException(message);
             }
 
-            warnings.Add(
-                $"layout best effort after {LayoutResampleAttempts + 1} attempts; " +
-                $"unmatched anchors: {string.Join(", ", unmatched)}.");
+            warnings.Add(message);
         }
 
         return (bestFields, bestContinentalness, bestShape, bestLayout, bestValidation.Report);
+    }
+
+    /// <summary>
+    ///     Formats a consolidated layout failure message naming the failure kind, the involved
+    ///     anchor indices, and any shared mass centroids.
+    /// </summary>
+    /// <param name="validation">Failing validation result.</param>
+    /// <param name="attempts">Number of attempts made.</param>
+    /// <returns>Formatted failure message.</returns>
+    private static string FormatLayoutFailure(LayoutValidationResult validation, int attempts)
+    {
+        var report = validation.Report;
+        var builder = new StringBuilder();
+        builder.Append($"layout validation failed after {attempts} attempt(s); ");
+
+        if (report.SharedMassGroups.Count > 0)
+        {
+            builder.Append("anchors sharing a mass: ");
+            for (var i = 0; i < report.SharedMassGroups.Count; ++i)
+            {
+                if (i > 0) builder.Append("; ");
+                var group = report.SharedMassGroups[i];
+                var centroid = report.Anchors[group[0]];
+                builder.Append(string.Join(", ", group.Select(index => $"#{index + 1}")));
+                builder.Append($" -> mass ({centroid.CentroidX:F2}, {centroid.CentroidY:F2})");
+            }
+
+            builder.Append('.');
+        }
+
+        var unmatched = new List<string>();
+        foreach (var anchor in report.Anchors)
+        {
+            if (anchor.Weight >= LayoutValidator.SignificantWeight && !anchor.Matched
+                && !anchor.SharedMass)
+            {
+                unmatched.Add($"#{anchor.Index + 1} ({anchor.X:F2}, {anchor.Y:F2})");
+            }
+        }
+
+        if (unmatched.Count > 0)
+        {
+            if (report.SharedMassGroups.Count > 0) builder.Append(' ');
+            builder.Append($"unmatched anchors: {string.Join(", ", unmatched)}.");
+        }
+
+        return builder.ToString();
     }
 
     /// <summary>

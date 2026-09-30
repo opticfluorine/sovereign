@@ -26,6 +26,7 @@ using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.WorldGen;
+using Sovereign.WorldGen.Layout;
 using Xunit;
 
 namespace TestWorldGen;
@@ -72,6 +73,22 @@ public class TestWorldGenPlanJob
         var messages = SentMessages(sender);
         Assert.Contains(messages, m => m.Contains("failed"));
         Assert.Contains(messages, m => m.Contains("boom"));
+    }
+
+    [Fact]
+    public void BeginPlan_StrictLayoutFailure_ReturnsToIdleWithConsolidatedMessage()
+    {
+        var (runner, system, _, sender) = CreateRunner(new ThrowingWorldGenPipeline(
+            new LayoutValidationException(
+                "layout validation failed after 3 attempt(s); unmatched anchors: #1 (0.02, 0.02).")));
+
+        runner.BeginPlan(999, "default", null, SenderEntityId);
+        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "strict failure handling");
+
+        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        var messages = SentMessages(sender);
+        Assert.Contains(messages, m => m.Contains("layout validation failed"));
+        Assert.Contains(messages, m => m.Contains("#1"));
     }
 
     [Fact]

@@ -347,6 +347,48 @@ public class TestProfileLoader
         Assert.Equal(1.0f, anchors[1].MountainBias);
     }
 
+    [Fact]
+    public void Load_ShippedThreeLandsProfile_DefaultsConnectivityToNone()
+    {
+        var loader = new ProfileLoader(
+            Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
+
+        var profile = loader.Load("threelands");
+
+        Assert.Equal(LayoutConnectivity.None, profile.Layout!.Connectivity);
+    }
+
+    [Fact]
+    public void Load_LayoutConnectivity_ParsesCaseInsensitively()
+    {
+        using var scope = new TempProfileDirectory();
+        scope.WriteProfile("separate", @"{
+  ""width"": 2048,
+  ""height"": 1024,
+  ""seaLevelZ"": 12,
+  ""surfaceMaxZ"": 28,
+  ""rockFloorZ"": -63,
+  ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
+  ""stoneBands"": [
+    { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
+  ],
+  ""layout"": {
+    ""strength"": 1.8,
+    ""connectivity"": ""Strict"",
+    ""anchors"": [
+      { ""x"": 0.5, ""y"": 0.5, ""radius"": 0.2, ""weight"": 1.0 }
+    ]
+  }
+}");
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        var profile = loader.Load("separate");
+
+        Assert.Equal(LayoutConnectivity.Strict, profile.Layout!.Connectivity);
+        Assert.Equal(1.8f, profile.Layout.Strength);
+    }
+
     /// <summary>
     ///     Collects the distinct biome names referenced by a table.
     /// </summary>

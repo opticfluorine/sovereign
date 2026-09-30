@@ -71,7 +71,10 @@ public class TestLayoutMask
     public void Mask_SingleAnchor_CentersLandMassAtAnchor()
     {
         var profile = TestProfiles.CreateSmall128();
-        profile.Layout = SingleAnchor(1f, 0.25f);
+
+        // Strong suppression removes the seed's own land, leaving the anchor as the only
+        // landmass so its centre is pinned to the anchor.
+        profile.Layout = SingleAnchor(3f, 0.25f);
 
         var (_, _, map, layout) = TestLayoutRunner.Run(profile, Seed);
 
@@ -124,11 +127,142 @@ public class TestLayoutMask
                 var v = (y + 0.5f) / profile.Height;
                 var direct = 0f;
                 foreach (var anchor in fields.Anchors) direct += LayoutMaskStage.BumpAt(anchor, u, v);
-                maxDifference = MathF.Max(maxDifference, MathF.Abs(direct - mask[x, y]));
+                var expected = Math.Clamp(0.5f + direct, 0f, 1f);
+                maxDifference = MathF.Max(maxDifference, MathF.Abs(expected - mask[x, y]));
             }
         }
 
         Assert.InRange(maxDifference, 0f, 0.1f);
+    }
+
+    [Fact]
+    public void Mask_EmptyRegion_IsNeutralHalf()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.Layout = SingleAnchor(1f, 0.05f);
+        var fields = new LayoutMaskStage().Build(profile.Width, profile.Height, profile.Layout,
+            SeedDerivation.DeriveSubSeed(Seed, "Layout"));
+        var mask = Assert.IsType<float[,]>(fields.Mask);
+
+        // A cell far from the small anchor carries no bump and must be neutral 0.5 so that
+        // anchors add land instead of taxing the rest of the map.
+        Assert.Equal(0.5f, mask[profile.Width - 4, profile.Height - 4], 3);
+    }
+
+    [Fact]
+    public void Mask_StrengthUpToOne_LeavesUnanchoredFieldUnchanged()
+    {
+        var plain = TestProfiles.CreateSmall128();
+        var (plainFields, _, _, _) = TestLayoutRunner.Run(plain, Seed);
+
+        var masked = TestProfiles.CreateSmall128();
+        masked.Layout = SingleAnchor(1f, 0.08f);
+        var (maskedFields, _, _, _) = TestLayoutRunner.Run(masked, Seed);
+
+        // Far from the anchor the zero-centered mask is neutral, so strength 1 leaves the
+        // continentalness untouched.
+        var x = masked.Width - 8;
+        var y = masked.Height - 8;
+        Assert.Equal(plainFields.Continentalness[x, y], maskedFields.Continentalness[x, y], 5);
+    }
+
+    [Fact]
+    public void Mask_StrengthAboveOne_SuppressesUnanchoredField()
+    {
+        var strengthOne = TestProfiles.CreateSmall128();
+        strengthOne.Layout = SingleAnchor(1f, 0.08f);
+        var (fieldsOne, _, _, _) = TestLayoutRunner.Run(strengthOne, Seed);
+
+        var strengthThree = TestProfiles.CreateSmall128();
+        strengthThree.Layout = SingleAnchor(3f, 0.08f);
+        var (fieldsThree, _, _, _) = TestLayoutRunner.Run(strengthThree, Seed);
+
+        // Away from the anchor the seed's own continentalness is suppressed so the layout
+        // can dominate a pre-existing landmass; inside the anchor land is preserved.
+        Assert.True(MeanOutsideAnchor(fieldsThree.Continentalness, 0.15f)
+                    < MeanOutsideAnchor(fieldsOne.Continentalness, 0.15f),
+            "Strong-layout suppression should lower the unanchored continentalness.");
+        Assert.True(fieldsThree.Continentalness[strengthOne.Width / 2,
+                strengthOne.Height / 2] > 0.5f,
+            "The anchored centre should remain land under strong suppression.");
+    }
+
+    [Fact]
+    public void ResolveAnchors_ForcedJitter_MovesZeroJitterAnchors()
+    {
+        var options = SingleAnchor(1f, 0.2f);
+        var initial = LayoutMaskStage.ResolveAnchors(options,
+            SeedDerivation.DeriveSubSeed(Seed, "Layout"), 0f);
+        var resampled = LayoutMaskStage.ResolveAnchors(options,
+            SeedDerivation.DeriveSubSeed(Seed, "Layout.Resample1"), 0.02f);
+
+        Assert.True(initial[0].X != resampled[0].X || initial[0].Y != resampled[0].Y,
+            "Forced jitter must move zero-jitter anchors between resample attempts.");
+    }
+
+    [Fact]
+    public void AnchorsEquivalent_ComparesCenters()
+    {
+        var options = SingleAnchor(1f, 0.2f);
+        var first = LayoutMaskStage.ResolveAnchors(options,
+            SeedDerivation.DeriveSubSeed(Seed, "Layout"), 0f);
+        var same = LayoutMaskStage.ResolveAnchors(options,
+            SeedDerivation.DeriveSubSeed(Seed, "Layout"), 0f);
+        var shifted = LayoutMaskStage.ResolveAnchors(options,
+            SeedDerivation.DeriveSubSeed(Seed, "Layout.Resample1"), 0.02f);
+
+        Assert.True(LayoutMaskStage.AnchorsEquivalent(first, same));
+        Assert.False(LayoutMaskStage.AnchorsEquivalent(first, shifted));
+        Assert.False(LayoutMaskStage.AnchorsEquivalent(first, null));
+    }
+
+    /// <summary>
+    ///     Computes the mean field value outside a normalized radius around the footprint
+    ///     centre.
+    /// </summary>
+    /// <param name="field">Field to average.</param>
+    /// <param name="radius">Exclusion radius around the centre.</param>
+    /// <returns>Mean value outside the radius.</returns>
+    private static double MeanOutsideAnchor(float[,] field, float radius)
+    {
+        var width = field.GetLength(0);
+        var height = field.GetLength(1);
+        var sum = 0.0;
+        var count = 0;
+        for (var y = 0; y < height; ++y)
+        {
+            var v = (y + 0.5f) / height - 0.5f;
+            for (var x = 0; x < width; ++x)
+            {
+                var u = (x + 0.5f) / width - 0.5f;
+                if (u * u + v * v <= radius * radius) continue;
+                sum += field[x, y];
+                ++count;
+            }
+        }
+
+        return count == 0 ? 0.0 : sum / count;
+    }
+
+    [Fact]
+    public void Mask_ExcessStrengthAboveTwo_IsCapped()
+    {
+        var strengthThree = TestProfiles.CreateSmall128();
+        strengthThree.Layout = SingleAnchor(3f, 0.08f);
+        var (fieldsThree, _, _, _) = TestLayoutRunner.Run(strengthThree, Seed);
+
+        var strengthFour = TestProfiles.CreateSmall128();
+        strengthFour.Layout = SingleAnchor(4f, 0.08f);
+        var (fieldsFour, _, _, _) = TestLayoutRunner.Run(strengthFour, Seed);
+
+        for (var y = 0; y < strengthThree.Height; ++y)
+        {
+            for (var x = 0; x < strengthThree.Width; ++x)
+            {
+                Assert.Equal(fieldsThree.Continentalness[x, y],
+                    fieldsFour.Continentalness[x, y]);
+            }
+        }
     }
 
     [Fact]

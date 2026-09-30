@@ -21,15 +21,45 @@ using System.Text.Json.Serialization;
 namespace Sovereign.WorldGen.Layout;
 
 /// <summary>
+///     How strictly layout validation requires significant anchors to match distinct land
+///     masses.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum LayoutConnectivity
+{
+    /// <summary>
+    ///     Each significant anchor must match a mass; anchors may share a mass.
+    /// </summary>
+    None,
+
+    /// <summary>
+    ///     Each significant anchor must match a distinct mass. Failures are best-effort.
+    /// </summary>
+    Separate,
+
+    /// <summary>
+    ///     Like <see cref="Separate" />, but a failed layout aborts the plan.
+    /// </summary>
+    Strict
+}
+
+/// <summary>
 ///     Layout prior configuration within a world generation profile. All keys are optional;
 ///     an absent section preserves the pre-layout pipeline output.
 /// </summary>
 public sealed class LayoutOptions
 {
     /// <summary>
-    ///     Strength of the continentalness mask in [0, 1]; 0 disables the mask.
+    ///     Strength of the continentalness mask in [0, 3]; 0 disables the mask, 1 is the
+    ///     additive baseline, and values above 1 blend the terrain toward the layout target.
     /// </summary>
     public float Strength { get; set; }
+
+    /// <summary>
+    ///     Connectivity requirement applied to significant anchors during validation.
+    ///     Defaults to <see cref="LayoutConnectivity.None" />.
+    /// </summary>
+    public LayoutConnectivity Connectivity { get; set; } = LayoutConnectivity.None;
 
     /// <summary>
     ///     Name of a named anchor layout preset, or null when explicit anchors are used.
