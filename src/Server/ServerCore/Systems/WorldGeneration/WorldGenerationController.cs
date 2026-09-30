@@ -26,10 +26,13 @@ namespace Sovereign.ServerCore.Systems.WorldGeneration;
 public class WorldGenerationController
 {
     private readonly WorldGenPlanJobRunner planRunner;
+    private readonly WorldGenCommitRunner commitRunner;
 
-    public WorldGenerationController(WorldGenPlanJobRunner planRunner)
+    public WorldGenerationController(WorldGenPlanJobRunner planRunner,
+        WorldGenCommitRunner commitRunner)
     {
         this.planRunner = planRunner;
+        this.commitRunner = commitRunner;
     }
 
     /// <summary>
@@ -47,14 +50,29 @@ public class WorldGenerationController
     }
 
     /// <summary>
-    ///     Requests that the pending world generation plan be committed to the world.
+    ///     Requests that the staged world generation plan be committed to the world in
+    ///     batched, idempotent transactions. Validation, the registry check, and the player
+    ///     interlock run synchronously; the writes run on a background task.
     /// </summary>
-    /// <param name="seed">Seed to confirm, or null to confirm the planned seed.</param>
-    /// <exception cref="NotImplementedException">World generation commit is implemented in a
-    /// later worldgen card.</exception>
-    public void Commit(ulong? seed)
+    /// <param name="seed">Seed to confirm, or null to confirm the staged seed.</param>
+    /// <param name="force">Whether to proceed despite subscribed players.</param>
+    /// <param name="senderEntityId">Entity to reply to.</param>
+    public void Commit(ulong? seed, bool force, ulong senderEntityId)
     {
-        throw new NotImplementedException("worldgen commit is implemented in a later worldgen card");
+        commitRunner.BeginCommit(seed, force, senderEntityId);
+    }
+
+    /// <summary>
+    ///     Requests that the staged world generation plan be committed, replacing a
+    ///     registered world whose footprint it fully contains.
+    /// </summary>
+    /// <param name="stagedSeed">Seed of the staged plan.</param>
+    /// <param name="oldSeed">Seed of the registered world to replace.</param>
+    /// <param name="force">Whether to proceed despite subscribed players.</param>
+    /// <param name="senderEntityId">Entity to reply to.</param>
+    public void Replace(ulong stagedSeed, ulong oldSeed, bool force, ulong senderEntityId)
+    {
+        commitRunner.BeginReplace(stagedSeed, oldSeed, force, senderEntityId);
     }
 
     /// <summary>

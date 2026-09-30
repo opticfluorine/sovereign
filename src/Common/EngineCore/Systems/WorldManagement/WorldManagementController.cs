@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
@@ -76,6 +77,27 @@ public class WorldManagementController
     {
         var details = new BooleanEventDetails { Value = true };
         var ev = new Event(EventId.Server_WorldManagement_UnloadIdleWorldSegments, details)
+        {
+            SyncToTick = true
+        };
+        eventSender.SendEvent(ev);
+    }
+
+    /// <summary>
+    ///     Requests that the entities of the given world segments be force-unloaded from
+    ///     server memory, discarding any pending block data updates so that the segments
+    ///     reload from the database on their next activation.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="segmentIndices">World segment indices to unload.</param>
+    public void UnloadWorldSegments(IEventSender eventSender,
+        IReadOnlyCollection<GridPosition> segmentIndices)
+    {
+        var details = new WorldSegmentSetEventDetails
+        {
+            SegmentIndices = segmentIndices
+        };
+        var ev = new Event(EventId.Server_WorldManagement_UnloadWorldSegments, details)
         {
             SyncToTick = true
         };

@@ -67,6 +67,11 @@ public sealed class WorldGenChatCommandHandler
     private const string AtOption = "--at";
 
     /// <summary>
+    ///     Option forcing a commit despite subscribed players.
+    /// </summary>
+    private const string ForceOption = "--force";
+
+    /// <summary>
     ///     Usage summary for the plan subcommand.
     /// </summary>
     private const string PlanUsage = "Usage: /worldgen plan <seed> [--profile <name>] [--at <x>,<y>]";
@@ -74,12 +79,12 @@ public sealed class WorldGenChatCommandHandler
     /// <summary>
     ///     Usage summary for the commit subcommand.
     /// </summary>
-    private const string CommitUsage = "Usage: /worldgen commit [seed]";
+    private const string CommitUsage = "Usage: /worldgen commit [seed] [--force]";
 
     /// <summary>
     ///     Usage summary for the replace subcommand.
     /// </summary>
-    private const string ReplaceUsage = "Usage: /worldgen replace <seed> <seed>";
+    private const string ReplaceUsage = "Usage: /worldgen replace <stagedSeed> <oldSeed> [--force]";
 
     /// <summary>
     ///     Usage summary shown when the subcommand cannot be recognized.
@@ -215,25 +220,29 @@ public sealed class WorldGenChatCommandHandler
     private void OnCommit(string[] args, ulong senderEntityId)
     {
         ulong? seed = null;
-        if (args.Length >= 2)
+        var force = false;
+
+        var i = 1;
+        while (i < args.Length)
         {
-            if (args.Length != 2 || !TryParseSeed(args[1], out var parsedSeed))
+            if (args[i] == ForceOption)
+            {
+                force = true;
+                ++i;
+            }
+            else if (i == 1 && TryParseSeed(args[i], out var parsedSeed))
+            {
+                seed = parsedSeed;
+                ++i;
+            }
+            else
             {
                 SendUsage(CommitUsage, senderEntityId);
                 return;
             }
-
-            seed = parsedSeed;
         }
 
-        try
-        {
-            controller.Commit(seed);
-        }
-        catch (NotImplementedException)
-        {
-            SendNotImplemented("commit", senderEntityId);
-        }
+        controller.Commit(seed, force, senderEntityId);
     }
 
     /// <summary>
@@ -243,13 +252,26 @@ public sealed class WorldGenChatCommandHandler
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnReplace(string[] args, ulong senderEntityId)
     {
-        if (args.Length != 3 || !TryParseSeed(args[1], out _) || !TryParseSeed(args[2], out _))
+        var force = false;
+        if (args.Length < 3 || !TryParseSeed(args[1], out var stagedSeed)
+            || !TryParseSeed(args[2], out var oldSeed))
         {
             SendUsage(ReplaceUsage, senderEntityId);
             return;
         }
 
-        SendNotImplemented("replace", senderEntityId);
+        for (var i = 3; i < args.Length; ++i)
+        {
+            if (args[i] != ForceOption)
+            {
+                SendUsage(ReplaceUsage, senderEntityId);
+                return;
+            }
+
+            force = true;
+        }
+
+        controller.Replace(stagedSeed, oldSeed, force, senderEntityId);
     }
 
     /// <summary>

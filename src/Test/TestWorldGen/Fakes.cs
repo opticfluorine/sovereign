@@ -17,9 +17,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Output;
 using Sovereign.WorldGen.Terrain;
@@ -160,9 +164,10 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
     }
 
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
-        int originY, string previewPath, Action<string>? progress)
+        int originY, string previewPath, string stagingDirectory,
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress)
     {
-        List<string> phases = new() { "Terrain", "Hydrology", "Preview" };
+        List<string> phases = new() { "Terrain", "Hydrology", "Preview", "Assembly" };
         lock (accessLock)
         {
             started = true;
@@ -180,8 +185,11 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
         {
             Seed = seed,
             ProfileName = profileName,
+            Profile = profile,
             OriginX = originX,
             OriginY = originY,
+            ResolvedTemplates = resolvedTemplates,
+            StagingDirectory = stagingDirectory,
             Terrain = new TerrainMap
             {
                 Width = 1,
@@ -217,6 +225,179 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
 }
 
 /// <summary>
+///     Builds populated template name indexers for tests.
+/// </summary>
+internal static class TestTemplateIndexers
+{
+    /// <summary>
+    ///     Creates a populated template name indexer from the given name-to-ID map.
+    /// </summary>
+    /// <param name="templates">Template names mapped to template entity IDs.</param>
+    /// <returns>Populated indexer.</returns>
+    public static TemplateNameComponentIndexer Create(IReadOnlyDictionary<string, ulong> templates)
+    {
+        var entityTable = new EntityTable();
+        var componentManager = new ComponentManager(new EntityNotifier());
+        var names = new NameComponentCollection(entityTable, componentManager);
+        var indexer = new TemplateNameComponentIndexer(names, new TemplateNameComponentFilter(names));
+        foreach (var (name, id) in templates)
+        {
+            names.AddComponent(id, name);
+        }
+
+        names.ApplyComponentUpdates();
+        return indexer;
+    }
+
+    /// <summary>
+    ///     Creates an indexer covering the templates referenced by the shipped default
+    ///     profile.
+    /// </summary>
+    /// <returns>Populated indexer.</returns>
+    public static TemplateNameComponentIndexer CreateDefault()
+    {
+        var names = new[]
+        {
+            "Bedrock", "Water", "Shale", "Granite", "Basalt", "Gravel", "Sand",
+            "Grass", "Dirt", "Sandstone", "Snow", "Oak Tree", "Pine Tree", "Cactus",
+            "Acacia Tree", "Boulder", "Dead Bush"
+        };
+        var templates = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < names.Length; ++i)
+        {
+            templates[names[i]] = 0x7FFE000000000000UL + (ulong)i;
+        }
+
+        return Create(templates);
+    }
+}
+
+/// <summary>
+///     Worldgen world registry store fake with in-memory entries.
+/// </summary>
+internal sealed class FakeWorldGenRegistryStore : IWorldGenWorldRegistryStore
+{
+    private readonly Lock accessLock = new();
+    private readonly List<WorldGenRegistryEntry> worlds = new();
+
+    public IReadOnlyList<WorldGenRegistryEntry> Worlds
+    {
+        get
+        {
+            lock (accessLock)
+            {
+                return new List<WorldGenRegistryEntry>(worlds);
+            }
+        }
+    }
+
+    public IReadOnlyList<WorldGenRegistryEntry> LoadWorlds()
+    {
+        lock (accessLock)
+        {
+            return new List<WorldGenRegistryEntry>(worlds);
+        }
+    }
+
+    public void AppendWorld(WorldGenRegistryEntry entry)
+    {
+        lock (accessLock)
+        {
+            worlds.Add(entry);
+        }
+    }
+
+    /// <summary>
+    ///     Seeds a registered world directly, bypassing the store semantics.
+    /// </summary>
+    /// <param name="entry">World to seed.</param>
+    public void Seed(WorldGenRegistryEntry entry)
+    {
+        lock (accessLock)
+        {
+            worlds.Add(entry);
+        }
+    }
+}
+
+/// <summary>
+///     Commit writer fake that records requests without touching any database.
+/// </summary>
+internal sealed class FakeWorldGenCommitWriter : IWorldGenCommitWriter
+{
+    private readonly Lock accessLock = new();
+    private readonly List<WorldGenCommitRequest> requests = new();
+
+    /// <summary>
+    ///     Optional gate the writer waits on before completing.
+    /// </summary>
+    public ManualResetEventSlim? Gate { get; init; }
+
+    /// <summary>
+    ///     Recorded commit requests, in call order.
+    /// </summary>
+    public IReadOnlyList<WorldGenCommitRequest> Requests
+    {
+        get
+        {
+            lock (accessLock)
+            {
+                return new List<WorldGenCommitRequest>(requests);
+            }
+        }
+    }
+
+    public WorldGenCommitStats Execute(WorldGenCommitRequest request)
+    {
+        lock (accessLock)
+        {
+            requests.Add(request);
+        }
+
+        Gate?.Wait(TimeSpan.FromSeconds(10));
+        request.Progress?.Invoke(1, 1);
+        return new WorldGenCommitStats
+        {
+            SegmentsWritten = 12,
+            DecorationsCreated = 3,
+            DecorationsDeleted = 0,
+            WallMs = 5
+        };
+    }
+}
+
+/// <summary>
+///     Segment subscription probe fake with per-segment subscriber sets.
+/// </summary>
+internal sealed class FakeSegmentSubscriptionProbe : ISegmentSubscriptionProbe
+{
+    private readonly Dictionary<GridPosition, HashSet<ulong>> subscribers = new();
+
+    /// <summary>
+    ///     Subscribes a player to a segment.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    /// <param name="playerEntityId">Player entity ID.</param>
+    public void Subscribe(GridPosition segmentIndex, ulong playerEntityId)
+    {
+        if (!subscribers.TryGetValue(segmentIndex, out var set))
+        {
+            set = new HashSet<ulong>();
+            subscribers[segmentIndex] = set;
+        }
+
+        set.Add(playerEntityId);
+    }
+
+    public IReadOnlySet<ulong> GetSubscribersForWorldSegment(GridPosition segmentIndex)
+    {
+        return subscribers.TryGetValue(segmentIndex, out var set)
+            ? set
+            : new HashSet<ulong>();
+    }
+}
+
+/// <summary>
 ///     World generation pipeline test double that always throws.
 /// </summary>
 internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
@@ -229,7 +410,8 @@ internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
     }
 
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
-        int originY, string previewPath, Action<string>? progress)
+        int originY, string previewPath, string stagingDirectory,
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress)
     {
         throw exception;
     }

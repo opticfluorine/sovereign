@@ -200,6 +200,25 @@ public sealed class WorldSegmentBlockDataManager
     }
 
     /// <summary>
+    ///     Discards any pending persistence state for the given world segment so that its
+    ///     in-memory block data is never written to the database. Used when an external
+    ///     writer has replaced the segment's authoritative data.
+    /// </summary>
+    /// <param name="segmentIndex">World segment index.</param>
+    public void DiscardPendingUpdates(GridPosition segmentIndex)
+    {
+        lock (segmentsToRegenerate)
+        {
+            segmentsToRegenerate.Remove(segmentIndex);
+        }
+
+        lock (segmentsToPersist)
+        {
+            segmentsToPersist.Remove(segmentIndex);
+        }
+    }
+
+    /// <summary>
     ///     Blocking call that adds a world segment to the data set.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>

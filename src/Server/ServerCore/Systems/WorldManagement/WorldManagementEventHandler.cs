@@ -127,6 +127,18 @@ public sealed class WorldManagementEventHandler
                 break;
             }
 
+            case EventId.Server_WorldManagement_UnloadWorldSegments:
+            {
+                if (ev.EventDetails is not WorldSegmentSetEventDetails details)
+                {
+                    logger.LogError("Received UnloadWorldSegments without details.");
+                    break;
+                }
+
+                unloadManager.UnloadSegments(details.SegmentIndices);
+                break;
+            }
+
             default:
                 logger.LogError("Unhandled event ID {Id}.", ev.EventId);
                 break;

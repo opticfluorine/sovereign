@@ -135,6 +135,7 @@ public class TestCaveStage
             SurfaceMaxZ = 28,
             RockFloorZ = -63,
             BedrockZ = -64,
+            BedrockTemplate = "Bedrock",
             StoneBands = new List<StoneBand>
             {
                 new() { FromZ = -63, ToZ = -1, Template = "Shale" }
@@ -158,6 +159,7 @@ public class TestCaveStage
             SurfaceMaxZ = 28,
             RockFloorZ = -63,
             BedrockZ = -64,
+            BedrockTemplate = "Bedrock",
             StoneBands = new List<StoneBand>
             {
                 new() { FromZ = -63, ToZ = -1, Template = "Shale" }

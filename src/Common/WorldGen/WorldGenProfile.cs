@@ -54,6 +54,11 @@ public sealed class WorldGenProfile
     public required int BedrockZ { get; set; }
 
     /// <summary>
+    ///     Name of the block template entity that fills the unmodifiable bedrock layer.
+    /// </summary>
+    public required string BedrockTemplate { get; set; }
+
+    /// <summary>
     ///     Stone bands filling the underground, ordered from top to bottom.
     /// </summary>
     public required List<StoneBand> StoneBands { get; set; }
@@ -84,4 +89,10 @@ public sealed class WorldGenProfile
     ///     option keeps its shipped default.
     /// </summary>
     public TerrainOptions Terrain { get; set; } = new();
+
+    /// <summary>
+    ///     Preview rendering options. Optional; null if absent from the profile, in which
+    ///     case the preview keeps its default maximum dimension.
+    /// </summary>
+    public PreviewOptions? Preview { get; set; }
 }

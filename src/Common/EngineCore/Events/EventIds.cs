@@ -724,6 +724,14 @@ public enum EventId
     /// e.g. for the /gcworld admin command; false for the periodic check)
     Server_WorldManagement_UnloadIdleWorldSegments = 200403,
 
+    /// <summary>
+    ///     Requests that the WorldManagement system force-unload the entities of the given
+    ///     world segments, discarding any pending block data updates so that the segments
+    ///     reload from the database.
+    /// </summary>
+    /// Associated details: WorldSegmentSetEventDetails
+    Server_WorldManagement_UnloadWorldSegments = 200404,
+
     #endregion Server_WorldManagement
 
     #region Server_TemplateEntity

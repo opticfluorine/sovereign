@@ -11,6 +11,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Common\WorldGen\WorldGen.csproj"/>
+        <ProjectReference Include="..\..\Server\Persistence\Persistence.csproj"/>
         <ProjectReference Include="..\..\Server\ServerCore\ServerCore.csproj"/>
     </ItemGroup>
 
@@ -30,6 +31,9 @@
     <ItemGroup>
         <Content Include="..\..\Server\SovereignServer\Data\Worldgen\default.json"
                  Link="Data\Worldgen\default.json"
+                 CopyToOutputDirectory="PreserveNewest"/>
+        <Content Include="..\..\Server\Persistence\Migrations\Full\Full_sqlite.sql"
+                 Link="Migrations\Full\Full_sqlite.sql"
                  CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 

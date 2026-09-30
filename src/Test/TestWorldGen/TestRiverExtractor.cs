@@ -136,7 +136,8 @@ public class TestRiverExtractor
     {
         var profile = TestProfiles.CreateSmall128WithoutRivers();
         var plan = new WorldGenPipeline().Plan(profile, "test128", Seed, 0, 0,
-            TempPreviewPath("norivers"), null);
+            TempPreviewPath("norivers"), TempPreviewPath("norivers-stage"),
+            TestResolvedTemplates.ForProfile(profile), null);
 
         AssertRiverFlagsAbsent(plan.Terrain, profile.Width, profile.Height);
         Assert.Equal(0, plan.Statistics.RiverCount);
@@ -384,6 +385,7 @@ public class TestRiverExtractor
             SurfaceMaxZ = 28,
             RockFloorZ = -63,
             BedrockZ = -64,
+            BedrockTemplate = "Bedrock",
             StoneBands = new List<StoneBand>
             {
                 new() { FromZ = -63, ToZ = -1, Template = "Basalt" }

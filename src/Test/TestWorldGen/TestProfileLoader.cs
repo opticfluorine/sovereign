@@ -38,6 +38,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ]
@@ -79,6 +80,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ],
@@ -117,6 +119,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ],
@@ -143,6 +146,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ],
@@ -168,6 +172,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ],
@@ -249,6 +254,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ],
@@ -271,6 +277,7 @@ public class TestProfileLoader
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ]
@@ -317,7 +324,7 @@ public class TestProfileLoader
             new HashSet<string> { "Taiga", "Forest", "Savanna", "Grassland", "Desert" },
             ReferencedTableBiomes(profile.Biomes!));
         Assert.Equal(96, profile.Terrain.MaxStraightRiverRun);
-        Assert.Contains("OakTree", profile.Biomes.Definitions["Grassland"].Decorations![0].Template);
+        Assert.Contains("Oak Tree", profile.Biomes.Definitions["Grassland"].Decorations![0].Template);
     }
 
     /// <summary>

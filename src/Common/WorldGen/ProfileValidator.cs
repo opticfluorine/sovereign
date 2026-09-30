@@ -192,7 +192,30 @@ public sealed class ProfileValidator
         ValidateRiverOptions(profile, issues);
         ValidateBiomeOptions(profile, issues);
         ValidateTerrainOptions(profile, issues);
+        ValidatePreviewOptions(profile, issues);
         return issues;
+    }
+
+    /// <summary>
+    ///     Validates that the bedrock template name is non-empty and that the preview knob,
+    ///     when present, lies in its allowed range.
+    /// </summary>
+    /// <param name="profile">Profile to validate.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidatePreviewOptions(WorldGenProfile profile,
+        List<ProfileValidationIssue> issues)
+    {
+        if (string.IsNullOrWhiteSpace(profile.BedrockTemplate))
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                "bedrockTemplate must be non-empty."));
+
+        if (profile.Preview is not { } preview) return;
+
+        if (preview.MaxDimension is < PreviewOptions.MinMaxDimension
+            or > PreviewOptions.MaxMaxDimension)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"preview.maxDimension ({preview.MaxDimension}) must be between " +
+                $"{PreviewOptions.MinMaxDimension} and {PreviewOptions.MaxMaxDimension}."));
     }
 
     /// <summary>

@@ -15,10 +15,10 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+using Sovereign.EngineCore;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.Persistence;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.WorldGeneration;
@@ -27,9 +27,6 @@ using Xunit;
 
 namespace TestWorldGen;
 
-/// <summary>
-///     Dependency injection smoke tests for the WorldGeneration system registrations.
-/// </summary>
 public class TestWorldGenServiceRegistration
 {
     [Fact]
@@ -38,12 +35,12 @@ public class TestWorldGenServiceRegistration
         var services = new ServiceCollection();
         services.AddSingleton<IEventLoop>(new FakeEventLoop());
         services.AddSingleton<IEventSender>(new FakeEventSender());
-        services.AddSingleton<EventCommunicator>();
-        services.AddSingleton<ILogger<WorldGenerationSystem>>(NullLogger<WorldGenerationSystem>.Instance);
-        services.AddSingleton<ILogger<WorldGenPlanJobRunner>>(NullLogger<WorldGenPlanJobRunner>.Instance);
+        services.AddLogging();
         services.AddOptions();
         services.Configure<WorldGenOptions>(_ => { });
+        services.AddSovereignCore();
         services.AddSovereignServer();
+        services.AddSovereignPersistence();
 
         using var provider = services.BuildServiceProvider();
 
@@ -55,9 +52,12 @@ public class TestWorldGenServiceRegistration
         Assert.NotNull(provider.GetRequiredService<WorldGenerationController>());
         Assert.NotNull(provider.GetRequiredService<WorldGenChatCommandHandler>());
         Assert.NotNull(provider.GetRequiredService<WorldGenPlanJobRunner>());
+        Assert.NotNull(provider.GetRequiredService<WorldGenCommitRunner>());
         Assert.NotNull(provider.GetRequiredService<WorldGenScratch>());
         Assert.NotNull(provider.GetRequiredService<IWorldGenPipeline>());
         Assert.NotNull(provider.GetRequiredService<ProfileLoader>());
         Assert.NotNull(provider.GetRequiredService<ProfileValidator>());
+        Assert.NotNull(provider.GetRequiredService<IWorldGenCommitWriter>());
+        Assert.NotNull(provider.GetRequiredService<IWorldGenWorldRegistryStore>());
     }
 }

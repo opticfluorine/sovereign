@@ -267,7 +267,7 @@ public class AdminChatProcessor : IChatProcessor
         new ChatCommand
         {
             Command = WorldGen,
-            HelpSummary = "Manage world generation: /worldgen plan|status|preview|commit|replace|abort.",
+            HelpSummary = "Manage world generation: /worldgen plan|status|preview|commit|replace|abort. Commit writes the staged plan into the world (replaces segments in its footprint).",
             IncludeInHelp = true
         }
     };

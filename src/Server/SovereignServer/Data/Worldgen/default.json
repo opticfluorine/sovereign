@@ -5,6 +5,7 @@
   "surfaceMaxZ": 28,
   "rockFloorZ": -63,
   "bedrockZ": -64,
+  "bedrockTemplate": "Bedrock",
   "stoneBands": [
     { "fromZ": -16, "toZ": -1, "template": "Shale" },
     { "fromZ": -40, "toZ": -17, "template": "Granite" },
@@ -53,7 +54,7 @@
         "subSurfaceTemplate": "Dirt",
         "subSurfaceDepth": 4,
         "decorations": [
-          { "template": "OakTree", "weight": 0.02, "minSpacing": 5, "maxSlope": 1 },
+          { "template": "Oak Tree", "weight": 0.02, "minSpacing": 5, "maxSlope": 1 },
           { "template": "Boulder", "weight": 0.004, "minSpacing": 7, "maxSlope": 2 }
         ]
       },
@@ -62,8 +63,8 @@
         "subSurfaceTemplate": "Dirt",
         "subSurfaceDepth": 3,
         "decorations": [
-          { "template": "OakTree", "weight": 0.07, "minSpacing": 3, "maxSlope": 1 },
-          { "template": "PineTree", "weight": 0.02, "minSpacing": 4, "maxSlope": 1 }
+          { "template": "Oak Tree", "weight": 0.07, "minSpacing": 3, "maxSlope": 1 },
+          { "template": "Pine Tree", "weight": 0.02, "minSpacing": 4, "maxSlope": 1 }
         ]
       },
       "Taiga": {
@@ -71,7 +72,7 @@
         "subSurfaceTemplate": "Dirt",
         "subSurfaceDepth": 2,
         "decorations": [
-          { "template": "PineTree", "weight": 0.06, "minSpacing": 3, "maxSlope": 2 }
+          { "template": "Pine Tree", "weight": 0.06, "minSpacing": 3, "maxSlope": 2 }
         ]
       },
       "Desert": {
@@ -88,7 +89,7 @@
         "subSurfaceTemplate": "Sand",
         "subSurfaceDepth": 2,
         "decorations": [
-          { "template": "AcaciaTree", "weight": 0.008, "minSpacing": 6, "maxSlope": 1 }
+          { "template": "Acacia Tree", "weight": 0.008, "minSpacing": 6, "maxSlope": 1 }
         ]
       },
       "Beach": {
@@ -101,7 +102,7 @@
         "subSurfaceTemplate": "Dirt",
         "subSurfaceDepth": 2,
         "decorations": [
-          { "template": "DeadBush", "weight": 0.04, "minSpacing": 4, "maxSlope": 1 }
+          { "template": "Dead Bush", "weight": 0.04, "minSpacing": 4, "maxSlope": 1 }
         ]
       },
       "Alpine": {

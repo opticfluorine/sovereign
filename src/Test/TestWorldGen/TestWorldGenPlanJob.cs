@@ -51,7 +51,7 @@ public class TestWorldGenPlanJob
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
 
         Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
-        Assert.Equal(new[] { "Terrain", "Hydrology", "Preview" }, pipeline.SeenPhases);
+        Assert.Equal(new[] { "Terrain", "Hydrology", "Preview", "Assembly" }, pipeline.SeenPhases);
         Assert.Equal("Plan complete", system.LastStatusMessage);
         Assert.NotNull(services.LastCompletedPlan);
         Assert.Equal(12345UL, services.LastCompletedPlan!.Seed);
@@ -111,6 +111,7 @@ public class TestWorldGenPlanJob
   ""surfaceMaxZ"": 28,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": []
 }");
         var (runner, system, _, sender) = CreateRunner(
@@ -136,6 +137,7 @@ public class TestWorldGenPlanJob
   ""surfaceMaxZ"": 40,
   ""rockFloorZ"": -63,
   ""bedrockZ"": -64,
+  ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": [
     { ""fromZ"": -63, ""toZ"": -1, ""template"": ""Basalt"" }
   ]
@@ -171,15 +173,16 @@ public class TestWorldGenPlanJob
         WorldGenerationServices Services, FakeEventSender Sender) CreateRunner(
         IWorldGenPipeline pipeline, string? profileDirectory = null)
     {
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
         var sender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
+        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
+            scratch, NullLogger<WorldGenerationSystem>.Instance);
+        var services = new WorldGenerationServices(system);
         var loader = new ProfileLoader(profileDirectory ??
             Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
         var runner = new WorldGenPlanJobRunner(system, services, pipeline, loader,
-            new ProfileValidator(), scratch, new ServerChatInternalController(sender),
+            new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
+            scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
         return (runner, system, services, sender);
     }

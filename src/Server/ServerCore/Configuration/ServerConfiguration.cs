@@ -279,4 +279,10 @@ public sealed class WorldGenOptions
     ///     use the default system temporary directory.
     /// </summary>
     public string ScratchDirectory { get; set; } = "";
+
+    /// <summary>
+    ///     Number of world segments or decorations written per commit transaction, in
+    ///     <c>[1, 4096]</c>.
+    /// </summary>
+    public int CommitBatchSize { get; set; } = 32;
 }
