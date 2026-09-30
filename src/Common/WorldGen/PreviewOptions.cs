@@ -44,6 +44,12 @@ public sealed class PreviewOptions
     public int MaxDimension { get; set; } = DefaultMaxDimension;
 
     /// <summary>
+    ///     Whether layout anchor highlighting is drawn over the preview when a layout is
+    ///     configured. Enabled by default; disable for a clean terrain image.
+    /// </summary>
+    public bool ShowAnchorOverlay { get; set; } = true;
+
+    /// <summary>
     ///     Gets the effective maximum preview dimension of a profile: the configured knob
     ///     when present, otherwise the shipped default.
     /// </summary>
@@ -52,5 +58,16 @@ public sealed class PreviewOptions
     public static int EffectiveMaxDimension(WorldGenProfile profile)
     {
         return profile.Preview?.MaxDimension ?? DefaultMaxDimension;
+    }
+
+    /// <summary>
+    ///     Gets whether anchor highlighting is enabled for a profile: the configured knob
+    ///     when present, otherwise enabled.
+    /// </summary>
+    /// <param name="profile">World generation profile.</param>
+    /// <returns>true when the anchor overlay should be drawn.</returns>
+    public static bool EffectiveShowAnchorOverlay(WorldGenProfile profile)
+    {
+        return profile.Preview?.ShowAnchorOverlay ?? true;
     }
 }

@@ -203,8 +203,9 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         Report(progress, "Rendering preview");
         previewClock.Start();
         var maxDimension = PreviewOptions.EffectiveMaxDimension(profile);
+        var showAnchorOverlay = PreviewOptions.EffectiveShowAnchorOverlay(profile);
         var preview = new PreviewRenderer().Render(map, continentalness, profile, maxDimension,
-            biomeMap, caves?.Map.Mouths, layout, layoutReport);
+            biomeMap, caves?.Map.Mouths, layout, layoutReport, showAnchorOverlay);
         PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
 
         var cavePreviewPaths = new List<string>();

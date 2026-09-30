@@ -519,6 +519,58 @@ public class TestWorldGenPipeline
     }
 
     [Fact]
+    public void Preview_AnchorOverlay_IsControllable()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        var (map, continentalness) = BuildTerrain(profile);
+        var options = new LayoutOptions
+        {
+            Strength = 1f,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.5f, Y = 0.5f, Radius = 0.2f, Weight = 1f }
+            }
+        };
+        var layout = new LayoutMaskStage().Build(profile.Width, profile.Height, options, Seed);
+        var renderer = new PreviewRenderer();
+
+        var noLayout = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension);
+        var withOverlay = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension, null, null, layout);
+        var withoutOverlay = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension, null, null, layout, null, false);
+
+        // The overlay changes pixels, while disabling it reproduces the plain render exactly.
+        Assert.NotEqual(noLayout.Pixels, withOverlay.Pixels);
+        Assert.Equal(noLayout.Pixels, withoutOverlay.Pixels);
+    }
+
+    [Fact]
+    public void Plan_WithLayoutAnchorOverlayDisabled_DropsOverlay()
+    {
+        var withOverlay = TestProfiles.CreateSmall128ThreeLands();
+        var withoutOverlay = TestProfiles.CreateSmall128ThreeLands();
+        withoutOverlay.Preview = new PreviewOptions { ShowAnchorOverlay = false };
+        var overlayPath = TempPreviewPath("overlayon");
+        var plainPath = TempPreviewPath("overlayoff");
+
+        try
+        {
+            Plan(withOverlay, "threelands", Seed, 0, 0, overlayPath);
+            Plan(withoutOverlay, "threelands", Seed, 0, 0, plainPath);
+
+            Assert.NotEqual(Sha256(PngReader.Read(overlayPath).Pixels),
+                Sha256(PngReader.Read(plainPath).Pixels));
+        }
+        finally
+        {
+            File.Delete(overlayPath);
+            File.Delete(plainPath);
+        }
+    }
+
+    [Fact]
     public void Plan_WithLayout_IsDeterministicAcrossRuns()
     {
         var profile = TestProfiles.CreateSmall128ThreeLands();

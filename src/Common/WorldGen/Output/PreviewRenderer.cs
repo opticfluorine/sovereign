@@ -190,17 +190,20 @@ public sealed class PreviewRenderer
     /// <param name="layout">Resolved layout fields whose anchors are overlaid, or null.</param>
     /// <param name="report">Layout validation report used to tint unmatched anchors red, or
     ///     null to treat every anchor as matched.</param>
+    /// <param name="showAnchorOverlay">Whether to draw layout anchor highlighting when a
+    ///     layout is given. Defaults to true.</param>
     /// <returns>Rendered preview image.</returns>
     public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
         WorldGenProfile profile, int maxDimension, BiomeMap? biomes = null,
         IReadOnlyList<(int X, int Y)>? mouthDots = null, LayoutFields? layout = null,
-        LayoutReport? report = null)
+        LayoutReport? report = null, bool showAnchorOverlay = true)
     {
         var cap = Math.Clamp(maxDimension, PreviewOptions.MinMaxDimension, MaxPreviewDimension);
         var factor = DownscaleFactor(map, cap);
         var outWidth = (map.Width + factor - 1) / factor;
         var outHeight = (map.Height + factor - 1) / factor;
-        var pixels = RenderFull(map, continentalness, profile, biomes, layout, report);
+        var pixels = RenderFull(map, continentalness, profile, biomes, layout, report,
+            showAnchorOverlay);
 
         if (factor > 1) pixels = Downscale(pixels, map.Width, map.Height, outWidth, outHeight, factor);
         if (mouthDots is { Count: > 0 }) DrawMouthDots(pixels, outWidth, outHeight, factor, mouthDots);
@@ -252,16 +255,20 @@ public sealed class PreviewRenderer
     /// <param name="layout">Resolved layout fields whose anchors are overlaid, or null.</param>
     /// <param name="report">Layout validation report used to tint unmatched anchors red, or
     ///     null to treat every anchor as matched.</param>
+    /// <param name="showAnchorOverlay">Whether to draw layout anchor highlighting when a
+    ///     layout is given.</param>
     /// <returns>Packed RGB pixel data in row-major order, top row first.</returns>
     private static byte[] RenderFull(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, BiomeMap? biomes, LayoutFields? layout, LayoutReport? report)
+        WorldGenProfile profile, BiomeMap? biomes, LayoutFields? layout, LayoutReport? report,
+        bool showAnchorOverlay)
     {
         var pixels = new byte[map.Width * map.Height * 3];
         for (var y = 0; y < map.Height; ++y)
         {
             for (var x = 0; x < map.Width; ++x)
             {
-                var color = ColorOf(map, continentalness, profile, biomes, layout, report, x, y);
+                var color = ColorOf(map, continentalness, profile, biomes, layout, report,
+                    showAnchorOverlay, x, y);
                 var offset = (y * map.Width + x) * 3;
                 pixels[offset] = color.R;
                 pixels[offset + 1] = color.G;
@@ -282,16 +289,18 @@ public sealed class PreviewRenderer
     /// <param name="layout">Resolved layout fields whose anchors are overlaid, or null.</param>
     /// <param name="report">Layout validation report used to tint unmatched anchors red, or
     ///     null to treat every anchor as matched.</param>
+    /// <param name="showAnchorOverlay">Whether to draw layout anchor highlighting when a
+    ///     layout is given.</param>
     /// <param name="x">Cell X coordinate.</param>
     /// <param name="y">Cell Y coordinate.</param>
     /// <returns>Cell color.</returns>
     private static (byte R, byte G, byte B) ColorOf(TerrainMap map,
         ContinentalnessResult continentalness, WorldGenProfile profile, BiomeMap? biomes,
-        LayoutFields? layout, LayoutReport? report, int x, int y)
+        LayoutFields? layout, LayoutReport? report, bool showAnchorOverlay, int x, int y)
     {
         var baseColor = BaseColorOf(map, continentalness, profile, biomes, x, y);
-        if (layout is not null && AnchorOverlayColor(layout, report, map.Width, map.Height, x, y)
-                is { } overlay)
+        if (showAnchorOverlay && layout is not null
+            && AnchorOverlayColor(layout, report, map.Width, map.Height, x, y) is { } overlay)
         {
             baseColor = overlay;
         }
