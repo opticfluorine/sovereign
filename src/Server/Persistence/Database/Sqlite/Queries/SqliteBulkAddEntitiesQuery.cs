@@ -41,6 +41,14 @@ public sealed class SqliteBulkAddEntitiesQuery(SqliteConnection connection) : IB
     private const string sqlPrefix =
         "INSERT INTO Entity (id, template_id, pos_x, pos_y, pos_z, entity_type) VALUES ";
 
+    // Parameter names are cached by row position; formatting them per row would allocate.
+    private static readonly string[] IdParameterNames = BuildParameterNames("@Id");
+    private static readonly string[] TemplateIdParameterNames = BuildParameterNames("@TemplateId");
+    private static readonly string[] XParameterNames = BuildParameterNames("@X");
+    private static readonly string[] YParameterNames = BuildParameterNames("@Y");
+    private static readonly string[] ZParameterNames = BuildParameterNames("@Z");
+    private static readonly string[] TypeParameterNames = BuildParameterNames("@Type");
+
     public void AddEntities(IReadOnlyList<BulkEntityRow> rows, IDbTransaction transaction)
     {
         for (var offset = 0; offset < rows.Count; offset += RowsPerCommand)
@@ -62,7 +70,7 @@ public sealed class SqliteBulkAddEntitiesQuery(SqliteConnection connection) : IB
     private SqliteCommand BuildCommand(IReadOnlyList<BulkEntityRow> rows, int offset, int count,
         IDbTransaction transaction)
     {
-        var sql = new StringBuilder(sqlPrefix);
+        var sql = new StringBuilder(sqlPrefix, sqlPrefix.Length + count * 64);
         var cmd = connection.CreateCommand();
         cmd.Transaction = (SqliteTransaction)transaction;
 
@@ -72,15 +80,21 @@ public sealed class SqliteBulkAddEntitiesQuery(SqliteConnection connection) : IB
             {
                 if (i > 0) sql.Append(',');
 
-                var row = rows[offset + i];
-                sql.Append($"(@Id{i}, @TemplateId{i}, @X{i}, @Y{i}, @Z{i}, @Type{i})");
+                sql.Append("(@Id").Append(i)
+                    .Append(", @TemplateId").Append(i)
+                    .Append(", @X").Append(i)
+                    .Append(", @Y").Append(i)
+                    .Append(", @Z").Append(i)
+                    .Append(", @Type").Append(i)
+                    .Append(')');
 
-                AddParameter(cmd, $"@Id{i}", (long)row.EntityId);
-                AddParameter(cmd, $"@TemplateId{i}", (long)row.TemplateEntityId);
-                AddParameter(cmd, $"@X{i}", row.X, SqliteType.Real);
-                AddParameter(cmd, $"@Y{i}", row.Y, SqliteType.Real);
-                AddParameter(cmd, $"@Z{i}", row.Z, SqliteType.Real);
-                AddParameter(cmd, $"@Type{i}", row.EntityType);
+                var row = rows[offset + i];
+                AddParameter(cmd, IdParameterNames[i], (long)row.EntityId);
+                AddParameter(cmd, TemplateIdParameterNames[i], (long)row.TemplateEntityId);
+                AddParameter(cmd, XParameterNames[i], row.X, SqliteType.Real);
+                AddParameter(cmd, YParameterNames[i], row.Y, SqliteType.Real);
+                AddParameter(cmd, ZParameterNames[i], row.Z, SqliteType.Real);
+                AddParameter(cmd, TypeParameterNames[i], row.EntityType);
             }
 
             cmd.CommandText = sql.ToString();
@@ -91,6 +105,22 @@ public sealed class SqliteBulkAddEntitiesQuery(SqliteConnection connection) : IB
             cmd.Dispose();
             throw;
         }
+    }
+
+    /// <summary>
+    ///     Builds the cached parameter names for every row position of a parameter.
+    /// </summary>
+    /// <param name="prefix">Parameter name prefix including the leading sigil.</param>
+    /// <returns>Parameter names indexed by row position.</returns>
+    private static string[] BuildParameterNames(string prefix)
+    {
+        var names = new string[RowsPerCommand];
+        for (var i = 0; i < names.Length; ++i)
+        {
+            names[i] = prefix + i;
+        }
+
+        return names;
     }
 
     /// <summary>
