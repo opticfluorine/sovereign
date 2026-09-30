@@ -52,7 +52,8 @@ public sealed class LayoutAnchorReport
     public required float Weight { get; init; }
 
     /// <summary>
-    ///     Whether the anchor matched a significant mass.
+    ///     Whether the anchor matched a significant mass. Anchors invalidated for sharing a
+    ///     mass with another significant anchor are reported as unmatched.
     /// </summary>
     public required bool Matched { get; init; }
 
@@ -65,6 +66,13 @@ public sealed class LayoutAnchorReport
     ///     Matched mass centroid Y in normalized coordinates; NaN when unmatched.
     /// </summary>
     public required float CentroidY { get; init; }
+
+    /// <summary>
+    ///     Whether the anchor was invalidated because it shared its mass with another
+    ///     significant anchor. When true, <see cref="CentroidX" /> and
+    ///     <see cref="CentroidY" /> still name the shared mass.
+    /// </summary>
+    public bool SharedMass { get; init; }
 }
 
 /// <summary>
@@ -81,6 +89,24 @@ public sealed class LayoutReport
     ///     Number of significant masses found.
     /// </summary>
     public required int MassCount { get; init; }
+
+    /// <summary>
+    ///     Connectivity mode the layout was validated against.
+    /// </summary>
+    public LayoutConnectivity Connectivity { get; init; } = LayoutConnectivity.None;
+
+    /// <summary>
+    ///     Groups of significant anchor indices that matched the same mass, one group per
+    ///     shared mass, in anchor order. Empty when no significant anchors share a mass.
+    /// </summary>
+    public IReadOnlyList<IReadOnlyList<int>> SharedMassGroups { get; init; }
+        = new List<IReadOnlyList<int>>();
+
+    /// <summary>
+    ///     Number of resample attempts made to validate the layout. Zero when validation is
+    ///     performed directly rather than through the pipeline's resample loop.
+    /// </summary>
+    public int AttemptCount { get; set; }
 
     /// <summary>
     ///     Warnings raised during layout resolution and validation.
@@ -109,8 +135,12 @@ public sealed class LayoutReport
     public string Format()
     {
         var builder = new StringBuilder();
+        var connectivity = Connectivity == LayoutConnectivity.None
+            ? ""
+            : $", connectivity {Connectivity.ToString().ToLowerInvariant()}";
         builder.AppendLine(
-            $"  Layout: {MassCount} masses, {MatchedAnchorCount}/{SignificantAnchorCount} anchors matched");
+            $"  Layout: {MassCount} masses, {MatchedAnchorCount}/{SignificantAnchorCount} anchors matched" +
+            $"{connectivity}");
         foreach (var anchor in Anchors)
         {
             if (anchor.Matched)
@@ -118,6 +148,12 @@ public sealed class LayoutReport
                 builder.AppendLine(
                     $"  Layout anchor {anchor.Index + 1} ({anchor.X:F2}, {anchor.Y:F2}) -> " +
                     $"mass ({anchor.CentroidX:F2}, {anchor.CentroidY:F2})");
+            }
+            else if (anchor.SharedMass)
+            {
+                builder.AppendLine(
+                    $"  Layout anchor {anchor.Index + 1} ({anchor.X:F2}, {anchor.Y:F2}) -> " +
+                    $"shared mass ({anchor.CentroidX:F2}, {anchor.CentroidY:F2})");
             }
             else
             {

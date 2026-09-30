@@ -656,13 +656,159 @@ public class TestWorldGenPipeline
         }
     }
 
+    [Fact]
+    public void Plan_WithSeparateLayout_IsDeterministic()
+    {
+        var profile = TestProfiles.CreateSmall128ThreeLands();
+        profile.Layout!.Connectivity = LayoutConnectivity.Separate;
+        var firstPath = TempPreviewPath("separatedet1");
+        var secondPath = TempPreviewPath("separatedet2");
+
+        try
+        {
+            var first = Plan(profile, "threelands", Seed, 0, 0, firstPath);
+            var second = Plan(profile, "threelands", Seed, 0, 0, secondPath);
+
+            Assert.Equal(Sha256(HeightsBytes(first.Terrain)),
+                Sha256(HeightsBytes(second.Terrain)));
+            Assert.Equal(Sha256(File.ReadAllBytes(firstPath)),
+                Sha256(File.ReadAllBytes(secondPath)));
+            Assert.Equal(first.Statistics.Layout!.Anchors.Count,
+                second.Statistics.Layout!.Anchors.Count);
+        }
+        finally
+        {
+            File.Delete(firstPath);
+            File.Delete(secondPath);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithStrictUnmatchableLayout_Throws()
+    {
+        var profile = CreateAllOceanProfile(LayoutConnectivity.Strict);
+        var path = TempPreviewPath("strictfail");
+
+        try
+        {
+            var exception = Assert.Throws<LayoutValidationException>(
+                () => Plan(profile, "test128", Seed, 0, 0, path));
+
+            Assert.Contains("layout validation failed", exception.Message);
+            Assert.Contains("unmatched", exception.Message);
+            Assert.Contains("#1", exception.Message);
+        }
+        finally
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithSeparateUnmatchableLayout_WarnsButCompletes()
+    {
+        var profile = CreateAllOceanProfile(LayoutConnectivity.Separate);
+        var path = TempPreviewPath("separatefail");
+
+        try
+        {
+            var plan = Plan(profile, "test128", Seed, 0, 0, path);
+
+            Assert.NotNull(plan.Statistics.Layout);
+            var report = plan.Statistics.Layout!;
+            Assert.False(report.AllSignificantAnchorsMatched);
+            Assert.Contains(report.Warnings,
+                w => w.Contains("unmatched", StringComparison.Ordinal));
+            Assert.Contains("Layout warning", plan.Statistics.Format());
+            Assert.True(File.Exists(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithForcedJitterResolvingIdentically_SkipsRemainingAttempts()
+    {
+        var options = new LayoutOptions
+        {
+            Strength = 1f,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.02f, Y = 0.02f, Radius = 0.1f, Weight = 1f }
+            }
+        };
+
+        // Find a seed whose first forced-jitter resample clamps back to the same anchor
+        // centre as the initial attempt; that resample cannot change the terrain.
+        ulong? collisionSeed = null;
+        for (ulong candidate = 1; candidate <= 500 && collisionSeed is null; ++candidate)
+        {
+            var initial = LayoutMaskStage.ResolveAnchors(options,
+                SeedDerivation.DeriveSubSeed(candidate, "Layout"), 0f);
+            var resample = LayoutMaskStage.ResolveAnchors(options,
+                SeedDerivation.DeriveSubSeed(candidate, "Layout.Resample1"), 0.02f);
+            if (LayoutMaskStage.AnchorsEquivalent(initial, resample)) collisionSeed = candidate;
+        }
+
+        Assert.NotNull(collisionSeed);
+
+        var profile = CreateAllOceanProfile(LayoutConnectivity.None);
+        profile.Layout = options;
+        var path = TempPreviewPath("skipattempt");
+
+        try
+        {
+            var plan = Plan(profile, "test128", collisionSeed.Value, 0, 0, path);
+
+            Assert.NotNull(plan.Statistics.Layout);
+            var report = plan.Statistics.Layout!;
+            Assert.False(report.AllSignificantAnchorsMatched);
+            Assert.Equal(1, report.AttemptCount);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    /// <summary>
+    ///     Creates an all-ocean profile so that layout validation fails deterministically,
+    ///     isolating the connectivity and resample behavior under test. The thresholds exceed
+    ///     1 so that even the layout mask cannot raise any cell to land.
+    /// </summary>
+    /// <param name="connectivity">Connectivity mode for the layout.</param>
+    /// <returns>Profile whose terrain is entirely ocean.</returns>
+    private static WorldGenProfile CreateAllOceanProfile(LayoutConnectivity connectivity)
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.Terrain.Thresholds = new ContinentalnessThresholdOptions
+        {
+            Ocean = 2f, Coast = 3f, Inland = 4f
+        };
+        profile.Layout = new LayoutOptions
+        {
+            Strength = 1f,
+            Connectivity = connectivity,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.5f, Y = 0.5f, Radius = 0.1f, Weight = 1f }
+            }
+        };
+        return profile;
+    }
+
     /// <summary>
     ///     SHA-256 hash of the golden 128x128 preview pixel buffer produced with the
-    ///     continents3 layout test profile and the fixed seed above. Pinned for the worldgen
-    ///     layout card on x64 Debian, .NET 10.0.12.
+    ///     continents3 layout test profile and the fixed seed above.
+    ///
+    ///     To regenerate after an intentional change: run this test once and read the actual
+    ///     hash from the assertion failure message, then update this constant. Regenerated
+    ///     for the worldgen 6b zero-centered layout mask on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenLayoutPreviewSha256 =
-        "8666A43950D312431C29B3A5C64D3309412574BBACADE0A035BA1189C51EAE5B";
+        "F6C3D73AF789BB2B640A7C443165D64CC800475A228DB08D3064C3025D653F06";
 
     [Fact]
     public void Plan_WithLayout_GoldenPreviewMatchesHash()

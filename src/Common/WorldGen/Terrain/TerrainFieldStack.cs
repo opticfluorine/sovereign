@@ -67,6 +67,8 @@ public sealed class TerrainFieldStack
     /// </summary>
     private const int RoughnessOctaves = 3;
 
+    private const float MaxSuppressionExcess = 2f;
+
     /// <summary>
     ///     Fraction of the ocean threshold at which the contrast stretch re-anchors it;
     ///     the land band above the threshold is spread across the remainder of [0, 1].
@@ -182,21 +184,39 @@ public sealed class TerrainFieldStack
     /// <summary>
     ///     Combines the layout mask into the normalized continentalness field additively, so
     ///     that band thresholds keep their meaning and strength interpolates between no
-    ///     layout and mask-dominant.
+    ///     layout and mask-dominant. Above strength 1 the seed's own continentalness is
+    ///     suppressed outside anchors and pulled toward the layout target inside anchors,
+    ///     letting an explicit layout dominate a seed's pre-existing landmass instead of
+    ///     merging with it.
     /// </summary>
     /// <param name="continentalness">Normalized continentalness field, updated in place.</param>
-    /// <param name="mask">Layout mask in [0, 1].</param>
-    /// <param name="strength">Layout strength in [0, 1].</param>
+    /// <param name="mask">Zero-centered layout mask in [0, 1]; 0.5 is neutral.</param>
+    /// <param name="strength">Layout strength in [0, 3].</param>
     /// <param name="width">Field width.</param>
     /// <param name="height">Field height.</param>
     private static void ApplyMask(float[,] continentalness, float[,] mask, float strength,
         int width, int height)
     {
+        var additive = System.MathF.Min(strength, 1f);
+        var excess = System.MathF.Min(System.MathF.Max(strength - 1f, 0f), MaxSuppressionExcess)
+                     / MaxSuppressionExcess;
+
         System.Threading.Tasks.Parallel.For(0, height, y =>
         {
             for (var x = 0; x < width; ++x)
             {
-                var value = continentalness[x, y] + strength * (mask[x, y] - 0.5f);
+                var maskValue = mask[x, y];
+                var value = continentalness[x, y] + additive * (maskValue - 0.5f);
+                if (excess > 0f)
+                {
+                    // Anchor influence is 1 at the core of a full-weight anchor and 0 on
+                    // unanchored cells. Unanchored cells are suppressed toward the ocean,
+                    // while anchored cells are blended toward the layout target.
+                    var influence = System.Math.Clamp(2f * (maskValue - 0.5f), 0f, 1f);
+                    value *= 1f - excess * (1f - influence);
+                    value += (maskValue - value) * (excess * influence);
+                }
+
                 continentalness[x, y] = System.Math.Clamp(value, 0f, 1f);
             }
         });

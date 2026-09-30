@@ -93,7 +93,8 @@ public sealed class LayoutFields
 ///     Builds the layout mask and its companion bias fields from a profile layout section.
 ///     The mask is accumulated as smoothstep bumps at quarter resolution and bilinearly
 ///     upsampled to block resolution, bounding mask memory to about a sixteenth of a full
-///     field.
+///     field. The mask is zero-centered: an empty mask is neutral 0.5 and anchors add land
+///     rather than taxing everything else.
 /// </summary>
 public sealed class LayoutMaskStage
 {
@@ -119,10 +120,13 @@ public sealed class LayoutMaskStage
     /// <param name="height">Footprint height in blocks.</param>
     /// <param name="options">Layout options.</param>
     /// <param name="seed">Layout sub-seed.</param>
+    /// <param name="forcedJitter">Additional per-anchor jitter in normalized coordinates
+    ///     applied on resample attempts, independent of the profile jitter; zero disables it.</param>
     /// <returns>Resolved layout fields.</returns>
-    public LayoutFields Build(int width, int height, LayoutOptions options, ulong seed)
+    public LayoutFields Build(int width, int height, LayoutOptions options, ulong seed,
+        float forcedJitter = 0f)
     {
-        var anchors = ResolveAnchors(options, seed);
+        var anchors = ResolveAnchors(options, seed, forcedJitter);
         var hasMask = options.Strength > 0f && anchors.Count > 0;
         var hasMountain = HasBias(anchors, a => a.MountainBias);
         var hasTemperature = HasBias(anchors, a => a.TemperatureBias);
@@ -147,7 +151,7 @@ public sealed class LayoutMaskStage
                         sum += BumpAt(anchor, u, v);
                     }
 
-                    quarterMask[qx, qy] = Math.Clamp(sum, 0f, 1f);
+                    quarterMask[qx, qy] = Math.Clamp(0.5f + sum, 0f, 1f);
                 }
             }
         }
@@ -194,14 +198,18 @@ public sealed class LayoutMaskStage
     /// </summary>
     /// <param name="options">Layout options.</param>
     /// <param name="seed">Layout sub-seed.</param>
+    /// <param name="forcedJitter">Additional per-anchor jitter in normalized coordinates
+    ///     applied independently of the profile jitter; zero disables it.</param>
     /// <returns>Resolved anchors.</returns>
-    public static List<ResolvedAnchor> ResolveAnchors(LayoutOptions options, ulong seed)
+    public static List<ResolvedAnchor> ResolveAnchors(LayoutOptions options, ulong seed,
+        float forcedJitter = 0f)
     {
         IReadOnlyList<LayoutAnchor> source = options.Preset is { } preset
             ? LayoutPresets.Resolve(preset, options.AnchorCount, seed)
             : options.Anchors ?? new List<LayoutAnchor>();
 
         var state = SeedDerivation.DeriveSubSeed(seed, "Layout.Jitter");
+        var forcedState = SeedDerivation.DeriveSubSeed(seed, "Layout.ForcedJitter");
         var resolved = new List<ResolvedAnchor>(source.Count);
         for (var i = 0; i < source.Count; ++i)
         {
@@ -212,6 +220,12 @@ public sealed class LayoutMaskStage
             {
                 x = anchor.X + (2f * NextUnit0(ref state) - 1f) * anchor.Jitter;
                 y = anchor.Y + (2f * NextUnit0(ref state) - 1f) * anchor.Jitter;
+            }
+
+            if (forcedJitter > 0f)
+            {
+                x += (2f * NextUnit0(ref forcedState) - 1f) * forcedJitter;
+                y += (2f * NextUnit0(ref forcedState) - 1f) * forcedJitter;
             }
 
             resolved.Add(new ResolvedAnchor
@@ -229,6 +243,26 @@ public sealed class LayoutMaskStage
         }
 
         return resolved;
+    }
+
+    /// <summary>
+    ///     Determines whether two resolved anchor lists occupy identical positions. Used to
+    ///     detect resample attempts whose forced jitter produced the same anchors as the
+    ///     previous attempt, and therefore identical terrain.
+    /// </summary>
+    /// <param name="a">First anchor list.</param>
+    /// <param name="b">Second anchor list, or null.</param>
+    /// <returns>true when both lists have the same length and anchor centers.</returns>
+    public static bool AnchorsEquivalent(IReadOnlyList<ResolvedAnchor> a,
+        IReadOnlyList<ResolvedAnchor>? b)
+    {
+        if (b is null || a.Count != b.Count) return false;
+        for (var i = 0; i < a.Count; ++i)
+        {
+            if (a[i].X != b[i].X || a[i].Y != b[i].Y) return false;
+        }
+
+        return true;
     }
 
     /// <summary>
