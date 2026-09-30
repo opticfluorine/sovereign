@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Terrain;
 
 namespace Sovereign.WorldGen.Output;
@@ -115,6 +116,31 @@ public sealed class PreviewRenderer
     private static readonly (byte R, byte G, byte B) BeachColor = (196, 178, 128);
 
     /// <summary>
+    ///     Overlay color of a matched layout anchor.
+    /// </summary>
+    private static readonly (byte R, byte G, byte B) AnchorMatchedColor = (255, 214, 64);
+
+    /// <summary>
+    ///     Overlay color of an unmatched layout anchor.
+    /// </summary>
+    private static readonly (byte R, byte G, byte B) AnchorUnmatchedColor = (240, 64, 64);
+
+    /// <summary>
+    ///     Half-thickness of anchor rings in normalized coordinates.
+    /// </summary>
+    private const float AnchorRingHalfWidth = 0.005f;
+
+    /// <summary>
+    ///     Half-length of the anchor crosshair arms in normalized coordinates.
+    /// </summary>
+    private const float AnchorCrosshairHalfLength = 0.02f;
+
+    /// <summary>
+    ///     Half-thickness of the anchor crosshair arms in normalized coordinates.
+    /// </summary>
+    private const float AnchorCrosshairHalfThickness = 0.006f;
+
+    /// <summary>
     ///     Fixed biome palette, indexed by <see cref="BiomeId" />. Distinct hues per biome;
     ///     ocean and shelf encode depth. Load-bearing for the biome preview golden hash:
     ///     palette edits are golden-hash edits.
@@ -161,16 +187,20 @@ public sealed class PreviewRenderer
     /// <param name="mouthDots">Surface cave mouth columns to mark with red dots, or null.
     ///     Dots are applied only after the surface image is complete and never alter any
     ///     other pixel.</param>
+    /// <param name="layout">Resolved layout fields whose anchors are overlaid, or null.</param>
+    /// <param name="report">Layout validation report used to tint unmatched anchors red, or
+    ///     null to treat every anchor as matched.</param>
     /// <returns>Rendered preview image.</returns>
     public PreviewImage Render(TerrainMap map, ContinentalnessResult continentalness,
         WorldGenProfile profile, int maxDimension, BiomeMap? biomes = null,
-        IReadOnlyList<(int X, int Y)>? mouthDots = null)
+        IReadOnlyList<(int X, int Y)>? mouthDots = null, LayoutFields? layout = null,
+        LayoutReport? report = null)
     {
         var cap = Math.Clamp(maxDimension, PreviewOptions.MinMaxDimension, MaxPreviewDimension);
         var factor = DownscaleFactor(map, cap);
         var outWidth = (map.Width + factor - 1) / factor;
         var outHeight = (map.Height + factor - 1) / factor;
-        var pixels = RenderFull(map, continentalness, profile, biomes);
+        var pixels = RenderFull(map, continentalness, profile, biomes, layout, report);
 
         if (factor > 1) pixels = Downscale(pixels, map.Width, map.Height, outWidth, outHeight, factor);
         if (mouthDots is { Count: > 0 }) DrawMouthDots(pixels, outWidth, outHeight, factor, mouthDots);
@@ -219,16 +249,19 @@ public sealed class PreviewRenderer
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
     /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
+    /// <param name="layout">Resolved layout fields whose anchors are overlaid, or null.</param>
+    /// <param name="report">Layout validation report used to tint unmatched anchors red, or
+    ///     null to treat every anchor as matched.</param>
     /// <returns>Packed RGB pixel data in row-major order, top row first.</returns>
     private static byte[] RenderFull(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, BiomeMap? biomes)
+        WorldGenProfile profile, BiomeMap? biomes, LayoutFields? layout, LayoutReport? report)
     {
         var pixels = new byte[map.Width * map.Height * 3];
         for (var y = 0; y < map.Height; ++y)
         {
             for (var x = 0; x < map.Width; ++x)
             {
-                var color = ColorOf(map, continentalness, profile, biomes, x, y);
+                var color = ColorOf(map, continentalness, profile, biomes, layout, report, x, y);
                 var offset = (y * map.Width + x) * 3;
                 pixels[offset] = color.R;
                 pixels[offset + 1] = color.G;
@@ -246,14 +279,23 @@ public sealed class PreviewRenderer
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
     /// <param name="biomes">Classified biome map, or null for height-class coloring.</param>
+    /// <param name="layout">Resolved layout fields whose anchors are overlaid, or null.</param>
+    /// <param name="report">Layout validation report used to tint unmatched anchors red, or
+    ///     null to treat every anchor as matched.</param>
     /// <param name="x">Cell X coordinate.</param>
     /// <param name="y">Cell Y coordinate.</param>
     /// <returns>Cell color.</returns>
     private static (byte R, byte G, byte B) ColorOf(TerrainMap map,
         ContinentalnessResult continentalness, WorldGenProfile profile, BiomeMap? biomes,
-        int x, int y)
+        LayoutFields? layout, LayoutReport? report, int x, int y)
     {
         var baseColor = BaseColorOf(map, continentalness, profile, biomes, x, y);
+        if (layout is not null && AnchorOverlayColor(layout, report, map.Width, map.Height, x, y)
+                is { } overlay)
+        {
+            baseColor = overlay;
+        }
+
         var shade = HillshadeOf(map, x, y);
         if (map.IsCliff[x, y]) shade *= CliffTint;
 
@@ -261,6 +303,64 @@ public sealed class PreviewRenderer
             ClampToByte(baseColor.R * shade),
             ClampToByte(baseColor.G * shade),
             ClampToByte(baseColor.B * shade));
+    }
+
+    /// <summary>
+    ///     Computes the anchor overlay color of a cell: crosshairs at anchor centers, rings
+    ///     at one and two radii, tinted red for unmatched anchors. Returns null away from
+    ///     every anchor.
+    /// </summary>
+    /// <param name="layout">Resolved layout fields.</param>
+    /// <param name="report">Layout validation report, or null.</param>
+    /// <param name="width">Footprint width in blocks.</param>
+    /// <param name="height">Footprint height in blocks.</param>
+    /// <param name="x">Cell X coordinate.</param>
+    /// <param name="y">Cell Y coordinate.</param>
+    /// <returns>Overlay color, or null.</returns>
+    private static (byte R, byte G, byte B)? AnchorOverlayColor(LayoutFields layout,
+        LayoutReport? report, int width, int height, int x, int y)
+    {
+        if (layout.Anchors.Count == 0) return null;
+
+        var u = (x + 0.5f) / width;
+        var v = (y + 0.5f) / height;
+        foreach (var anchor in layout.Anchors)
+        {
+            var du = u - anchor.X;
+            var dv = v - anchor.Y;
+            var threshold = 2f * anchor.Radius + AnchorRingHalfWidth;
+            if (du * du + dv * dv > threshold * threshold) continue;
+
+            var distance = MathF.Sqrt(du * du + dv * dv);
+            var onCrosshair = MathF.Abs(du) <= AnchorCrosshairHalfThickness
+                              && MathF.Abs(dv) <= AnchorCrosshairHalfLength
+                              || MathF.Abs(dv) <= AnchorCrosshairHalfThickness
+                              && MathF.Abs(du) <= AnchorCrosshairHalfLength;
+            var onRing = MathF.Abs(distance - anchor.Radius) <= AnchorRingHalfWidth
+                         || MathF.Abs(distance - 2f * anchor.Radius) <= AnchorRingHalfWidth;
+            if (!onCrosshair && !onRing) continue;
+
+            return IsMatched(report, anchor.Index) ? AnchorMatchedColor : AnchorUnmatchedColor;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     Determines whether an anchor matched a mass, treating a missing report as matched.
+    /// </summary>
+    /// <param name="report">Layout validation report, or null.</param>
+    /// <param name="index">Anchor index.</param>
+    /// <returns>true if matched, false otherwise.</returns>
+    private static bool IsMatched(LayoutReport? report, int index)
+    {
+        if (report is null) return true;
+        foreach (var anchor in report.Anchors)
+        {
+            if (anchor.Index == index) return anchor.Matched;
+        }
+
+        return true;
     }
 
     /// <summary>

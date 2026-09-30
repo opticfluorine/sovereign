@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Sovereign.WorldGen;
+using Sovereign.WorldGen.Layout;
 
 namespace TestWorldGen;
 
@@ -191,6 +192,23 @@ internal static class TestProfiles
                     SubSurfaceDepth = 1
                 }
             }
+        };
+        return profile;
+    }
+
+    /// <summary>
+    ///     Creates the 128x128 biome profile with the continents3 layout preset enabled at
+    ///     full strength. The preset is the spec case: three continents left to right with a
+    ///     smaller, mountainous middle.
+    /// </summary>
+    /// <returns>Profile.</returns>
+    public static WorldGenProfile CreateSmall128ThreeLands()
+    {
+        var profile = CreateSmall128Biomes();
+        profile.Layout = new LayoutOptions
+        {
+            Strength = 1f,
+            Preset = "continents3"
         };
         return profile;
     }

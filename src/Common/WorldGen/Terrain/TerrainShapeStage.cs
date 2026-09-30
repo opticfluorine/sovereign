@@ -16,6 +16,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Sovereign.WorldGen.Layout;
 
 namespace Sovereign.WorldGen.Terrain;
 
@@ -58,6 +59,16 @@ public sealed class TerrainShapeStage
     private const int RoughnessAmplitude = 3;
 
     /// <summary>
+    ///     Fraction of the roughness range that a full layout roughness bias contributes.
+    /// </summary>
+    private const float RoughnessBiasCoefficient = 0.15f;
+
+    /// <summary>
+    ///     Histogram bin shift produced by a full mountain bias.
+    /// </summary>
+    private const int MountainBiasBinShift = 512;
+
+    /// <summary>
     ///     Depth in blocks below sea level at the boundary between deep ocean and shelf.
     /// </summary>
     private const int ShelfDepth = 6;
@@ -74,14 +85,18 @@ public sealed class TerrainShapeStage
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
     /// <param name="seed">Sub-seed for terrain shaping.</param>
+    /// <param name="layout">Resolved layout fields whose biases modulate the mountain mask
+    /// and roughness, or null for the unbiased path.</param>
     /// <returns>Shaped terrain result.</returns>
     public TerrainShapeResult Apply(TerrainFields fields, ContinentalnessResult continentalness,
-        WorldGenProfile profile, ulong seed)
+        WorldGenProfile profile, ulong seed, LayoutFields? layout = null)
     {
         var width = profile.Width;
         var height = profile.Height;
 
-        var mountainMask = BuildMountainMask(fields, continentalness, width, height);
+        var mountainMask = BuildMountainMask(fields, continentalness, width, height,
+            layout?.MountainBias);
+        var roughnessBias = layout?.RoughnessBias;
 
         var heights = new int[width, height];
         var minHeight = profile.RockFloorZ + 8;
@@ -92,9 +107,13 @@ public sealed class TerrainShapeStage
             {
                 isOcean[x, y] = continentalness.Classes[x, y] != ContinentalClass.Land;
                 var baseZ = BaseHeight(fields.Continentalness[x, y], continentalness, profile);
+                var roughness = roughnessBias is null
+                    ? fields.Roughness[x, y]
+                    : Math.Clamp(fields.Roughness[x, y]
+                                 + RoughnessBiasCoefficient * roughnessBias[x, y], 0f, 1f);
                 var raw = baseZ
                           + fields.MountainRidge[x, y] * mountainMask[x, y] * MountainAmplitude
-                          + fields.Roughness[x, y] * RoughnessAmplitude;
+                          + roughness * RoughnessAmplitude;
                 heights[x, y] = Math.Clamp((int)raw, minHeight, profile.SurfaceMaxZ);
             }
         });
@@ -142,9 +161,10 @@ public sealed class TerrainShapeStage
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="width">Footprint width in blocks.</param>
     /// <param name="height">Footprint height in blocks.</param>
+    /// <param name="mountainBias">Layout mountain bias field, or null for the unbiased path.</param>
     /// <returns>Mountain mask in [0, 1].</returns>
-    private static float[,] BuildMountainMask(TerrainFields fields, ContinentalnessResult continentalness,
-        int width, int height)
+    internal static float[,] BuildMountainMask(TerrainFields fields, ContinentalnessResult continentalness,
+        int width, int height, float[,]? mountainBias)
     {
         var histogram = new int[RidgeHistogramBins];
         var landCells = 0L;
@@ -167,14 +187,19 @@ public sealed class TerrainShapeStage
         {
             for (var x = 0; x < width; ++x)
             {
-                if (continentalness.Classes[x, y] != ContinentalClass.Land
-                    || BinOf(fields.MountainRidge[x, y]) < thresholdBin)
+                if (continentalness.Classes[x, y] != ContinentalClass.Land) continue;
+
+                var effectiveBin = thresholdBin;
+                if (mountainBias is not null)
                 {
-                    continue;
+                    var shift = (int)MathF.Round(mountainBias[x, y] * MountainBiasBinShift);
+                    effectiveBin = Math.Clamp(thresholdBin - shift, 0, RidgeHistogramBins - 1);
                 }
 
-                mask[x, y] = (fields.MountainRidge[x, y] - (float)thresholdBin / RidgeHistogramBins)
-                             / (1f - (float)thresholdBin / RidgeHistogramBins);
+                if (BinOf(fields.MountainRidge[x, y]) < effectiveBin) continue;
+
+                var floor = (float)effectiveBin / RidgeHistogramBins;
+                mask[x, y] = (fields.MountainRidge[x, y] - floor) / (1f - floor);
             }
         });
 

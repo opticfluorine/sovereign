@@ -32,6 +32,9 @@
         <Content Include="..\..\Server\SovereignServer\Data\Worldgen\default.json"
                  Link="Data\Worldgen\default.json"
                  CopyToOutputDirectory="PreserveNewest"/>
+        <Content Include="..\..\Server\SovereignServer\Data\Worldgen\threelands.json"
+                 Link="Data\Worldgen\threelands.json"
+                 CopyToOutputDirectory="PreserveNewest"/>
         <Content Include="..\..\Server\Persistence\Migrations\Full\Full_sqlite.sql"
                  Link="Migrations\Full\Full_sqlite.sql"
                  CopyToOutputDirectory="PreserveNewest"/>

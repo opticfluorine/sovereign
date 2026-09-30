@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Sovereign.WorldGen.Layout;
 
 namespace Sovereign.WorldGen;
 
@@ -89,6 +90,12 @@ public sealed class WorldGenProfile
     ///     option keeps its shipped default.
     /// </summary>
     public TerrainOptions Terrain { get; set; } = new();
+
+    /// <summary>
+    ///     Layout prior options. Optional; null or inactive if absent from the profile, in
+    ///     which case the pipeline output is byte-identical to the unmasked path.
+    /// </summary>
+    public LayoutOptions? Layout { get; set; }
 
     /// <summary>
     ///     Preview rendering options. Optional; null if absent from the profile, in which

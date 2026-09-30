@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using Sovereign.WorldGen;
+using Sovereign.WorldGen.Layout;
 using Xunit;
 
 namespace TestWorldGen;
@@ -325,6 +326,25 @@ public class TestProfileLoader
             ReferencedTableBiomes(profile.Biomes!));
         Assert.Equal(96, profile.Terrain.MaxStraightRiverRun);
         Assert.Contains("Oak Tree", profile.Biomes.Definitions["Grassland"].Decorations![0].Template);
+    }
+
+    [Fact]
+    public void Load_ShippedThreeLandsProfile_ParsesLayoutAndValidatesCleanly()
+    {
+        var loader = new ProfileLoader(
+            Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
+        var validator = new ProfileValidator();
+
+        var profile = loader.Load("threelands");
+        var issues = validator.Validate(profile);
+
+        Assert.Empty(issues);
+        Assert.NotNull(profile.Layout);
+        Assert.Equal(1.0f, profile.Layout!.Strength);
+        Assert.Null(profile.Layout.Preset);
+        var anchors = Assert.IsType<List<LayoutAnchor>>(profile.Layout.Anchors);
+        Assert.Equal(3, anchors.Count);
+        Assert.Equal(1.0f, anchors[1].MountainBias);
     }
 
     /// <summary>

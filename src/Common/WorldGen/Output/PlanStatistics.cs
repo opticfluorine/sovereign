@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Layout;
 
 namespace Sovereign.WorldGen.Output;
 
@@ -119,6 +120,11 @@ public sealed class PlanStatistics
     public int DecorationsTotal { get; init; }
 
     /// <summary>
+    ///     Best-effort layout validation report, or null if the profile has no active layout.
+    /// </summary>
+    public LayoutReport? Layout { get; init; }
+
+    /// <summary>
     ///     Formats the statistics as a chat-ready block.
     /// </summary>
     /// <returns>Formatted statistics.</returns>
@@ -136,6 +142,7 @@ public sealed class PlanStatistics
                 $"LongestStraightRiverRun: {LongestStraightRiverRun}");
         AppendBiomeLines(builder);
         AppendDecorationLines(builder);
+        AppendLayoutLines(builder);
         AppendCaveLines(builder);
         builder.Append(
             $"  Terrain: {FormatSeconds(TerrainMs)}  Hydrology: {FormatSeconds(HydrologyMs)}  " +
@@ -154,6 +161,17 @@ public sealed class PlanStatistics
         if (Caves is null) return;
 
         builder.AppendLine(Caves.Format());
+    }
+
+    /// <summary>
+    ///     Appends the layout report block, or nothing when no layout is configured.
+    /// </summary>
+    /// <param name="builder">Builder to append to.</param>
+    private void AppendLayoutLines(StringBuilder builder)
+    {
+        if (Layout is null) return;
+
+        builder.Append(Layout.Format());
     }
 
     /// <summary>

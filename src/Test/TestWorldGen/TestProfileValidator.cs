@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sovereign.WorldGen;
+using Sovereign.WorldGen.Layout;
 using Xunit;
 
 namespace TestWorldGen;
@@ -748,5 +749,126 @@ public class TestProfileValidator
         profile.Biomes!.Swamp = new SwampOptions { Template = "", MaxHeightZ = 14 };
 
         AssertHasError(validator.Validate(profile), "swamp.template");
+    }
+
+    [Fact]
+    public void Validate_ValidLayout_HasNoIssues()
+    {
+        Assert.Empty(validator.Validate(CreateValidWithLayout()));
+    }
+
+    [Fact]
+    public void Validate_LayoutStrengthOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Strength = 1.5f;
+
+        AssertHasError(validator.Validate(profile), "layout.strength");
+
+        profile.Layout.Strength = -0.1f;
+        AssertHasError(validator.Validate(profile), "layout.strength");
+    }
+
+    [Fact]
+    public void Validate_UnknownLayoutPreset_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Preset = "bogus";
+
+        AssertHasError(validator.Validate(profile), "preset");
+    }
+
+    [Fact]
+    public void Validate_PresetAndAnchorsTogether_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Preset = "continents3";
+
+        AssertHasError(validator.Validate(profile), "mutually exclusive");
+    }
+
+    [Fact]
+    public void Validate_LayoutAnchorCoordinateOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors![0].X = 0.0f;
+
+        AssertHasError(validator.Validate(profile), "anchors[0].x");
+    }
+
+    [Fact]
+    public void Validate_LayoutAnchorRadiusOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors![0].Radius = 0.01f;
+
+        AssertHasError(validator.Validate(profile), "radius");
+    }
+
+    [Fact]
+    public void Validate_LayoutAnchorWeightOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors![0].Weight = 0.05f;
+
+        AssertHasError(validator.Validate(profile), "weight");
+    }
+
+    [Fact]
+    public void Validate_LayoutAnchorJitterOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors![0].Jitter = 0.25f;
+
+        AssertHasError(validator.Validate(profile), "jitter");
+    }
+
+    [Fact]
+    public void Validate_LayoutAnchorBiasOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors![0].MountainBias = 1.5f;
+
+        AssertHasError(validator.Validate(profile), "mountainBias");
+    }
+
+    [Fact]
+    public void Validate_LayoutAnchorCountOutOfRange_IsError()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.AnchorCount = 0;
+
+        AssertHasError(validator.Validate(profile), "anchorCount");
+    }
+
+    [Fact]
+    public void Validate_LayoutStrengthWithoutAnchors_IsWarning()
+    {
+        var profile = CreateValidWithLayout();
+        profile.Layout!.Anchors = new List<LayoutAnchor>();
+
+        var issues = validator.Validate(profile);
+
+        Assert.DoesNotContain(issues, i => i.Severity == ProfileValidationSeverity.Error);
+        Assert.Contains(issues, i => i.Severity == ProfileValidationSeverity.Warning
+                                     && i.Message.Contains("no-op", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    ///     Creates a valid profile with a valid layout section attached.
+    /// </summary>
+    /// <returns>Profile.</returns>
+    private static WorldGenProfile CreateValidWithLayout()
+    {
+        var profile = TestProfiles.CreateValid();
+        profile.Layout = new LayoutOptions
+        {
+            Strength = 1f,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.5f, Y = 0.5f, Radius = 0.2f, Weight = 1f, MountainBias = 0.5f }
+            }
+        };
+        return profile;
     }
 }
