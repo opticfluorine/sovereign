@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Sovereign.EngineUtil.Collections;
 using Sovereign.WorldGen;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
@@ -93,28 +93,43 @@ public sealed class WorldGenTemplateResolver
     /// </summary>
     /// <param name="profile">Profile to scan.</param>
     /// <returns>Referenced template names.</returns>
-    private static LinkedHashSet CollectReferencedNames(WorldGenProfile profile)
+    private static LinkedHashSet<string> CollectReferencedNames(WorldGenProfile profile)
     {
-        var names = new LinkedHashSet { profile.BedrockTemplate, WaterTemplateName };
+        var names = new LinkedHashSet<string>(StringComparer.Ordinal);
+        AddName(names, profile.BedrockTemplate);
+        AddName(names, WaterTemplateName);
 
-        foreach (var band in profile.StoneBands) names.Add(band.Template);
+        foreach (var band in profile.StoneBands) AddName(names, band.Template);
 
         if (profile.Biomes is { } biomes)
         {
-            names.Add(biomes.OceanFloorTemplate);
-            names.Add(biomes.WaterFloorTemplate);
-            if (biomes.Swamp is { } swamp) names.Add(swamp.Template);
+            AddName(names, biomes.OceanFloorTemplate);
+            AddName(names, biomes.WaterFloorTemplate);
+            if (biomes.Swamp is { } swamp) AddName(names, swamp.Template);
 
             foreach (var definition in biomes.Definitions.Values)
             {
-                names.Add(definition.SurfaceTemplate);
-                names.Add(definition.SubSurfaceTemplate);
+                AddName(names, definition.SurfaceTemplate);
+                AddName(names, definition.SubSurfaceTemplate);
                 if (definition.Decorations is null) continue;
-                foreach (var decoration in definition.Decorations) names.Add(decoration.Template);
+                foreach (var decoration in definition.Decorations)
+                {
+                    AddName(names, decoration.Template);
+                }
             }
         }
 
         return names;
+    }
+
+    /// <summary>
+    ///     Adds a template name to the set if it is not blank.
+    /// </summary>
+    /// <param name="names">Template names collected so far.</param>
+    /// <param name="name">Template name to add.</param>
+    private static void AddName(LinkedHashSet<string> names, string? name)
+    {
+        if (!string.IsNullOrWhiteSpace(name)) names.Add(name!);
     }
 
     /// <summary>
@@ -130,47 +145,5 @@ public sealed class WorldGenTemplateResolver
         }
 
         return available;
-    }
-
-    /// <summary>
-    ///     Insertion-ordered set of distinct strings.
-    /// </summary>
-    private sealed class LinkedHashSet : IEnumerable<string>
-    {
-        private readonly List<string> order = new();
-        private readonly HashSet<string> seen = new(StringComparer.Ordinal);
-
-        /// <summary>
-        ///     Adds a name if it has not been seen and is not blank.
-        /// </summary>
-        /// <param name="name">Name to add.</param>
-        public void Add(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return;
-            if (!seen.Add(name)) return;
-            order.Add(name);
-        }
-
-        /// <summary>
-        ///     Names in insertion order.
-        /// </summary>
-        public IReadOnlyList<string> Order => order;
-
-        /// <summary>
-        ///     Number of distinct names.
-        /// </summary>
-        public int Count => order.Count;
-
-        /// <summary>
-        ///     Enumerates the names in insertion order.
-        /// </summary>
-        /// <returns>Enumerator.</returns>
-        public IEnumerator<string> GetEnumerator() => order.GetEnumerator();
-
-        /// <summary>
-        ///     Enumerates the names in insertion order.
-        /// </summary>
-        /// <returns>Enumerator.</returns>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
