@@ -20,6 +20,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Output;
 using Sovereign.WorldGen.Caves;
@@ -480,6 +481,208 @@ public class TestWorldGenPipeline
                 $"Golden biome preview hash mismatch: expected {GoldenBiomesPreviewSha256}, " +
                 $"actual {actual}. If the change (e.g. a palette edit) was intentional, " +
                 "regenerate the constant as described in its documentation.");
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithLayout_ProducesLayoutReportAndOverlay()
+    {
+        var profile = TestProfiles.CreateSmall128ThreeLands();
+        var maskedPath = TempPreviewPath("layout");
+        var plainPath = TempPreviewPath("layoutplain");
+
+        try
+        {
+            var plan = Plan(profile, "threelands", Seed, 0, 0, maskedPath);
+            var plain = Plan(TestProfiles.CreateSmall128Biomes(), "test128biomes", Seed, 0, 0,
+                plainPath);
+
+            Assert.NotNull(plan.Statistics.Layout);
+            var report = plan.Statistics.Layout!;
+            Assert.Equal(3, report.Anchors.Count);
+            Assert.Equal(3, report.SignificantAnchorCount);
+            Assert.Contains("Layout:", plan.Statistics.Format());
+
+            // The anchor overlay changes preview pixels relative to the unmasked plan.
+            Assert.NotEqual(Sha256(PngReader.Read(plainPath).Pixels),
+                Sha256(PngReader.Read(maskedPath).Pixels));
+        }
+        finally
+        {
+            File.Delete(maskedPath);
+            File.Delete(plainPath);
+        }
+    }
+
+    [Fact]
+    public void Preview_AnchorOverlay_IsControllable()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        var (map, continentalness) = BuildTerrain(profile);
+        var options = new LayoutOptions
+        {
+            Strength = 1f,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.5f, Y = 0.5f, Radius = 0.2f, Weight = 1f }
+            }
+        };
+        var layout = new LayoutMaskStage().Build(profile.Width, profile.Height, options, Seed);
+        var renderer = new PreviewRenderer();
+
+        var noLayout = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension);
+        var withOverlay = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension, null, null, layout);
+        var withoutOverlay = renderer.Render(map, continentalness, profile,
+            PreviewOptions.DefaultMaxDimension, null, null, layout, null, false);
+
+        // The overlay changes pixels, while disabling it reproduces the plain render exactly.
+        Assert.NotEqual(noLayout.Pixels, withOverlay.Pixels);
+        Assert.Equal(noLayout.Pixels, withoutOverlay.Pixels);
+    }
+
+    [Fact]
+    public void Plan_WithLayoutAnchorOverlayDisabled_DropsOverlay()
+    {
+        var withOverlay = TestProfiles.CreateSmall128ThreeLands();
+        var withoutOverlay = TestProfiles.CreateSmall128ThreeLands();
+        withoutOverlay.Preview = new PreviewOptions { ShowAnchorOverlay = false };
+        var overlayPath = TempPreviewPath("overlayon");
+        var plainPath = TempPreviewPath("overlayoff");
+
+        try
+        {
+            Plan(withOverlay, "threelands", Seed, 0, 0, overlayPath);
+            Plan(withoutOverlay, "threelands", Seed, 0, 0, plainPath);
+
+            Assert.NotEqual(Sha256(PngReader.Read(overlayPath).Pixels),
+                Sha256(PngReader.Read(plainPath).Pixels));
+        }
+        finally
+        {
+            File.Delete(overlayPath);
+            File.Delete(plainPath);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithLayout_IsDeterministicAcrossRuns()
+    {
+        var profile = TestProfiles.CreateSmall128ThreeLands();
+        var firstPath = TempPreviewPath("layoutdet1");
+        var secondPath = TempPreviewPath("layoutdet2");
+
+        try
+        {
+            var first = Plan(profile, "threelands", Seed, 0, 0, firstPath);
+            var second = Plan(profile, "threelands", Seed, 0, 0, secondPath);
+
+            Assert.Equal(Sha256(HeightsBytes(first.Terrain)), Sha256(HeightsBytes(second.Terrain)));
+            Assert.Equal(Sha256(File.ReadAllBytes(firstPath)),
+                Sha256(File.ReadAllBytes(secondPath)));
+            Assert.Equal(first.Statistics.Layout!.Anchors.Count,
+                second.Statistics.Layout!.Anchors.Count);
+        }
+        finally
+        {
+            File.Delete(firstPath);
+            File.Delete(secondPath);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithInactiveLayout_IsByteIdenticalToCard5()
+    {
+        var profile = TestProfiles.CreateSmall128Biomes();
+        profile.Layout = new LayoutOptions
+        {
+            Strength = 0f,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.5f, Y = 0.5f, Radius = 0.2f, Weight = 1f }
+            }
+        };
+        var path = TempPreviewPath("layoutinactive");
+
+        try
+        {
+            var plan = Plan(profile, "test128biomes", Seed, 0, 0, path);
+
+            Assert.Null(plan.Statistics.Layout);
+            Assert.Equal(GoldenHeightsSha256,
+                Sha256(HeightsBytes(plan.Terrain)).ToUpperInvariant());
+            Assert.Equal(GoldenBiomesPreviewSha256,
+                Sha256(PngReader.Read(path).Pixels).ToUpperInvariant());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void Plan_WithUnmatchedLayoutAnchor_ResamplesAndWarns()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.Layout = new LayoutOptions
+        {
+            Strength = 0.05f,
+            Anchors = new List<LayoutAnchor>
+            {
+                new() { X = 0.1f, Y = 0.1f, Radius = 0.1f, Weight = 1f, Jitter = 0.1f }
+            }
+        };
+        var path = TempPreviewPath("layoutwarn");
+
+        try
+        {
+            var plan = Plan(profile, "test128", Seed, 0, 0, path);
+
+            Assert.NotNull(plan.Statistics.Layout);
+            var report = plan.Statistics.Layout!;
+            Assert.False(report.AllSignificantAnchorsMatched);
+            Assert.Contains(report.Warnings, w => w.Contains("unmatched", StringComparison.Ordinal));
+            Assert.Contains("Layout warning", plan.Statistics.Format());
+            Assert.True(File.Exists(path));
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    /// <summary>
+    ///     SHA-256 hash of the golden 128x128 preview pixel buffer produced with the
+    ///     continents3 layout test profile and the fixed seed above. Pinned for the worldgen
+    ///     layout card on x64 Debian, .NET 10.0.12.
+    /// </summary>
+    private const string GoldenLayoutPreviewSha256 =
+        "8666A43950D312431C29B3A5C64D3309412574BBACADE0A035BA1189C51EAE5B";
+
+    [Fact]
+    public void Plan_WithLayout_GoldenPreviewMatchesHash()
+    {
+        var profile = TestProfiles.CreateSmall128ThreeLands();
+        var path = TempPreviewPath("layoutgolden");
+
+        try
+        {
+            Plan(profile, "threelands", Seed, 0, 0, path);
+            var image = PngReader.Read(path);
+            Assert.Equal(128, image.Width);
+            Assert.Equal(128, image.Height);
+            var actual = Sha256(image.Pixels);
+
+            Assert.True(string.Equals(actual, GoldenLayoutPreviewSha256,
+                    StringComparison.OrdinalIgnoreCase),
+                $"Golden layout preview hash mismatch: expected {GoldenLayoutPreviewSha256}, " +
+                $"actual {actual}. If the change was intentional, regenerate the constant as " +
+                "described in its documentation.");
         }
         finally
         {

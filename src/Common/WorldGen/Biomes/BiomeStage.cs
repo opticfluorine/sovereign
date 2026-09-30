@@ -16,6 +16,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Terrain;
 
@@ -57,15 +58,23 @@ public sealed class BiomeStage
     private const float BandCut = 1f / 3f;
 
     /// <summary>
+    ///     Fraction of the climate range that a full layout temperature or moisture bias
+    ///     contributes.
+    /// </summary>
+    private const float ClimateBiasCoefficient = 0.25f;
+
+    /// <summary>
     ///     Classifies the biome of every cell.
     /// </summary>
     /// <param name="map">Terrain map with heights and water flags populated.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="profile">World generation profile.</param>
     /// <param name="seed">Sub-seed for biome classification.</param>
+    /// <param name="layout">Resolved layout fields whose temperature and moisture biases
+    /// shift the climate fields, or null for the unbiased path.</param>
     /// <returns>Biome map with every cell classified.</returns>
     public BiomeMap Apply(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, ulong seed)
+        WorldGenProfile profile, ulong seed, LayoutFields? layout = null)
     {
         var width = profile.Width;
         var height = profile.Height;
@@ -77,7 +86,40 @@ public sealed class BiomeStage
         var moisture = ClimateField(width, height,
             SeedDerivation.DeriveSubSeed(seed, "BiomeMoist"), MoistureWavelength);
 
+        if (layout?.TemperatureBias is { } temperatureBias)
+        {
+            temperature = ApplyBias(temperature, temperatureBias, ClimateBiasCoefficient);
+        }
+
+        if (layout?.MoistureBias is { } moistureBias)
+        {
+            moisture = ApplyBias(moisture, moistureBias, ClimateBiasCoefficient);
+        }
+
         return Apply(map, continentalness, options, ResolveTable(options), temperature, moisture);
+    }
+
+    /// <summary>
+    ///     Adds a scaled layout bias field to a normalized climate field and clamps to [0, 1].
+    /// </summary>
+    /// <param name="field">Normalized climate field.</param>
+    /// <param name="bias">Bias field in [-1, 1].</param>
+    /// <param name="coefficient">Bias scale factor.</param>
+    /// <returns>Biased climate field.</returns>
+    private static float[,] ApplyBias(float[,] field, float[,] bias, float coefficient)
+    {
+        var width = field.GetLength(0);
+        var height = field.GetLength(1);
+        var result = new float[width, height];
+        Parallel.For(0, height, y =>
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                result[x, y] = Math.Clamp(field[x, y] + coefficient * bias[x, y], 0f, 1f);
+            }
+        });
+
+        return result;
     }
 
     /// <summary>

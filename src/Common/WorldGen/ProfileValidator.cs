@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Layout;
 
 namespace Sovereign.WorldGen;
 
@@ -171,6 +172,41 @@ public sealed class ProfileValidator
     private const int MaxDecorationSlope = 2;
 
     /// <summary>
+    ///     Minimum allowed layout anchor radius in normalized coordinates.
+    /// </summary>
+    private const float MinAnchorRadius = 0.02f;
+
+    /// <summary>
+    ///     Maximum allowed layout anchor radius in normalized coordinates.
+    /// </summary>
+    private const float MaxAnchorRadius = 0.5f;
+
+    /// <summary>
+    ///     Minimum allowed layout anchor weight.
+    /// </summary>
+    private const float MinAnchorWeight = 0.1f;
+
+    /// <summary>
+    ///     Maximum allowed layout anchor weight.
+    /// </summary>
+    private const float MaxAnchorWeight = 1f;
+
+    /// <summary>
+    ///     Maximum allowed layout anchor positional jitter.
+    /// </summary>
+    private const float MaxAnchorJitter = 0.2f;
+
+    /// <summary>
+    ///     Minimum allowed anchor count for the random preset.
+    /// </summary>
+    private const int MinLayoutAnchorCount = 1;
+
+    /// <summary>
+    ///     Maximum allowed anchor count for the random preset.
+    /// </summary>
+    private const int MaxLayoutAnchorCount = 16;
+
+    /// <summary>
     ///     Moisture band keys of the Whittaker table rows, in band order.
     /// </summary>
     private static readonly string[] MoistureBands = { "dry", "temperate", "wet" };
@@ -192,8 +228,100 @@ public sealed class ProfileValidator
         ValidateRiverOptions(profile, issues);
         ValidateBiomeOptions(profile, issues);
         ValidateTerrainOptions(profile, issues);
+        ValidateLayoutOptions(profile, issues);
         ValidatePreviewOptions(profile, issues);
         return issues;
+    }
+
+    /// <summary>
+    ///     Validates the optional layout section: strength, preset and anchor mutual
+    ///     exclusion, anchor geometry and biases, and the random anchor count.
+    /// </summary>
+    /// <param name="profile">Profile to validate.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateLayoutOptions(WorldGenProfile profile,
+        List<ProfileValidationIssue> issues)
+    {
+        if (profile.Layout is not { } layout) return;
+
+        if (layout.Strength is < 0f or > 1f)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.strength ({layout.Strength}) must be between 0 and 1."));
+
+        if (layout.Preset is not null && !LayoutPresets.IsKnown(layout.Preset))
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.preset \"{layout.Preset}\" is not a known preset."));
+
+        if (layout.Preset is not null && layout.Anchors is { Count: > 0 })
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                "layout.preset and layout.anchors are mutually exclusive."));
+
+        if (layout.AnchorCount is < MinLayoutAnchorCount or > MaxLayoutAnchorCount)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchorCount ({layout.AnchorCount}) must be between " +
+                $"{MinLayoutAnchorCount} and {MaxLayoutAnchorCount}."));
+
+        if (layout.Strength > 0f && layout.Preset is null && layout.Anchors is not { Count: > 0 })
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Warning,
+                "layout.strength is positive but no preset or anchors are configured; " +
+                "the mask is a no-op."));
+
+        if (layout.Anchors is not { } anchors) return;
+        for (var i = 0; i < anchors.Count; ++i)
+        {
+            ValidateLayoutAnchor(anchors[i], i, issues);
+        }
+    }
+
+    /// <summary>
+    ///     Validates a single layout anchor.
+    /// </summary>
+    /// <param name="anchor">Anchor to validate.</param>
+    /// <param name="index">Zero-based anchor index for error messages.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateLayoutAnchor(LayoutAnchor anchor, int index,
+        List<ProfileValidationIssue> issues)
+    {
+        if (anchor.X is < LayoutMaskStage.MinAnchorCoordinate or > LayoutMaskStage.MaxAnchorCoordinate)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchors[{index}].x ({anchor.X}) must be between " +
+                $"{LayoutMaskStage.MinAnchorCoordinate} and {LayoutMaskStage.MaxAnchorCoordinate}."));
+        if (anchor.Y is < LayoutMaskStage.MinAnchorCoordinate or > LayoutMaskStage.MaxAnchorCoordinate)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchors[{index}].y ({anchor.Y}) must be between " +
+                $"{LayoutMaskStage.MinAnchorCoordinate} and {LayoutMaskStage.MaxAnchorCoordinate}."));
+        if (anchor.Radius is < MinAnchorRadius or > MaxAnchorRadius)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchors[{index}].radius ({anchor.Radius}) must be between " +
+                $"{MinAnchorRadius} and {MaxAnchorRadius}."));
+        if (anchor.Weight is < MinAnchorWeight or > MaxAnchorWeight)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchors[{index}].weight ({anchor.Weight}) must be between " +
+                $"{MinAnchorWeight} and {MaxAnchorWeight}."));
+        if (anchor.Jitter is < 0f or > MaxAnchorJitter)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchors[{index}].jitter ({anchor.Jitter}) must be between 0 and " +
+                $"{MaxAnchorJitter}."));
+
+        ValidateAnchorBias("mountainBias", index, anchor.MountainBias, issues);
+        ValidateAnchorBias("temperatureBias", index, anchor.TemperatureBias, issues);
+        ValidateAnchorBias("moistureBias", index, anchor.MoistureBias, issues);
+        ValidateAnchorBias("roughnessBias", index, anchor.RoughnessBias, issues);
+    }
+
+    /// <summary>
+    ///     Validates a single layout anchor bias.
+    /// </summary>
+    /// <param name="name">Bias name for error messages.</param>
+    /// <param name="index">Zero-based anchor index for error messages.</param>
+    /// <param name="value">Bias value.</param>
+    /// <param name="issues">List to append issues to.</param>
+    private static void ValidateAnchorBias(string name, int index, float value,
+        List<ProfileValidationIssue> issues)
+    {
+        if (value is < -1f or > 1f)
+            issues.Add(new ProfileValidationIssue(ProfileValidationSeverity.Error,
+                $"layout.anchors[{index}].{name} ({value}) must be between -1 and 1."));
     }
 
     /// <summary>

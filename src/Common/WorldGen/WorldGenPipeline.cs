@@ -22,6 +22,7 @@ using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Hydrology;
+using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Output;
 using Sovereign.WorldGen.Terrain;
@@ -105,17 +106,31 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         int lakeCount;
         int longestStraightRiverRun;
 
+        LayoutFields? layout = null;
+        LayoutReport? layoutReport = null;
+
         Report(progress, "Terrain: sampling noise fields");
         terrainClock.Start();
-        var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
-            SubSeed(seed, "TerrainFields"), profile.Terrain);
-        var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
-            profile.Height, profile.Terrain);
-        terrainClock.Stop();
+        TerrainFields fields;
+        ContinentalnessResult continentalness;
+        TerrainShapeResult shape;
+        if (profile.Layout is { IsActive: true } layoutOptions)
+        {
+            (fields, continentalness, shape, layout, layoutReport) =
+                RunLayoutTerrain(profile, seed, layoutOptions, progress);
+        }
+        else
+        {
+            fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
+                SubSeed(seed, "TerrainFields"), profile.Terrain);
+            continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
+                profile.Height, profile.Terrain);
 
-        Report(progress, "Terrain: shaping surface");
-        terrainClock.Start();
-        var shape = new TerrainShapeStage().Apply(fields, continentalness, profile, SubSeed(seed, "TerrainShape"));
+            Report(progress, "Terrain: shaping surface");
+            shape = new TerrainShapeStage().Apply(fields, continentalness, profile,
+                SubSeed(seed, "TerrainShape"));
+        }
+
         terrainClock.Stop();
 
         var map = shape.Map;
@@ -158,7 +173,8 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         {
             Report(progress, "Biomes: classifying biomes");
             biomesClock.Start();
-            biomeMap = new BiomeStage().Apply(map, continentalness, profile, SubSeed(seed, "Biomes"));
+            biomeMap = new BiomeStage().Apply(map, continentalness, profile, SubSeed(seed, "Biomes"),
+                layout);
 
             Report(progress, "Biomes: assigning materials");
             materials = new MaterialStage().Apply(map, biomeMap, biomes, SubSeed(seed, "MaterialJitter"));
@@ -187,8 +203,9 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         Report(progress, "Rendering preview");
         previewClock.Start();
         var maxDimension = PreviewOptions.EffectiveMaxDimension(profile);
+        var showAnchorOverlay = PreviewOptions.EffectiveShowAnchorOverlay(profile);
         var preview = new PreviewRenderer().Render(map, continentalness, profile, maxDimension,
-            biomeMap, caves?.Map.Mouths);
+            biomeMap, caves?.Map.Mouths, layout, layoutReport, showAnchorOverlay);
         PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
 
         var cavePreviewPaths = new List<string>();
@@ -235,6 +252,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             BiomePercentages = biomeMap is null ? null : BiomePercentages(biomeMap),
             DecorationCounts = biomeMap is null ? null : DecorationCounts(decorations),
             DecorationsTotal = decorations.Count,
+            Layout = layoutReport,
             Caves = caves?.Stats
         };
 
@@ -256,6 +274,84 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             Statistics = statistics,
             PreviewPath = previewPath
         };
+    }
+
+    /// <summary>
+    ///     Number of layout resample attempts after the initial attempt.
+    /// </summary>
+    private const int LayoutResampleAttempts = 2;
+
+    /// <summary>
+    ///     Runs the terrain stages with a layout mask, resampling the anchor jitter when the
+    ///     layout is not fully honored. The best attempt is always accepted; the report
+    ///     carries a warning naming any unmatched anchors.
+    /// </summary>
+    /// <param name="profile">World generation profile.</param>
+    /// <param name="seed">Root world seed.</param>
+    /// <param name="options">Active layout options.</param>
+    /// <param name="progress">Optional progress callback.</param>
+    /// <returns>Terrain fields, continentalness, shaped terrain, layout fields, and report.</returns>
+    private static (TerrainFields Fields, ContinentalnessResult Continentalness,
+        TerrainShapeResult Shape, LayoutFields Layout, LayoutReport Report) RunLayoutTerrain(
+        WorldGenProfile profile, ulong seed, LayoutOptions options, Action<string>? progress)
+    {
+        var warnings = new List<string>();
+        var maskStage = new LayoutMaskStage();
+        var validator = new LayoutValidator();
+
+        TerrainFields bestFields = null!;
+        ContinentalnessResult bestContinentalness = null!;
+        TerrainShapeResult bestShape = null!;
+        LayoutFields bestLayout = null!;
+        LayoutValidationResult? bestValidation = null;
+
+        for (var attempt = 0; attempt <= LayoutResampleAttempts; ++attempt)
+        {
+            var layoutSeed = attempt == 0
+                ? SeedDerivation.DeriveSubSeed(seed, "Layout")
+                : SeedDerivation.DeriveSubSeed(seed, $"Layout.Resample{attempt}");
+            var layout = maskStage.Build(profile.Width, profile.Height, options, layoutSeed);
+
+            Report(progress, attempt == 0
+                ? "Terrain: sampling noise fields"
+                : $"Terrain: resampling layout (attempt {attempt + 1})");
+            var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
+                SubSeed(seed, "TerrainFields"), profile.Terrain, layout);
+            var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
+                profile.Height, profile.Terrain);
+            var shape = new TerrainShapeStage().Apply(fields, continentalness, profile,
+                SubSeed(seed, "TerrainShape"), layout);
+
+            var validation = validator.Validate(shape.Map, layout.Anchors, warnings);
+            if (bestValidation is null || validation.MatchedCount > bestValidation.MatchedCount)
+            {
+                bestFields = fields;
+                bestContinentalness = continentalness;
+                bestShape = shape;
+                bestLayout = layout;
+                bestValidation = validation;
+            }
+
+            if (validation.Success) break;
+        }
+
+        if (!bestValidation!.Success)
+        {
+            var unmatched = new List<string>();
+            foreach (var anchor in bestValidation.Report.Anchors)
+            {
+                if (anchor.Weight >= LayoutValidator.SignificantWeight && !anchor.Matched)
+                {
+                    unmatched.Add($"#{anchor.Index + 1} ({anchor.X:F2}, {anchor.Y:F2})");
+                }
+            }
+
+            warnings.Add(
+                $"layout best effort after {LayoutResampleAttempts + 1} attempts; " +
+                $"unmatched anchors: {string.Join(", ", unmatched)}.");
+        }
+
+        return (bestFields, bestContinentalness, bestShape, bestLayout, bestValidation.Report);
     }
 
     /// <summary>

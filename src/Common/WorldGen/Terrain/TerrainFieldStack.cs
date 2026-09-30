@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Threading.Tasks;
+using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Noise;
 
 namespace Sovereign.WorldGen.Terrain;
@@ -81,8 +82,11 @@ public sealed class TerrainFieldStack
     /// <param name="height">Footprint height in blocks.</param>
     /// <param name="seed">Sub-seed for field sampling.</param>
     /// <param name="terrain">Terrain generation options.</param>
+    /// <param name="layout">Resolved layout fields whose mask is combined into
+    /// continentalness, or null for the unmasked path.</param>
     /// <returns>Sampled fields.</returns>
-    public TerrainFields Sample(int width, int height, ulong seed, TerrainOptions terrain)
+    public TerrainFields Sample(int width, int height, ulong seed, TerrainOptions terrain,
+        LayoutFields? layout = null)
     {
         var continentalness = new float[width, height];
         var ridge = new float[width, height];
@@ -109,7 +113,13 @@ public sealed class TerrainFieldStack
             }
         });
 
-        NormalizeContinentalness(continentalness, warpNoise, width, height, maxDimension, terrain);
+        NormalizeAndStretch(continentalness, width, height, terrain);
+        if (layout is { Mask: { } mask })
+        {
+            ApplyMask(continentalness, mask, layout.Strength, width, height);
+        }
+
+        ApplyEdgeFalloff(continentalness, warpNoise, width, height, maxDimension, terrain);
 
         return new TerrainFields
         {
@@ -133,19 +143,16 @@ public sealed class TerrainFieldStack
     }
 
     /// <summary>
-    ///     Normalizes the continentalness field to [0, 1] over its observed range, applies a
-    ///     contrast stretch around the land band so that mid-range differences translate into
-    ///     coastline variety instead of concentric bands, and applies an edge falloff so that
-    ///     the footprint border always trends below sea level.
+    ///     Normalizes the continentalness field to [0, 1] over its observed range and applies
+    ///     a contrast stretch around the land band so that mid-range differences translate
+    ///     into coastline variety instead of concentric bands.
     /// </summary>
     /// <param name="continentalness">Continentalness field, updated in place.</param>
-    /// <param name="warpNoise">Noise source for the edge falloff.</param>
     /// <param name="width">Field width.</param>
     /// <param name="height">Field height.</param>
-    /// <param name="maxDimension">Larger footprint dimension.</param>
     /// <param name="terrain">Terrain generation options.</param>
-    private static void NormalizeContinentalness(float[,] continentalness, SeededNoise warpNoise,
-        int width, int height, int maxDimension, TerrainOptions terrain)
+    private static void NormalizeAndStretch(float[,] continentalness, int width, int height,
+        TerrainOptions terrain)
     {
         var min = float.MaxValue;
         var max = float.MinValue;
@@ -160,7 +167,6 @@ public sealed class TerrainFieldStack
         }
 
         var range = System.MathF.Max(max - min, 1e-6f);
-        var edgeWavelength = terrain.ContinentalnessWavelengthFactor * maxDimension;
         var oceanThreshold = terrain.Thresholds.Ocean;
 
         System.Threading.Tasks.Parallel.For(0, height, y =>
@@ -168,9 +174,56 @@ public sealed class TerrainFieldStack
             for (var x = 0; x < width; ++x)
             {
                 var normalized = (continentalness[x, y] - min) / range;
-                var stretched = ContrastStretch(normalized, oceanThreshold);
+                continentalness[x, y] = ContrastStretch(normalized, oceanThreshold);
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Combines the layout mask into the normalized continentalness field additively, so
+    ///     that band thresholds keep their meaning and strength interpolates between no
+    ///     layout and mask-dominant.
+    /// </summary>
+    /// <param name="continentalness">Normalized continentalness field, updated in place.</param>
+    /// <param name="mask">Layout mask in [0, 1].</param>
+    /// <param name="strength">Layout strength in [0, 1].</param>
+    /// <param name="width">Field width.</param>
+    /// <param name="height">Field height.</param>
+    private static void ApplyMask(float[,] continentalness, float[,] mask, float strength,
+        int width, int height)
+    {
+        System.Threading.Tasks.Parallel.For(0, height, y =>
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                var value = continentalness[x, y] + strength * (mask[x, y] - 0.5f);
+                continentalness[x, y] = System.Math.Clamp(value, 0f, 1f);
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Applies an edge falloff so that the footprint border always trends below sea level.
+    ///     The falloff is applied after the layout mask so that no anchor can put land on the
+    ///     map border regardless of strength.
+    /// </summary>
+    /// <param name="continentalness">Continentalness field, updated in place.</param>
+    /// <param name="warpNoise">Noise source for the edge falloff.</param>
+    /// <param name="width">Field width.</param>
+    /// <param name="height">Field height.</param>
+    /// <param name="maxDimension">Larger footprint dimension.</param>
+    /// <param name="terrain">Terrain generation options.</param>
+    private static void ApplyEdgeFalloff(float[,] continentalness, SeededNoise warpNoise,
+        int width, int height, int maxDimension, TerrainOptions terrain)
+    {
+        var edgeWavelength = terrain.ContinentalnessWavelengthFactor * maxDimension;
+
+        System.Threading.Tasks.Parallel.For(0, height, y =>
+        {
+            for (var x = 0; x < width; ++x)
+            {
                 var falloff = EdgeFalloff(warpNoise, x, y, width, height, edgeWavelength);
-                var compressed = stretched * (1f - falloff) - falloff;
+                var compressed = continentalness[x, y] * (1f - falloff) - falloff;
                 continentalness[x, y] = System.Math.Clamp(compressed, 0f, 1f);
             }
         });
