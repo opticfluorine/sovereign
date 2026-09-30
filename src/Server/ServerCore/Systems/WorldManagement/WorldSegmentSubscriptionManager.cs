@@ -38,7 +38,7 @@ namespace Sovereign.ServerCore.Systems.WorldManagement;
 ///     which have gone out of range, followed by subscription to any world segments
 ///     which have come into range.
 /// </remarks>
-public class WorldSegmentSubscriptionManager : ISegmentSubscriptionProbe
+public class WorldSegmentSubscriptionManager
 {
     private const int DefaultSyncBufferSize = 128;
     private readonly WorldSegmentActivationManager activationManager;

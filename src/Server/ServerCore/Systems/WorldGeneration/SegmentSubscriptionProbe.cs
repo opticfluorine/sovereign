@@ -16,18 +16,29 @@
 
 using System.Collections.Generic;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.ServerCore.Systems.WorldManagement;
 
-namespace Sovereign.ServerCore.Systems.WorldManagement;
+namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
 /// <summary>
-///     Read-only probe of the player segment subscriptions maintained by world management.
+///     ISegmentSubscriptionProbe backed by the world management services API.
 /// </summary>
-public interface ISegmentSubscriptionProbe
+public sealed class SegmentSubscriptionProbe : ISegmentSubscriptionProbe
 {
+    private readonly WorldManagementServices worldManagementServices;
+
+    public SegmentSubscriptionProbe(WorldManagementServices worldManagementServices)
+    {
+        this.worldManagementServices = worldManagementServices;
+    }
+
     /// <summary>
     ///     Gets the players who are currently subscribed to the given world segment.
     /// </summary>
     /// <param name="segmentIndex">World segment index.</param>
     /// <returns>Set of players (possibly empty) subscribed to the world segment.</returns>
-    IReadOnlySet<ulong> GetSubscribersForWorldSegment(GridPosition segmentIndex);
+    public IReadOnlySet<ulong> GetSubscribersForWorldSegment(GridPosition segmentIndex)
+    {
+        return worldManagementServices.GetPlayersSubscribedToWorldSegment(segmentIndex);
+    }
 }
