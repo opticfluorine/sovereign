@@ -168,6 +168,8 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<BlockTemplateNameComponentIndexer>();
         services.TryAddSingleton<ItemTemplateNameComponentFilter>();
         services.TryAddSingleton<ItemTemplateNameComponentIndexer>();
+        services.TryAddSingleton<TemplateNameComponentFilter>();
+        services.TryAddSingleton<TemplateNameComponentIndexer>();
         services.TryAddSingleton<SlotComponentEventFilter>();
         services.TryAddSingleton<SlotIndexer>();
         services.TryAddSingleton<PlayerEquipmentIndexer>();

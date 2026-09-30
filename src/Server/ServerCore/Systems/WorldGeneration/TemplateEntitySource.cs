@@ -14,45 +14,30 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
-using Sovereign.EngineCore.Components;
-using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Components.Indexers;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
 /// <summary>
-///     Default IWorldGenTemplateSource, backed by the live template entities tracked by
-///     the entity table and the name component collection.
+///     Default IWorldGenTemplateSource, backed by the template name component indexer.
 /// </summary>
 public sealed class TemplateEntitySource : IWorldGenTemplateSource
 {
-    private readonly EntityTable entityTable;
-    private readonly NameComponentCollection names;
+    private readonly TemplateNameComponentIndexer templateNames;
 
-    public TemplateEntitySource(EntityTable entityTable, NameComponentCollection names)
+    public TemplateEntitySource(TemplateNameComponentIndexer templateNames)
     {
-        this.entityTable = entityTable;
-        this.names = names;
+        this.templateNames = templateNames;
     }
 
     /// <summary>
     ///     Gets every named template entity available for resolution.
     /// </summary>
-    /// <returns>Template names mapped to template entity IDs. Later duplicates of the
-    ///     same name (case-insensitively) overwrite earlier ones.</returns>
+    /// <returns>Template names mapped to template entity IDs; the lookup is
+    ///     case-insensitive.</returns>
     public IReadOnlyDictionary<string, ulong> GetNamedTemplates()
     {
-        var templates = new Dictionary<string, ulong>(StringComparer.Ordinal);
-        for (var id = EntityConstants.FirstTemplateEntityId;
-             id < entityTable.NextTemplateEntityId;
-             ++id)
-        {
-            if (!entityTable.Exists(id)) continue;
-            if (!names.HasComponentForEntity(id)) continue;
-            templates[names[id]] = id;
-        }
-
-        return templates;
+        return templateNames.EntitiesByName;
     }
 }
