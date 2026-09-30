@@ -181,7 +181,7 @@ public class TestWorldGenPlanJob
         var loader = new ProfileLoader(profileDirectory ??
             Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
         var runner = new WorldGenPlanJobRunner(system, services, pipeline, loader,
-            new ProfileValidator(), new WorldGenTemplateResolver(new FakeWorldGenTemplateSource()),
+            new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
             scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
         return (runner, system, services, sender);

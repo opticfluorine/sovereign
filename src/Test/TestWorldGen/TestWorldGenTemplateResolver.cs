@@ -16,13 +16,12 @@
 
 using System.Collections.Generic;
 using Sovereign.ServerCore.Systems.WorldGeneration;
-using Sovereign.WorldGen;
 using Xunit;
 
 namespace TestWorldGen;
 
 /// <summary>
-///     Tests of plan-time template resolution against a template source.
+///     Tests of plan-time template resolution against the template name indexer.
 /// </summary>
 public class TestWorldGenTemplateResolver
 {
@@ -30,7 +29,7 @@ public class TestWorldGenTemplateResolver
     public void Resolve_AllNamesPresent_ProducesIdsOnPlan()
     {
         var profile = TestProfiles.CreateSmall128Biomes();
-        var source = new DictionarySource(new Dictionary<string, ulong>
+        var templates = TestTemplateIndexers.Create(new Dictionary<string, ulong>
         {
             ["Bedrock"] = 0x7FFE000000000010,
             ["Water"] = 0x7FFE000000000001,
@@ -48,7 +47,7 @@ public class TestWorldGenTemplateResolver
             ["Acacia Tree"] = 0x7FFE000000000013,
             ["Dead Bush"] = 0x7FFE000000000017
         });
-        var resolver = new WorldGenTemplateResolver(source);
+        var resolver = new WorldGenTemplateResolver(templates);
 
         var resolved = resolver.Resolve(profile, "test");
 
@@ -64,7 +63,7 @@ public class TestWorldGenTemplateResolver
     {
         var profile = TestProfiles.CreateSmall128Biomes();
         profile.BedrockTemplate = "Missing Rock";
-        var source = new DictionarySource(new Dictionary<string, ulong>
+        var templates = TestTemplateIndexers.Create(new Dictionary<string, ulong>
         {
             ["Bedrock"] = 0x7FFE000000000010,
             ["Water"] = 0x7FFE000000000001,
@@ -77,7 +76,7 @@ public class TestWorldGenTemplateResolver
             ["Dirt"] = 0x7FFE000000000003
             // Decoration names deliberately missing.
         });
-        var resolver = new WorldGenTemplateResolver(source);
+        var resolver = new WorldGenTemplateResolver(templates);
 
         var exception = Assert.Throws<WorldGenTemplateResolutionException>(
             () => resolver.Resolve(profile, "test"));
@@ -97,7 +96,7 @@ public class TestWorldGenTemplateResolver
     public void Resolve_DuplicateNames_ResolvedOnce()
     {
         var profile = TestProfiles.CreateSmall128();
-        var source = new DictionarySource(new Dictionary<string, ulong>
+        var templates = TestTemplateIndexers.Create(new Dictionary<string, ulong>
         {
             ["Bedrock"] = 0x7FFE000000000010,
             ["Water"] = 0x7FFE000000000001,
@@ -105,25 +104,10 @@ public class TestWorldGenTemplateResolver
             ["Granite"] = 0x7FFE00000000000A,
             ["Basalt"] = 0x7FFE00000000000B
         });
-        var resolver = new WorldGenTemplateResolver(source);
+        var resolver = new WorldGenTemplateResolver(templates);
 
         var resolved = resolver.Resolve(profile, "test");
 
         Assert.Equal(5, resolved.IdsByName.Count);
-    }
-
-    /// <summary>
-    ///     Template source backed by a fixed dictionary.
-    /// </summary>
-    private sealed class DictionarySource : IWorldGenTemplateSource
-    {
-        private readonly IReadOnlyDictionary<string, ulong> templates;
-
-        public DictionarySource(IReadOnlyDictionary<string, ulong> templates)
-        {
-            this.templates = templates;
-        }
-
-        public IReadOnlyDictionary<string, ulong> GetNamedTemplates() => templates;
     }
 }

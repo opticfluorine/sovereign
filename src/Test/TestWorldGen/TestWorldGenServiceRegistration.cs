@@ -41,7 +41,6 @@ public class TestWorldGenServiceRegistration
         services.AddSovereignCore();
         services.AddSovereignServer();
         services.AddSovereignPersistence();
-        services.AddSingleton<IWorldGenTemplateSource>(new FakeWorldGenTemplateSource());
 
         using var provider = services.BuildServiceProvider();
 

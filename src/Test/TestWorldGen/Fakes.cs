@@ -17,7 +17,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Sovereign.EngineCore.Components;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.ServerCore.Systems.WorldGeneration;
@@ -222,20 +225,36 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
 }
 
 /// <summary>
-///     World generation pipeline test double that always throws.
+///     Builds populated template name indexers for tests.
 /// </summary>
-/// <summary>
-///     Template source with a fixed set of named templates covering the shipped default
-///     profile.
-/// </summary>
-internal sealed class FakeWorldGenTemplateSource : IWorldGenTemplateSource
+internal static class TestTemplateIndexers
 {
     /// <summary>
-    ///     Names available for resolution, mapped to sequential placeholder template IDs.
+    ///     Creates a populated template name indexer from the given name-to-ID map.
     /// </summary>
-    private static readonly Dictionary<string, ulong> Names = new(StringComparer.OrdinalIgnoreCase);
+    /// <param name="templates">Template names mapped to template entity IDs.</param>
+    /// <returns>Populated indexer.</returns>
+    public static TemplateNameComponentIndexer Create(IReadOnlyDictionary<string, ulong> templates)
+    {
+        var entityTable = new EntityTable();
+        var componentManager = new ComponentManager(new EntityNotifier());
+        var names = new NameComponentCollection(entityTable, componentManager);
+        var indexer = new TemplateNameComponentIndexer(names, new TemplateNameComponentFilter(names));
+        foreach (var (name, id) in templates)
+        {
+            names.AddComponent(id, name);
+        }
 
-    static FakeWorldGenTemplateSource()
+        names.ApplyComponentUpdates();
+        return indexer;
+    }
+
+    /// <summary>
+    ///     Creates an indexer covering the templates referenced by the shipped default
+    ///     profile.
+    /// </summary>
+    /// <returns>Populated indexer.</returns>
+    public static TemplateNameComponentIndexer CreateDefault()
     {
         var names = new[]
         {
@@ -243,13 +262,14 @@ internal sealed class FakeWorldGenTemplateSource : IWorldGenTemplateSource
             "Grass", "Dirt", "Sandstone", "Snow", "Oak Tree", "Pine Tree", "Cactus",
             "Acacia Tree", "Boulder", "Dead Bush"
         };
+        var templates = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
         for (var i = 0; i < names.Length; ++i)
         {
-            Names[names[i]] = 0x7FFE000000000000UL + (ulong)i;
+            templates[names[i]] = 0x7FFE000000000000UL + (ulong)i;
         }
-    }
 
-    public IReadOnlyDictionary<string, ulong> GetNamedTemplates() => Names;
+        return Create(templates);
+    }
 }
 
 /// <summary>
@@ -377,6 +397,9 @@ internal sealed class FakeSegmentSubscriptionProbe : ISegmentSubscriptionProbe
     }
 }
 
+/// <summary>
+///     World generation pipeline test double that always throws.
+/// </summary>
 internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
 {
     private readonly Exception exception;

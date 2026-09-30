@@ -200,7 +200,6 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldGenPlanJobRunner>();
         services.TryAddSingleton<WorldGenCommitRunner>();
         services.TryAddSingleton<WorldGenTemplateResolver>();
-        services.TryAddSingleton<IWorldGenTemplateSource, TemplateEntitySource>();
         services.TryAddSingleton<ISegmentSubscriptionProbe, SegmentSubscriptionProbe>();
         services.TryAddSingleton<WorldGenScratch>();
         services.TryAddSingleton<IWorldGenPipeline, WorldGenPipeline>();

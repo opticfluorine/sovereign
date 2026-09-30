@@ -17,22 +17,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineUtil.Collections;
 using Sovereign.WorldGen;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
-
-/// <summary>
-///     Source of the live named template entities used for plan-time template resolution.
-/// </summary>
-public interface IWorldGenTemplateSource
-{
-    /// <summary>
-    ///     Gets every named template entity available for resolution.
-    /// </summary>
-    /// <returns>Template names mapped to template entity IDs.</returns>
-    IReadOnlyDictionary<string, ulong> GetNamedTemplates();
-}
 
 /// <summary>
 ///     Resolves the template names referenced by a world generation profile against the
@@ -46,11 +35,11 @@ public sealed class WorldGenTemplateResolver
     /// </summary>
     public const string WaterTemplateName = "Water";
 
-    private readonly IWorldGenTemplateSource templateSource;
+    private readonly TemplateNameComponentIndexer templateNames;
 
-    public WorldGenTemplateResolver(IWorldGenTemplateSource templateSource)
+    public WorldGenTemplateResolver(TemplateNameComponentIndexer templateNames)
     {
-        this.templateSource = templateSource;
+        this.templateNames = templateNames;
     }
 
     /// <summary>
@@ -64,7 +53,7 @@ public sealed class WorldGenTemplateResolver
     public WorldGenResolvedTemplates Resolve(WorldGenProfile profile, string profileName)
     {
         var referenced = CollectReferencedNames(profile);
-        var available = AvailableTemplatesByName();
+        var available = templateNames.EntitiesByName;
         var resolved = new List<(string Name, ulong TemplateEntityId)>(referenced.Count);
         var missing = new List<string>();
 
@@ -130,20 +119,5 @@ public sealed class WorldGenTemplateResolver
     private static void AddName(LinkedHashSet<string> names, string? name)
     {
         if (!string.IsNullOrWhiteSpace(name)) names.Add(name!);
-    }
-
-    /// <summary>
-    ///     Builds the case-insensitive name-to-ID map of all named template entities.
-    /// </summary>
-    /// <returns>Map from lowercased template name to template entity ID.</returns>
-    private Dictionary<string, ulong> AvailableTemplatesByName()
-    {
-        var available = new Dictionary<string, ulong>(StringComparer.OrdinalIgnoreCase);
-        foreach (var (name, id) in templateSource.GetNamedTemplates())
-        {
-            available[name] = id;
-        }
-
-        return available;
     }
 }

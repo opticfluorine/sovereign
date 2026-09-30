@@ -244,7 +244,7 @@ public class TestWorldGenChatCommandHandler
         var services = new WorldGenerationServices(system);
         var loader = new ProfileLoader(Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
         var runner = new WorldGenPlanJobRunner(system, services, new StubWorldGenPipeline(), loader,
-            new ProfileValidator(), new WorldGenTemplateResolver(new FakeWorldGenTemplateSource()),
+            new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
             scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
         var commitRunner = CreateCommitRunner(system, services, scratch, sender);
