@@ -23,9 +23,14 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Output;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
+using Sovereign.ServerCore.Configuration;
 using Sovereign.WorldGen.Terrain;
 
 namespace TestWorldGen;
@@ -525,5 +530,94 @@ internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
         System.Threading.CancellationToken cancellationToken = default)
     {
         throw exception;
+    }
+}
+
+/// <summary>
+///     Constructs wired WorldGenerationSystem fixtures and routes controller events to
+///     them in tests.
+/// </summary>
+internal static class WorldGenFixture
+{
+    /// <summary>
+    ///     Builds a WorldGenerationSystem wired to the given job runners and scratch.
+    /// </summary>
+    /// <param name="stateManager">Job state manager.</param>
+    /// <param name="planRunner">Plan runner.</param>
+    /// <param name="commitRunner">Commit runner.</param>
+    /// <param name="scratch">Scratch resolver.</param>
+    /// <returns>Wired system.</returns>
+    public static WorldGenerationSystem BuildSystem(WorldGenStateManager stateManager,
+        WorldGenPlanJobRunner planRunner, WorldGenCommitRunner commitRunner, WorldGenScratch scratch)
+    {
+        return new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
+            stateManager, planRunner, commitRunner, scratch,
+            NullLogger<WorldGenerationSystem>.Instance);
+    }
+
+    /// <summary>
+    ///     Builds a profile-backed plan job runner with the given pipeline.
+    /// </summary>
+    /// <param name="stateManager">Job state manager.</param>
+    /// <param name="services">World generation services.</param>
+    /// <param name="pipeline">Pipeline test double.</param>
+    /// <param name="sender">Chat recording event sender.</param>
+    /// <param name="scratch">Scratch resolver.</param>
+    /// <param name="profileDirectory">Profile directory, or null for the shipped data.</param>
+    /// <returns>Plan runner.</returns>
+    public static WorldGenPlanJobRunner BuildPlanRunner(WorldGenStateManager stateManager,
+        WorldGenerationServices services, IWorldGenPipeline pipeline, FakeEventSender sender,
+        WorldGenScratch scratch, string? profileDirectory = null)
+    {
+        return new WorldGenPlanJobRunner(stateManager, services, pipeline,
+            new ProfileLoader(profileDirectory ??
+                Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen")),
+            new ProfileValidator(),
+            new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()), scratch,
+            new ServerChatInternalController(sender), NullLogger<WorldGenPlanJobRunner>.Instance);
+    }
+
+    /// <summary>
+    ///     Builds a commit runner backed by test doubles.
+    /// </summary>
+    /// <param name="stateManager">Job state manager.</param>
+    /// <param name="services">World generation services.</param>
+    /// <param name="scratch">Scratch resolver.</param>
+    /// <param name="sender">Recording event sender.</param>
+    /// <param name="registry">Registry store fake, or null for a fresh fake.</param>
+    /// <param name="writer">Commit writer test double, or null for a fresh fake.</param>
+    /// <returns>Commit runner.</returns>
+    public static WorldGenCommitRunner BuildCommitRunner(WorldGenStateManager stateManager,
+        WorldGenerationServices services, WorldGenScratch scratch, FakeEventSender sender,
+        FakeWorldGenRegistryStore? registry = null, IWorldGenCommitWriter? writer = null)
+    {
+        return new WorldGenCommitRunner(stateManager, services, scratch,
+            registry ?? new FakeWorldGenRegistryStore(), writer ?? new FakeWorldGenCommitWriter(),
+            new FakeSegmentSubscriptionProbe(), new WorldManagementController(), sender,
+            new ServerChatInternalController(sender), Options.Create(new WorldGenOptions()),
+            NullLogger<WorldGenCommitRunner>.Instance);
+    }
+
+    /// <summary>
+    ///     Delivers the worldgen controller events recorded by the sender to the system's
+    ///     incoming queue, clears them, and runs one execution pass of the system.
+    /// </summary>
+    /// <param name="system">System to feed.</param>
+    /// <param name="sender">Event sender the controller used.</param>
+    public static void Pump(WorldGenerationSystem system, FakeEventSender sender)
+    {
+        foreach (var ev in sender.SentEvents)
+        {
+            if (ev.EventId is EventId.Server_WorldGen_Plan
+                or EventId.Server_WorldGen_Commit
+                or EventId.Server_WorldGen_Replace
+                or EventId.Server_WorldGen_Abort)
+            {
+                system.EventCommunicator.SendEventToSystem(ev);
+            }
+        }
+
+        sender.Reset();
+        system.ExecuteOnce();
     }
 }

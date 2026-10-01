@@ -854,5 +854,34 @@ public enum EventId
 
     #endregion Server_Chat
 
+    #region Server_WorldGen
+
+    /// <summary>
+    ///     Requests that the WorldGeneration system compute a new world generation plan.
+    /// </summary>
+    /// Associated details: WorldGenPlanEventDetails
+    Server_WorldGen_Plan = 200900,
+
+    /// <summary>
+    ///     Requests that the WorldGeneration system commit the staged world generation plan.
+    /// </summary>
+    /// Associated details: WorldGenCommitEventDetails
+    Server_WorldGen_Commit = 200901,
+
+    /// <summary>
+    ///     Requests that the WorldGeneration system commit its staged plan, replacing a
+    ///     registered world whose footprint it fully contains.
+    /// </summary>
+    /// Associated details: WorldGenReplaceEventDetails
+    Server_WorldGen_Replace = 200902,
+
+    /// <summary>
+    ///     Requests that the WorldGeneration system abort the running job.
+    /// </summary>
+    /// Associated details: None
+    Server_WorldGen_Abort = 200903,
+
+    #endregion Server_WorldGen
+
     #endregion Server
 }

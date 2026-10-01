@@ -51,9 +51,9 @@ public class TestWorldGenPlanJob
         runner.BeginPlan(12345, "default", null, SenderEntityId);
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         Assert.Equal(new[] { "Terrain", "Hydrology", "Preview", "Assembly" }, pipeline.SeenPhases);
-        Assert.Equal("Plan complete", system.LastStatusMessage);
+        Assert.Equal("Plan complete", services.LastStatusMessage);
         Assert.NotNull(services.LastCompletedPlan);
         Assert.Equal(12345UL, services.LastCompletedPlan!.Seed);
         Assert.Contains(SentMessages(sender), m => m.Contains("World generation started"));
@@ -63,13 +63,13 @@ public class TestWorldGenPlanJob
     [Fact]
     public void BeginPlan_PipelineFailure_ReturnsToIdleWithErrorReply()
     {
-        var (runner, system, _, sender) = CreateRunner(
+        var (runner, system, services, sender) = CreateRunner(
             new ThrowingWorldGenPipeline(new InvalidOperationException("boom")));
 
         runner.BeginPlan(999, "default", null, SenderEntityId);
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "failure handling");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "failure handling");
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         var messages = SentMessages(sender);
         Assert.Contains(messages, m => m.Contains("failed"));
         Assert.Contains(messages, m => m.Contains("boom"));
@@ -78,14 +78,14 @@ public class TestWorldGenPlanJob
     [Fact]
     public void BeginPlan_StrictLayoutFailure_ReturnsToIdleWithConsolidatedMessage()
     {
-        var (runner, system, _, sender) = CreateRunner(new ThrowingWorldGenPipeline(
+        var (runner, system, services, sender) = CreateRunner(new ThrowingWorldGenPipeline(
             new LayoutValidationException(
                 "layout validation failed after 3 attempt(s); unmatched anchors: #1 (0.02, 0.02).")));
 
         runner.BeginPlan(999, "default", null, SenderEntityId);
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "strict failure handling");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "strict failure handling");
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         var messages = SentMessages(sender);
         Assert.Contains(messages, m => m.Contains("layout validation failed"));
         Assert.Contains(messages, m => m.Contains("#1"));
@@ -96,25 +96,25 @@ public class TestWorldGenPlanJob
     {
         var gate = new ManualResetEventSlim(false);
         var pipeline = new StubWorldGenPipeline { Gate = gate };
-        var (runner, system, _, sender) = CreateRunner(pipeline);
+        var (runner, system, services, sender) = CreateRunner(pipeline);
 
         runner.BeginPlan(1, "default", null, SenderEntityId);
         try
         {
-            WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Planning && pipeline.Started,
+            WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Planning && pipeline.Started,
                 "job start");
 
             runner.BeginPlan(2, "default", null, SenderEntityId);
 
             Assert.Contains(SentMessages(sender), m => m.Contains("already running"));
-            Assert.Equal(WorldGenerationJobStatus.Planning, system.JobStatus);
+            Assert.Equal(WorldGenerationJobStatus.Planning, services.JobStatus);
         }
         finally
         {
             gate.Set();
         }
 
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "job completion");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "job completion");
     }
 
     [Fact]
@@ -131,13 +131,13 @@ public class TestWorldGenPlanJob
   ""bedrockTemplate"": ""Bedrock"",
   ""stoneBands"": []
 }");
-        var (runner, system, _, sender) = CreateRunner(
+        var (runner, system, services, sender) = CreateRunner(
             new ThrowingWorldGenPipeline(new InvalidOperationException("should not run")),
             scope.DirectoryPath);
 
         runner.BeginPlan(1, "broken", null, SenderEntityId);
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         var messages = SentMessages(sender);
         Assert.Contains(messages, m => m.Contains("Profile error"));
         Assert.Contains(messages, m => m.Contains("aborted"));
@@ -165,19 +165,19 @@ public class TestWorldGenPlanJob
         runner.BeginPlan(1, "warned", null, SenderEntityId);
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         Assert.Contains(SentMessages(sender), m => m.Contains("Profile warning"));
     }
 
     [Fact]
     public void BeginPlan_ProfileLoadFailure_RepliesErrorAndReturnsToIdle()
     {
-        var (runner, system, _, sender) = CreateRunner(
+        var (runner, system, services, sender) = CreateRunner(
             new ThrowingWorldGenPipeline(new InvalidOperationException("should not run")));
 
         runner.BeginPlan(1, "nonexistent-profile", null, SenderEntityId);
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         Assert.Contains(SentMessages(sender), m => m.Contains("Worldgen plan failed"));
     }
 
@@ -192,15 +192,12 @@ public class TestWorldGenPlanJob
     {
         var sender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            scratch, NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
-        var loader = new ProfileLoader(profileDirectory ??
-            Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
-        var runner = new WorldGenPlanJobRunner(system, services, pipeline, loader,
-            new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
-            scratch, new ServerChatInternalController(sender),
-            NullLogger<WorldGenPlanJobRunner>.Instance);
+        var stateManager = new WorldGenStateManager(NullLogger<WorldGenStateManager>.Instance);
+        var services = new WorldGenerationServices(stateManager);
+        var runner = WorldGenFixture.BuildPlanRunner(stateManager, services, pipeline, sender,
+            scratch, profileDirectory);
+        var system = WorldGenFixture.BuildSystem(stateManager, runner,
+            WorldGenFixture.BuildCommitRunner(stateManager, services, scratch, sender), scratch);
         return (runner, system, services, sender);
     }
 

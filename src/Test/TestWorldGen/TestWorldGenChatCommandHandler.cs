@@ -44,7 +44,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Status_WhenIdle_ReportsIdle()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("status", SenderEntityId);
 
@@ -54,8 +54,8 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Status_ReportsRunningPhase()
     {
-        var (handler, sender, system, _) = CreateHandler();
-        system.SetJobStatus(WorldGenerationJobStatus.Planning, "Terrain: shaping surface");
+        var (handler, sender, jobSender, system, stateManager, services) = CreateHandler();
+        stateManager.SetJobStatus(WorldGenerationJobStatus.Planning, "Terrain: shaping surface");
 
         handler.Handle("status", SenderEntityId);
 
@@ -67,9 +67,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Plan_StartsJob()
     {
-        var (handler, sender, _, services) = CreateHandler();
+        var (handler, sender, jobSender, system, _, services) = CreateHandler();
 
         handler.Handle("plan 1", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
 
         Assert.Contains(SentMessages(sender), m => m.Contains("World generation started"));
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
@@ -79,9 +80,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Plan_WithOptions_ParsesAndStartsJob()
     {
-        var (handler, sender, _, services) = CreateHandler();
+        var (handler, sender, jobSender, system, _, services) = CreateHandler();
 
         handler.Handle("plan 42 --profile default --at 10,-20", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
 
         Assert.Contains(SentMessages(sender), m => m.Contains("World generation started"));
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
@@ -92,9 +94,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Plan_UnknownProfile_ReportsFailure()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, jobSender, system, _, _) = CreateHandler();
 
         handler.Handle("plan 1 --profile no-such-profile", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
 
         Assert.Contains(SentMessages(sender), m => m.Contains("Worldgen plan failed"));
     }
@@ -102,7 +105,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Plan_MissingSeed_ReportsUsage()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("plan", SenderEntityId);
 
@@ -112,7 +115,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Plan_BadAtOption_ReportsUsage()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("plan 1 --at bogus", SenderEntityId);
 
@@ -122,9 +125,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Commit_WithoutPlan_ReportsNoStagedPlan()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, jobSender, system, _, _) = CreateHandler();
 
         handler.Handle("commit", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
 
         Assert.Contains("No staged world generation plan", GetSingleSystemMessage(sender),
             StringComparison.Ordinal);
@@ -133,9 +137,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Commit_WithSeedWithoutPlan_ReportsNoStagedPlan()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, jobSender, system, _, _) = CreateHandler();
 
         handler.Handle("commit 7", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
 
         Assert.Contains("No staged world generation plan", GetSingleSystemMessage(sender),
             StringComparison.Ordinal);
@@ -144,7 +149,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Commit_BadSeed_ReportsUsage()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("commit xyz", SenderEntityId);
 
@@ -154,7 +159,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Preview_WithoutPlan_ReportsError()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("preview", SenderEntityId);
 
@@ -165,9 +170,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Preview_AfterPlan_ReportsPreviewPath()
     {
-        var (handler, sender, _, services) = CreateHandler();
+        var (handler, sender, jobSender, system, _, services) = CreateHandler();
 
         handler.Handle("plan 1", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
         WaitUntil(() => services.LastCompletedPlan is not null, "plan completion");
         sender.Reset();
 
@@ -180,9 +186,10 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Replace_WithoutPlan_ReportsNoStagedPlan()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, jobSender, system, _, _) = CreateHandler();
 
         handler.Handle("replace 1 2", SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
 
         Assert.Contains("No staged world generation plan", GetSingleSystemMessage(sender),
             StringComparison.Ordinal);
@@ -191,7 +198,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Replace_BadArgs_ReportsUsage()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("replace 1", SenderEntityId);
 
@@ -201,7 +208,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_Abort_WhenIdle_ReportsNoJob()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("abort", SenderEntityId);
 
@@ -213,29 +220,30 @@ public class TestWorldGenChatCommandHandler
     public void Handle_Abort_WhileRunning_RequestsCancellation()
     {
         var gate = new ManualResetEventSlim(false);
-        var (handler, sender, system, _) = CreateHandler(gate);
+        var (handler, sender, jobSender, system, stateManager, services) = CreateHandler(gate);
 
         handler.Handle("plan 12345", SenderEntityId);
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Planning, "job start");
+        WorldGenFixture.Pump(system, jobSender);
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Planning, "job start");
 
         handler.Handle("abort", SenderEntityId);
-
+        WorldGenFixture.Pump(system, jobSender);
         Assert.Contains(SentMessages(sender),
             m => m.Contains("Cancellation requested", StringComparison.Ordinal));
-        Assert.Equal(WorldGenerationJobStatus.Cancelling, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Cancelling, services.JobStatus);
 
         handler.Handle("abort", SenderEntityId);
         Assert.Contains(SentMessages(sender),
-            m => m.Contains("already requested", StringComparison.Ordinal));
+            m => m.Contains("Cancellation requested", StringComparison.Ordinal));
 
         gate.Set();
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "job completion");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "job completion");
     }
 
     [Fact]
     public void Handle_UnknownSubcommand_ReportsUsage()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("bogus", SenderEntityId);
 
@@ -245,7 +253,7 @@ public class TestWorldGenChatCommandHandler
     [Fact]
     public void Handle_EmptyMessage_ReportsUsage()
     {
-        var (handler, sender, _, _) = CreateHandler();
+        var (handler, sender, _, _, _, _) = CreateHandler();
 
         handler.Handle("   ", SenderEntityId);
 
@@ -255,46 +263,30 @@ public class TestWorldGenChatCommandHandler
     /// <summary>
     ///     Creates a handler backed by a real system and job runner with a stub pipeline.
     /// </summary>
-    /// <returns>Handler, recording event sender, the job slot system, and the services.</returns>
+    /// <returns>Handler, recording chat sender, the controller event sender, the job slot
+    ///     system, the state manager, and the services.</returns>
     private static (WorldGenChatCommandHandler Handler, FakeEventSender Sender,
-        WorldGenerationSystem System, WorldGenerationServices Services) CreateHandler(
-        ManualResetEventSlim? gate = null)
+        FakeEventSender JobSender, WorldGenerationSystem System, WorldGenStateManager StateManager,
+        WorldGenerationServices Services) CreateHandler(ManualResetEventSlim? gate = null)
     {
         var sender = new FakeEventSender();
+        var jobSender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            scratch, NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
+        var stateManager = new WorldGenStateManager(NullLogger<WorldGenStateManager>.Instance);
+        var services = new WorldGenerationServices(stateManager);
         var loader = new ProfileLoader(Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
-        var runner = new WorldGenPlanJobRunner(system, services,
+        var runner = new WorldGenPlanJobRunner(stateManager, services,
             new StubWorldGenPipeline { Gate = gate }, loader,
             new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
             scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
-        var commitRunner = CreateCommitRunner(system, services, scratch, sender);
+        var commitRunner = WorldGenFixture.BuildCommitRunner(stateManager, services, scratch, sender);
+        var system = WorldGenFixture.BuildSystem(stateManager, runner, commitRunner, scratch);
         var handler = new WorldGenChatCommandHandler(
-            new WorldGenerationController(runner, commitRunner, services), services,
-            new ServerChatInternalController(sender));
+            new WorldGenerationController(), services,
+            new ServerChatInternalController(sender), jobSender);
 
-        return (handler, sender, system, services);
-    }
-
-    /// <summary>
-    ///     Creates a commit runner backed by test doubles.
-    /// </summary>
-    /// <param name="system">Job slot system.</param>
-    /// <param name="services">World generation services.</param>
-    /// <param name="scratch">Scratch resolver.</param>
-    /// <param name="sender">Recording event sender.</param>
-    /// <returns>Commit runner.</returns>
-    private static WorldGenCommitRunner CreateCommitRunner(WorldGenerationSystem system,
-        WorldGenerationServices services, WorldGenScratch scratch, FakeEventSender sender)
-    {
-        return new WorldGenCommitRunner(system, services, scratch,
-            new FakeWorldGenRegistryStore(), new FakeWorldGenCommitWriter(),
-            new FakeSegmentSubscriptionProbe(), new WorldManagementController(), sender,
-            new ServerChatInternalController(sender), Options.Create(new WorldGenOptions()),
-            NullLogger<WorldGenCommitRunner>.Instance);
+        return (handler, sender, jobSender, system, stateManager, services);
     }
 
     /// <summary>

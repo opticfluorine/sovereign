@@ -41,7 +41,7 @@ namespace Sovereign.ServerCore.Systems.WorldGeneration;
 /// </summary>
 public sealed class WorldGenCommitRunner
 {
-    private readonly WorldGenerationSystem system;
+    private readonly WorldGenStateManager stateManager;
     private readonly WorldGenerationServices services;
     private readonly WorldGenScratch scratch;
     private readonly IWorldGenWorldRegistryStore registryStore;
@@ -55,14 +55,14 @@ public sealed class WorldGenCommitRunner
 
     private readonly object jobLock = new();
 
-    public WorldGenCommitRunner(WorldGenerationSystem system, WorldGenerationServices services,
+    public WorldGenCommitRunner(WorldGenStateManager stateManager, WorldGenerationServices services,
         WorldGenScratch scratch, IWorldGenWorldRegistryStore registryStore,
         IWorldGenCommitWriter writer, ISegmentSubscriptionProbe subscriptionProbe,
         WorldManagementController worldController, IEventSender eventSender,
         ServerChatInternalController chat, IOptions<WorldGenOptions> options,
         ILogger<WorldGenCommitRunner> logger)
     {
-        this.system = system;
+        this.stateManager = stateManager;
         this.services = services;
         this.scratch = scratch;
         this.registryStore = registryStore;
@@ -155,7 +155,7 @@ public sealed class WorldGenCommitRunner
     {
         lock (jobLock)
         {
-            if (system.JobStatus != WorldGenerationJobStatus.Idle)
+            if (stateManager.JobStatus != WorldGenerationJobStatus.Idle)
             {
                 chat.SendSystemMessage(
                     "A world generation job is already running; use /worldgen status for progress.",
@@ -186,12 +186,12 @@ public sealed class WorldGenCommitRunner
             var forceNote = subscriberCount > 0
                 ? $" {subscriberCount} subscribed player(s) inside the footprint were overridden."
                 : "";
-            system.BeginJob(WorldGenerationJobStatus.Committing, "commit starting");
+            stateManager.BeginJob(WorldGenerationJobStatus.Committing, "commit starting");
             chat.SendSystemMessage(
                 $"World generation {verb} started: seed {plan.Seed}, footprint {width}x{height} " +
                 $"at ({plan.OriginX}, {plan.OriginY}).{replaceNote}{forceNote}", senderEntityId);
 
-            var token = system.JobCancellationToken;
+            var token = stateManager.JobCancellationToken;
             Task.Run(() => RunCommit(plan, replacedWorld, senderEntityId, token));
         }
     }
@@ -208,7 +208,7 @@ public sealed class WorldGenCommitRunner
     {
         try
         {
-            var progressChat = new ProgressChat(system, chat, senderEntityId);
+            var progressChat = new ProgressChat(stateManager, chat, senderEntityId);
             var stats = writer.Execute(new WorldGenCommitRequest
             {
                 StagingDirectory = plan.StagingDirectory,
@@ -235,7 +235,7 @@ public sealed class WorldGenCommitRunner
             worldController.UnloadWorldSegments(eventSender, FootprintSegments(plan).ToList());
             scratch.DeleteSessionDirectory(plan.StagingDirectory);
 
-            system.EndJob("Commit complete");
+            stateManager.EndJob("Commit complete");
             chat.SendSystemMessage(
                 $"World generation committed: seed {plan.Seed}; {stats.SegmentsWritten} " +
                 $"segments written, {stats.DecorationsCreated} decorations created" +
@@ -246,10 +246,10 @@ public sealed class WorldGenCommitRunner
         }
         catch (OperationCanceledException)
         {
-            var phase = system.LastStatusMessage ?? "commit";
+            var phase = stateManager.LastStatusMessage ?? "commit";
             logger.LogInformation("World generation commit aborted at {Phase} (seed {Seed}).",
                 phase, plan.Seed);
-            system.EndJob($"Commit aborted at {phase}");
+            stateManager.EndJob($"Commit aborted at {phase}");
             chat.SendSystemMessage(
                 $"World generation commit aborted at {phase}; the batched writes are " +
                 "idempotent, so re-run /worldgen commit to finish.", senderEntityId);
@@ -257,7 +257,7 @@ public sealed class WorldGenCommitRunner
         catch (Exception e)
         {
             logger.LogError(e, "World generation commit failed (seed {Seed}).", plan.Seed);
-            system.EndJob($"Commit failed: {e.Message}");
+            stateManager.EndJob($"Commit failed: {e.Message}");
             chat.SendSystemMessage($"World generation commit failed: {e.Message}", senderEntityId);
         }
     }
@@ -275,7 +275,7 @@ public sealed class WorldGenCommitRunner
     {
         lock (jobLock)
         {
-            if (system.JobStatus != WorldGenerationJobStatus.Idle)
+            if (stateManager.JobStatus != WorldGenerationJobStatus.Idle)
             {
                 chat.SendSystemMessage(
                     "A world generation job is already running; use /worldgen status for progress.",
@@ -329,7 +329,7 @@ public sealed class WorldGenCommitRunner
     /// <param name="message">Refusal reason.</param>
     private void Refuse(ulong senderEntityId, string message)
     {
-        system.EndJob("Commit refused");
+        stateManager.EndJob("Commit refused");
         chat.SendSystemMessage(message, senderEntityId);
     }
 
@@ -399,17 +399,17 @@ public sealed class WorldGenCommitRunner
     /// </summary>
     private sealed class ProgressChat
     {
-        private readonly WorldGenerationSystem system;
+        private readonly WorldGenStateManager stateManager;
         private readonly ServerChatInternalController chat;
         private readonly ulong senderEntityId;
         private readonly Stopwatch clock = Stopwatch.StartNew();
         private string phase = "starting";
         private int lastMilestone;
 
-        public ProgressChat(WorldGenerationSystem system, ServerChatInternalController chat,
+        public ProgressChat(WorldGenStateManager stateManager, ServerChatInternalController chat,
             ulong senderEntityId)
         {
-            this.system = system;
+            this.stateManager = stateManager;
             this.chat = chat;
             this.senderEntityId = senderEntityId;
         }
@@ -423,9 +423,9 @@ public sealed class WorldGenCommitRunner
             this.phase = phase;
             // Do not stomp a settling slot: after a cancel request (or settlement) the job
             // must not be reported back as actively committing.
-            if (system.JobStatus is WorldGenerationJobStatus.Idle
+            if (stateManager.JobStatus is WorldGenerationJobStatus.Idle
                 or WorldGenerationJobStatus.Cancelling) return;
-            system.SetJobStatus(WorldGenerationJobStatus.Committing, $"commit {phase}");
+            stateManager.SetJobStatus(WorldGenerationJobStatus.Committing, $"commit {phase}");
         }
 
         /// <summary>
@@ -438,12 +438,12 @@ public sealed class WorldGenCommitRunner
             if (totalBatches <= 0) return;
 
             // Same rule as OnPhase: never resurrect a settling slot.
-            var status = system.JobStatus;
+            var status = stateManager.JobStatus;
             if (status is WorldGenerationJobStatus.Idle
                 or WorldGenerationJobStatus.Cancelling) return;
 
             var percent = completedBatches * 100 / totalBatches;
-            system.SetJobStatus(WorldGenerationJobStatus.Committing,
+            stateManager.SetJobStatus(WorldGenerationJobStatus.Committing,
                 $"commit {percent}% ({phase})");
             var milestone = percent / 25;
             if (milestone > lastMilestone && percent < 100)

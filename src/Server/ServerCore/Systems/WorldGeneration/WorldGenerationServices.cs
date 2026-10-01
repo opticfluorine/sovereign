@@ -23,22 +23,22 @@ namespace Sovereign.ServerCore.Systems.WorldGeneration;
 /// </summary>
 public class WorldGenerationServices
 {
-    private readonly WorldGenerationSystem system;
+    private readonly WorldGenStateManager stateManager;
 
-    public WorldGenerationServices(WorldGenerationSystem system)
+    public WorldGenerationServices(WorldGenStateManager stateManager)
     {
-        this.system = system;
+        this.stateManager = stateManager;
     }
 
     /// <summary>
     ///     Gets the status of the single world generation job slot.
     /// </summary>
-    public WorldGenerationJobStatus JobStatus => system.JobStatus;
+    public WorldGenerationJobStatus JobStatus => stateManager.JobStatus;
 
     /// <summary>
     ///     Gets the last human-readable status message reported for the job slot.
     /// </summary>
-    public string? LastStatusMessage => system.LastStatusMessage;
+    public string? LastStatusMessage => stateManager.LastStatusMessage;
 
     /// <summary>
     ///     Gets the last plan completed in this server session, or null if none has completed.
@@ -52,22 +52,5 @@ public class WorldGenerationServices
     public void RecordCompletedPlan(WorldGenPlan plan)
     {
         LastCompletedPlan = plan;
-    }
-
-    /// <summary>
-    ///     Requests that the running world generation job be aborted.
-    /// </summary>
-    /// <returns>Outcome of the request.</returns>
-    public WorldGenAbortOutcome RequestAbort()
-    {
-        if (JobStatus == WorldGenerationJobStatus.Idle) return WorldGenAbortOutcome.NotRunning;
-        if (JobStatus == WorldGenerationJobStatus.Cancelling || system.IsCancelling)
-        {
-            return WorldGenAbortOutcome.AlreadyRequested;
-        }
-
-        return system.RequestCancellation("Cancellation requested")
-            ? WorldGenAbortOutcome.Requested
-            : WorldGenAbortOutcome.NotRunning;
     }
 }

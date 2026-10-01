@@ -17,6 +17,7 @@
 using System;
 using System.Globalization;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Events;
 using Sovereign.ServerCore.Systems.ServerChat;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
@@ -94,13 +95,16 @@ public sealed class WorldGenChatCommandHandler
     private readonly WorldGenerationController controller;
     private readonly WorldGenerationServices services;
     private readonly ServerChatInternalController internalController;
+    private readonly IEventSender eventSender;
 
     public WorldGenChatCommandHandler(WorldGenerationController controller,
-        WorldGenerationServices services, ServerChatInternalController internalController)
+        WorldGenerationServices services, ServerChatInternalController internalController,
+        IEventSender eventSender)
     {
         this.controller = controller;
         this.services = services;
         this.internalController = internalController;
+        this.eventSender = eventSender;
     }
 
     /// <summary>
@@ -185,7 +189,7 @@ public sealed class WorldGenChatCommandHandler
             }
         }
 
-        controller.Plan(seed, profileName, origin, senderEntityId);
+        controller.Plan(eventSender, seed, profileName, origin, senderEntityId);
     }
 
     /// <summary>
@@ -242,7 +246,7 @@ public sealed class WorldGenChatCommandHandler
             }
         }
 
-        controller.Commit(seed, force, senderEntityId);
+        controller.Commit(eventSender, seed, force, senderEntityId);
     }
 
     /// <summary>
@@ -271,7 +275,7 @@ public sealed class WorldGenChatCommandHandler
             force = true;
         }
 
-        controller.Replace(stagedSeed, oldSeed, force, senderEntityId);
+        controller.Replace(eventSender, stagedSeed, oldSeed, force, senderEntityId);
     }
 
     /// <summary>
@@ -280,15 +284,16 @@ public sealed class WorldGenChatCommandHandler
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnAbort(ulong senderEntityId)
     {
-        var reply = controller.Abort() switch
+        if (services.JobStatus == WorldGenerationJobStatus.Idle)
         {
-            WorldGenAbortOutcome.Requested =>
-                "Cancellation requested; the job will stop at its next checkpoint.",
-            WorldGenAbortOutcome.AlreadyRequested =>
-                "Cancellation was already requested; waiting for the job to unwind.",
-            _ => "No world generation job is running; it may have already completed."
-        };
-        internalController.SendSystemMessage(reply, senderEntityId);
+            internalController.SendSystemMessage(
+                "No world generation job is running; it may have already completed.", senderEntityId);
+            return;
+        }
+
+        controller.Abort(eventSender);
+        internalController.SendSystemMessage(
+            "Cancellation requested; the job will stop at its next checkpoint.", senderEntityId);
     }
 
     /// <summary>

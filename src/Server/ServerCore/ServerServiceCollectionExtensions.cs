@@ -196,6 +196,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldGenerationSystem>();
         services.TryAddSingleton<WorldGenerationServices>();
         services.TryAddSingleton<WorldGenerationController>();
+        services.TryAddSingleton<WorldGenStateManager>();
         services.TryAddSingleton<WorldGenChatCommandHandler>();
         services.TryAddSingleton<WorldGenPlanJobRunner>();
         services.TryAddSingleton<WorldGenCommitRunner>();

@@ -65,7 +65,7 @@ public class TestWorldGenCommitRunner : IDisposable
 
         Assert.Contains("No staged world generation plan",
             SingleMessage(fixture.Sender), StringComparison.Ordinal);
-        Assert.Equal(WorldGenerationJobStatus.Idle, fixture.System.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, fixture.Services.JobStatus);
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class TestWorldGenCommitRunner : IDisposable
         Assert.Contains("(0, 0, 0)", message);
         Assert.Contains("--force", message);
         Assert.Empty(fixture.Writer.Requests);
-        Assert.Equal(WorldGenerationJobStatus.Idle, fixture.System.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, fixture.Services.JobStatus);
     }
 
     [Fact]
@@ -137,7 +137,7 @@ public class TestWorldGenCommitRunner : IDisposable
         fixture.Subscriptions.Subscribe(new GridPosition { X = 0, Y = 0, Z = 0 }, 1000);
 
         fixture.Runner.BeginCommit(null, force: true, SenderEntityId);
-        await WaitUntil(() => fixture.System.JobStatus == WorldGenerationJobStatus.Idle,
+        await WaitUntil(() => fixture.Services.JobStatus == WorldGenerationJobStatus.Idle,
             "commit completion");
 
         var messages = SentMessages(fixture.Sender);
@@ -154,7 +154,7 @@ public class TestWorldGenCommitRunner : IDisposable
 
         fixture.Runner.BeginCommit(7, force: false, SenderEntityId);
 
-        await WaitUntil(() => fixture.System.JobStatus == WorldGenerationJobStatus.Idle,
+        await WaitUntil(() => fixture.Services.JobStatus == WorldGenerationJobStatus.Idle,
             "commit completion");
 
         var world = Assert.Single(fixture.Registry.Worlds);
@@ -183,7 +183,7 @@ public class TestWorldGenCommitRunner : IDisposable
         Assert.NotNull(request.ReplaceWorld);
         Assert.Equal((ulong)99, request.ReplaceWorld.Seed);
 
-        await WaitUntil(() => fixture.System.JobStatus == WorldGenerationJobStatus.Idle,
+        await WaitUntil(() => fixture.Services.JobStatus == WorldGenerationJobStatus.Idle,
             "replace completion");
         Assert.Equal((ulong)99, fixture.Registry.Worlds[0].Seed);
         Assert.Equal(2, fixture.Registry.Worlds.Count);
@@ -218,7 +218,7 @@ public class TestWorldGenCommitRunner : IDisposable
     public void Commit_WhileJobRunning_IsRefused()
     {
         var fixture = CreateFixture();
-        fixture.System.SetJobStatus(WorldGenerationJobStatus.Planning, "busy");
+        fixture.StateManager.SetJobStatus(WorldGenerationJobStatus.Planning, "busy");
 
         fixture.Runner.BeginCommit(null, force: false, SenderEntityId);
 
@@ -235,18 +235,21 @@ public class TestWorldGenCommitRunner : IDisposable
     {
         var sender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            scratch, NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
+        var stateManager = new WorldGenStateManager(NullLogger<WorldGenStateManager>.Instance);
+        var services = new WorldGenerationServices(stateManager);
         var registry = new FakeWorldGenRegistryStore();
         var writer = new FakeWorldGenCommitWriter();
         var subscriptions = new FakeSegmentSubscriptionProbe();
-        var runner = new WorldGenCommitRunner(system, services, scratch, registry, writer,
+        var runner = new WorldGenCommitRunner(stateManager, services, scratch, registry, writer,
             subscriptions, new WorldManagementController(), sender,
             new ServerChatInternalController(sender), Options.Create(new WorldGenOptions()),
             NullLogger<WorldGenCommitRunner>.Instance);
-        return new CommitFixture(runner, system, services, sender, registry, writer,
-            subscriptions);
+        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
+            stateManager, WorldGenFixture.BuildPlanRunner(stateManager, services,
+                new StubWorldGenPipeline(), sender, scratch), runner, scratch,
+            NullLogger<WorldGenerationSystem>.Instance);
+        return new CommitFixture(runner, system, services, stateManager, sender, registry,
+            writer, subscriptions);
     }
 
     /// <summary>
@@ -404,7 +407,8 @@ public class TestWorldGenCommitRunner : IDisposable
     /// <param name="Writer">Writer fake.</param>
     /// <param name="Subscriptions">Subscription fake.</param>
     private sealed record CommitFixture(WorldGenCommitRunner Runner,
-        WorldGenerationSystem System, WorldGenerationServices Services, FakeEventSender Sender,
+        WorldGenerationSystem System, WorldGenerationServices Services,
+        WorldGenStateManager StateManager, FakeEventSender Sender,
         FakeWorldGenRegistryStore Registry, FakeWorldGenCommitWriter Writer,
         FakeSegmentSubscriptionProbe Subscriptions);
 }
