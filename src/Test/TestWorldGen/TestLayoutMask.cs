@@ -339,7 +339,7 @@ public class TestLayoutMask
         var plain = TerrainShapeStage.BuildMountainMask(fields, continentalness,
             profile.Width, profile.Height, null);
         var biased = TerrainShapeStage.BuildMountainMask(fields, continentalness,
-            profile.Width, profile.Height, bias);
+            profile.Width, profile.Height, bias, layout.Anchors);
 
         Assert.True(Sum(biased) > Sum(plain),
             "A positive mountain bias should mask in more mountain cells.");

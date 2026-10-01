@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Noise;
@@ -77,10 +78,12 @@ public sealed class CaveStage
     /// <param name="terrain">Terrain map with heights and water flags populated.</param>
     /// <param name="biomes">Classified biome map, or null when biomes are not configured.</param>
     /// <param name="seed">Root world seed.</param>
+    /// <param name="cancellationToken">Token observed between levels.</param>
     /// <returns>The cave stage result.</returns>
     public CaveStageResult Apply(WorldGenProfile profile, TerrainMap terrain, BiomeMap? biomes,
-        ulong seed)
+        ulong seed, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var levels = profile.CaveLevels!;
         var options = profile.Caves ?? new CaveOptions();
 
@@ -90,10 +93,12 @@ public sealed class CaveStage
 
         for (var i = 0; i < levels.Count; ++i)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var result = GenerateWithResample(levels[i], terrain, options, seed, i, warnings);
             levelMaps.Add(result.Map);
             levelResults.Add(result);
         }
+
 
         var shaftBuilder = new CaveShaftBuilder();
         var shafts = shaftBuilder.Build(levelMaps, terrain, biomes, options,

@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Terrain;
@@ -72,14 +73,17 @@ public sealed class DecorationPlacer
     ///     plan has no caves.</param>
     /// <returns>Placements in scan order.</returns>
     public DecorationPlacerResult Apply(TerrainMap map, BiomeMap biomes, BiomeOptions options,
-        IReadOnlyList<(int X, int Y)>? mouthColumns = null)
+        IReadOnlyList<(int X, int Y)>? mouthColumns = null,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var pools = ResolvePools(options);
         var placements = new List<DecorationPlacement>();
         var mouthExclusions = BuildMouthExclusions(mouthColumns);
 
         for (var y = 0; y < map.Height; ++y)
         {
+            if ((y & 0x3F) == 0) cancellationToken.ThrowIfCancellationRequested();
             for (var x = 0; x < map.Width; ++x)
             {
                 var biome = biomes.Biome[x, y];

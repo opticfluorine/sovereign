@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Threading;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
@@ -45,10 +46,22 @@ public sealed class WorldGenCommitRequest
     public Action<int, int>? Progress { get; init; }
 
     /// <summary>
+    ///     Optional callback invoked when a write phase begins, with a short phase label
+    ///     such as "writing segments" or "writing decorations".
+    /// </summary>
+    public Action<string>? Phase { get; init; }
+
+    /// <summary>
     ///     Optional test hook invoked after each committed batch with the one-based batch
     ///     count; a throwing hook simulates an interruption.
     /// </summary>
     public Action<int>? AfterBatch { get; init; }
+
+    /// <summary>
+    ///     Optional token observed between batches; cancellation unwinds through
+    ///     <see cref="OperationCanceledException" />.
+    /// </summary>
+    public CancellationToken CancellationToken { get; init; }
 }
 
 /// <summary>

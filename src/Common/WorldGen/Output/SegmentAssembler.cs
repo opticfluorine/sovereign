@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
@@ -145,17 +146,27 @@ public sealed class SegmentAssembler
     /// </summary>
     /// <param name="progress">Optional callback invoked with a progress description.</param>
     /// <returns>Counts of the written outputs.</returns>
-    public AssemblyResult Assemble(Action<string>? progress = null)
+    public AssemblyResult Assemble(Action<string>? progress = null,
+        CancellationToken cancellationToken = default)
     {
         var segmentsDirectory = EnsureSegmentsDirectory();
         var (minSegmentZ, maxSegmentZ) = SegmentZRange(profile);
         var (minSegmentX, maxSegmentX) = SegmentRange(profile.Width, originX);
         var (minSegmentY, maxSegmentY) = SegmentRange(profile.Height, originY);
+        var segmentZLevels = maxSegmentZ - minSegmentZ + 1;
 
-        progress?.Invoke("Assembly: writing segment blobs");
+        progress?.Invoke("Assembly: writing segment blobs (0%)");
         var segmentCount = 0;
+        var totalSegments = 0L;
         for (var sz = minSegmentZ; sz <= maxSegmentZ; ++sz)
         {
+            totalSegments += (long)(maxSegmentX - minSegmentX + 1)
+                             * (maxSegmentY - minSegmentY + 1);
+        }
+
+        for (var sz = minSegmentZ; sz <= maxSegmentZ; ++sz)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             for (var sy = minSegmentY; sy <= maxSegmentY; ++sy)
             {
                 for (var sx = minSegmentX; sx <= maxSegmentX; ++sx)
@@ -167,11 +178,14 @@ public sealed class SegmentAssembler
                 }
             }
 
-            progress?.Invoke($"Assembly: {(sz - minSegmentZ + 1) * 100 / (maxSegmentZ - minSegmentZ + 1)}%");
+            progress?.Invoke($"Assembly: writing segment blobs " +
+                             $"{(sz - minSegmentZ + 1) * 100 / segmentZLevels}%");
         }
 
-        progress?.Invoke("Assembly: staging decorations");
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Invoke($"Assembly: staging decorations ({segmentCount * 100 / Math.Max(totalSegments, 1)}%)");
         var decorationCount = StageDecorations();
+        progress?.Invoke("Assembly: complete (100%)");
 
         return new AssemblyResult { SegmentCount = segmentCount, DecorationCount = decorationCount };
     }

@@ -15,6 +15,8 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Sovereign.WorldGen.Layout;
 
@@ -43,10 +45,42 @@ public sealed class TerrainShapeStage
     private const int RidgeHistogramBins = 4096;
 
     /// <summary>
-    ///     Fraction of land cells below the mountain mask threshold; the remaining ridge crest
-    ///     is masked in as mountains.
+    ///     Fraction of a mass's land cells below its mountain mask threshold; the remaining
+    ///     ridge crest is masked in as mountains. The same constant the global cut uses.
     /// </summary>
-    private const float MountainCoverage = 0.125f;
+    private const float BaseCoverage = 0.125f;
+
+    /// <summary>
+    ///     Coverage points a full mountain bias adds to a mass's quota. The bias shifts the
+    ///     coverage before the cut, making bias a coverage control: +1 adds ~10 points of
+    ///     mountain coverage, -1 removes ~10. Sign convention preserved: positive bias is
+    ///     more mountains.
+    /// </summary>
+    private const float CoverageSensitivity = 0.10f;
+
+    /// <summary>
+    ///     Minimum clipped mass coverage.
+    /// </summary>
+    private const float MinCoverage = 0f;
+
+    /// <summary>
+    ///     Maximum clipped mass coverage.
+    /// </summary>
+    private const float MaxCoverage = 0.5f;
+
+    /// <summary>
+    ///     Mass area in cells below which the per-mass coverage is damped linearly. Roughly
+    ///     a 50x50 island; smaller islets carry a proportional share of the quota instead of
+    ///     statutorily keeping a full quota of alpine blocks. Applies only to the per-mass
+    ///     path; the global cut is undamped.
+    /// </summary>
+    private const long MinQuotaArea = 2500;
+
+    /// <summary>
+    ///     Damped-coverage floor: a damped mass keeps at least this absolute coverage, so
+    ///     tiny islets still carry a little mountain texture.
+    /// </summary>
+    private const float MinQuotaCoverageFloor = 0.05f;
 
     /// <summary>
     ///     Mountain amplitude in blocks above the continental base.
@@ -62,11 +96,6 @@ public sealed class TerrainShapeStage
     ///     Fraction of the roughness range that a full layout roughness bias contributes.
     /// </summary>
     private const float RoughnessBiasCoefficient = 0.15f;
-
-    /// <summary>
-    ///     Histogram bin shift produced by a full mountain bias.
-    /// </summary>
-    private const int MountainBiasBinShift = 512;
 
     /// <summary>
     ///     Depth in blocks below sea level at the boundary between deep ocean and shelf.
@@ -87,15 +116,21 @@ public sealed class TerrainShapeStage
     /// <param name="seed">Sub-seed for terrain shaping.</param>
     /// <param name="layout">Resolved layout fields whose biases modulate the mountain mask
     /// and roughness, or null for the unbiased path.</param>
+    /// <param name="anchors">Resolved layout anchors used for mass significance, or null when
+    /// no anchors are available and the global cut applies to all land.</param>
+    /// <param name="cancellationToken">Token observed at stage boundaries.</param>
     /// <returns>Shaped terrain result.</returns>
     public TerrainShapeResult Apply(TerrainFields fields, ContinentalnessResult continentalness,
-        WorldGenProfile profile, ulong seed, LayoutFields? layout = null)
+        WorldGenProfile profile, ulong seed, LayoutFields? layout = null,
+        IReadOnlyList<ResolvedAnchor>? anchors = null,
+        CancellationToken cancellationToken = default)
     {
         var width = profile.Width;
         var height = profile.Height;
+        cancellationToken.ThrowIfCancellationRequested();
 
         var mountainMask = BuildMountainMask(fields, continentalness, width, height,
-            layout?.MountainBias);
+            layout?.MountainBias, anchors, cancellationToken);
         var roughnessBias = layout?.RoughnessBias;
 
         var heights = new int[width, height];
@@ -118,6 +153,8 @@ public sealed class TerrainShapeStage
             }
         });
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         // Only land cells participate in relaxation: the seafloor keeps its shape, and land
         // is not eroded toward the depth of the adjacent ocean floor.
         var movable = new bool[width, height];
@@ -131,6 +168,8 @@ public sealed class TerrainShapeStage
 
         var cliffs = new bool[width, height];
         SlopeRelaxation.Relax(heights, cliffs, movable);
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var isBeach = new bool[width, height];
         MarkBeaches(heights, isOcean, isBeach, width, height, profile);
@@ -154,47 +193,68 @@ public sealed class TerrainShapeStage
     }
 
     /// <summary>
-    ///     Builds the mountain mask by thresholding the ridge field so that mountains cover
-    ///     roughly the configured fraction of land cells.
+    ///     Builds the mountain mask over every land cell. Significant masses cut their own
+    ///     ridge histograms at their own coverage quotas; decoration land shares one global
+    ///     histogram at the base coverage. Per-mass cuts are computed from histograms over
+    ///     the mass's cells with stable tie-breaking by cell index, so results carry no
+    ///     parallel-order or hash-order dependence.
     /// </summary>
     /// <param name="fields">Sampled terrain fields.</param>
     /// <param name="continentalness">Banded continentalness classification.</param>
     /// <param name="width">Footprint width in blocks.</param>
     /// <param name="height">Footprint height in blocks.</param>
     /// <param name="mountainBias">Layout mountain bias field, or null for the unbiased path.</param>
+    /// <param name="anchors">Resolved layout anchors for mass significance, or null to treat
+    /// all land as decoration under the global cut.</param>
+    /// <param name="cancellationToken">Token observed between per-mass cuts.</param>
     /// <returns>Mountain mask in [0, 1].</returns>
-    internal static float[,] BuildMountainMask(TerrainFields fields, ContinentalnessResult continentalness,
-        int width, int height, float[,]? mountainBias)
+    internal static float[,] BuildMountainMask(TerrainFields fields,
+        ContinentalnessResult continentalness, int width, int height, float[,]? mountainBias,
+        IReadOnlyList<ResolvedAnchor>? anchors = null, CancellationToken cancellationToken = default)
     {
-        var histogram = new int[RidgeHistogramBins];
-        var landCells = 0L;
-        for (var y = 0; y < height; ++y)
-        {
-            for (var x = 0; x < width; ++x)
-            {
-                if (continentalness.Classes[x, y] != ContinentalClass.Land) continue;
+        var report = MassAnalysis.Analyze(
+            SyntheticMap(continentalness, width, height), anchors);
+        var labels = report.Labels;
 
-                ++landCells;
-                var bin = BinOf(fields.MountainRidge[x, y]);
-                ++histogram[bin];
+        // Per-mass mask quota thresholds, keyed by component label. Decoration labels are
+        // absent and fall to the global cut.
+        var thresholds = new Dictionary<long, int>();
+        foreach (var mass in report.Masses)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!mass.Significant) continue;
+
+            var bias = mountainBias is null
+                ? 0f
+                : MeanMassBias(mountainBias, labels, mass);
+            var coverage = Math.Clamp(BaseCoverage + bias * CoverageSensitivity,
+                MinCoverage, MaxCoverage);
+            if (mass.Size < MinQuotaArea)
+            {
+                coverage = Math.Max(coverage * mass.Size / (float)MinQuotaArea,
+                    MinQuotaCoverageFloor);
             }
+
+            thresholds[mass.ComponentId] = PerMassThresholdBin(fields, labels,
+                width, height, mass.ComponentId, coverage);
         }
 
-        var thresholdBin = ThresholdBin(histogram, landCells);
-
         var mask = new float[width, height];
+        var globalThreshold = ThresholdBin(
+            GlobalHistogram(fields, continentalness, width, height),
+            CountLand(continentalness, width, height));
+
         Parallel.For(0, height, y =>
         {
+            cancellationToken.ThrowIfCancellationRequested();
             for (var x = 0; x < width; ++x)
             {
                 if (continentalness.Classes[x, y] != ContinentalClass.Land) continue;
 
-                var effectiveBin = thresholdBin;
-                if (mountainBias is not null)
-                {
-                    var shift = (int)MathF.Round(mountainBias[x, y] * MountainBiasBinShift);
-                    effectiveBin = Math.Clamp(thresholdBin - shift, 0, RidgeHistogramBins - 1);
-                }
+                var label = labels[x, y];
+                var effectiveBin = thresholds.TryGetValue(label, out var massThreshold)
+                    ? massThreshold
+                    : globalThreshold;
 
                 if (BinOf(fields.MountainRidge[x, y]) < effectiveBin) continue;
 
@@ -224,7 +284,7 @@ public sealed class TerrainShapeStage
     /// <returns>Threshold bin index.</returns>
     private static int ThresholdBin(int[] histogram, long landCells)
     {
-        var target = (long)(landCells * (1.0 - MountainCoverage));
+        var target = (long)(landCells * (1.0 - BaseCoverage));
         var cumulative = 0L;
         for (var bin = 0; bin < RidgeHistogramBins; ++bin)
         {
@@ -233,6 +293,159 @@ public sealed class TerrainShapeStage
         }
 
         return RidgeHistogramBins - 1;
+    }
+
+    /// <summary>
+    ///     Counts the land cells of a classification.
+    /// </summary>
+    /// <param name="continentalness">Banded classification.</param>
+    /// <param name="width">Footprint width in blocks.</param>
+    /// <param name="height">Footprint height in blocks.</param>
+    /// <returns>Land cell count.</returns>
+    private static long CountLand(ContinentalnessResult continentalness, int width, int height)
+    {
+        var count = 0L;
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                if (continentalness.Classes[x, y] == ContinentalClass.Land) ++count;
+            }
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    ///     Builds a synthetic terrain map whose water classes mirror the classification, so
+    ///     <see cref="MassAnalysis" /> and its per-mass cutoffs can read the land cells.
+    /// </summary>
+    /// <param name="continentalness">Banded classification.</param>
+    /// <param name="width">Footprint width in blocks.</param>
+    /// <param name="height">Footprint height in blocks.</param>
+    /// <returns>Map with IsOcean set to non-land.</returns>
+    private static TerrainMap SyntheticMap(ContinentalnessResult continentalness, int width,
+        int height)
+    {
+        var isOcean = new bool[width, height];
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                isOcean[x, y] = continentalness.Classes[x, y] != ContinentalClass.Land;
+            }
+        }
+
+        return new TerrainMap
+        {
+            Width = width,
+            Height = height,
+            Heights = new int[width, height],
+            IsOcean = isOcean,
+            IsCliff = new bool[width, height],
+            IsBeach = new bool[width, height],
+            IsRiver = new bool[width, height],
+            RiverWidth = new int[width, height],
+            IsBank = new bool[width, height],
+            IsLake = new bool[width, height],
+            LakeSurfaceZ = new int[width, height]
+        };
+    }
+
+    /// <summary>
+    ///     Computes the mean layout mountain bias over a mass's cells. The bias field is
+    ///     provided at block resolution (the mask stage's caller upsamples the quarter-
+    ///     resolution layout bias); the mean is a plain deterministic scan.
+    /// </summary>
+    /// <param name="mountainBias">Block-resolution bias field.</param>
+    /// <param name="labels">Component labels.</param>
+    /// <param name="mass">Analyzed mass.</param>
+    /// <returns>Mean bias over the mass cells, or zero when the mass has no cells.</returns>
+    private static float MeanMassBias(float[,] mountainBias, int[,] labels,
+        MassAnalysisResult mass)
+    {
+        var sum = 0.0;
+        var count = 0L;
+        var width = labels.GetLength(0);
+        var height = labels.GetLength(1);
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                if (labels[x, y] != mass.ComponentId) continue;
+                sum += mountainBias[x, y];
+                ++count;
+            }
+        }
+
+        return count == 0 ? 0f : (float)(sum / count);
+    }
+
+    /// <summary>
+    ///     Computes the histogram bin of a mass's ridge distribution at which the given
+    ///     coverage fraction of the mass's own cells is masked in. The count of cells below
+    ///     a bin depends only on the multiset of ridge values, so the cut is independent of
+    ///     cell ordering and thread scheduling.
+    /// </summary>
+    /// <param name="fields">Sampled terrain fields.</param>
+    /// <param name="labels">Component labels.</param>
+    /// <param name="width">Footprint width in blocks.</param>
+    /// <param name="height">Footprint height in blocks.</param>
+    /// <param name="componentId">Label of the mass under test.</param>
+    /// <param name="coverage">Coverage fraction in [0, 1] of the mass's cells to mask in.</param>
+    /// <returns>Threshold bin index.</returns>
+    private static int PerMassThresholdBin(TerrainFields fields, int[,] labels, int width,
+        int height, long componentId, float coverage)
+    {
+        var histogram = new int[RidgeHistogramBins];
+        var cells = 0L;
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                if (labels[x, y] != componentId) continue;
+
+                ++cells;
+                ++histogram[BinOf(fields.MountainRidge[x, y])];
+            }
+        }
+
+        if (cells == 0) return RidgeHistogramBins - 1;
+
+        var target = (long)(cells * (1.0 - coverage));
+        var cumulative = 0L;
+        for (var bin = 0; bin < RidgeHistogramBins; ++bin)
+        {
+            cumulative += histogram[bin];
+            if (cumulative >= target) return bin;
+        }
+
+        return RidgeHistogramBins - 1;
+    }
+
+    /// <summary>
+    ///     Computes the ridge histogram over all land cells for the shared decorative cut.
+    /// </summary>
+    /// <param name="fields">Sampled terrain fields.</param>
+    /// <param name="continentalness">Banded classification.</param>
+    /// <param name="width">Footprint width in blocks.</param>
+    /// <param name="height">Footprint height in blocks.</param>
+    /// <returns>Histogram of ridge bins over land.</returns>
+    private static int[] GlobalHistogram(TerrainFields fields,
+        ContinentalnessResult continentalness, int width, int height)
+    {
+        var histogram = new int[RidgeHistogramBins];
+        for (var y = 0; y < height; ++y)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                if (continentalness.Classes[x, y] != ContinentalClass.Land) continue;
+
+                ++histogram[BinOf(fields.MountainRidge[x, y])];
+            }
+        }
+
+        return histogram;
     }
 
     /// <summary>

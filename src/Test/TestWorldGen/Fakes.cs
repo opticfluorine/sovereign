@@ -165,7 +165,8 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
 
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
         int originY, string previewPath, string stagingDirectory,
-        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress)
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
+        System.Threading.CancellationToken cancellationToken = default)
     {
         List<string> phases = new() { "Terrain", "Hydrology", "Preview", "Assembly" };
         lock (accessLock)
@@ -398,6 +399,115 @@ internal sealed class FakeSegmentSubscriptionProbe : ISegmentSubscriptionProbe
 }
 
 /// <summary>
+///     World generation pipeline test double that parks on a gate and then honors the
+///     cancellation token, mimicking a real mid-pipeline abort.
+/// </summary>
+internal sealed class CancellableStubPipeline : IWorldGenPipeline
+{
+    /// <summary>Set when the pipeline has reached its parked phase.</summary>
+    public ManualResetEventSlim Entered { get; } = new(false);
+
+    /// <summary>Release gate for the parked phase.</summary>
+    public ManualResetEventSlim Release { get; } = new(false);
+
+    /// <summary>Staging directory the pipeline was invoked with.</summary>
+    public string? StagingDirectorySeen { get; private set; }
+
+    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, string previewPath, string stagingDirectory,
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
+        System.Threading.CancellationToken cancellationToken = default)
+    {
+        StagingDirectorySeen = stagingDirectory;
+        progress?.Invoke("Terrain");
+        Entered.Set();
+        Release.Wait(TimeSpan.FromSeconds(10));
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Invoke("Hydrology");
+
+        return new WorldGenPlan
+        {
+            Seed = seed,
+            ProfileName = profileName,
+            Profile = profile,
+            OriginX = originX,
+            OriginY = originY,
+            ResolvedTemplates = resolvedTemplates,
+            StagingDirectory = stagingDirectory,
+            Terrain = new TerrainMap
+            {
+                Width = 1,
+                Height = 1,
+                Heights = new int[1, 1],
+                IsOcean = new bool[1, 1],
+                IsCliff = new bool[1, 1],
+                IsBeach = new bool[1, 1],
+                IsRiver = new bool[1, 1],
+                RiverWidth = new int[1, 1],
+                IsBank = new bool[1, 1],
+                IsLake = new bool[1, 1],
+                LakeSurfaceZ = new int[1, 1]
+            },
+            Statistics = new PlanStatistics
+            {
+                Width = 1,
+                Height = 1,
+                LandCells = 0,
+                WaterCells = 1,
+                RiverCount = 0,
+                LakeCount = 0,
+                LongestStraightRiverRun = 0,
+                TerrainMs = 0,
+                HydrologyMs = 0,
+                BiomesMs = 0,
+                PreviewMs = 0,
+                TotalMs = 0
+            },
+            PreviewPath = previewPath
+        };
+    }
+}
+
+/// <summary>
+///     Commit writer test double that parks on a gate after its first batch and then
+///     honors the request's cancellation token.
+/// </summary>
+internal sealed class GatedCancellableCommitWriter : IWorldGenCommitWriter
+{
+    /// <summary>Set when the writer has committed its first batch.</summary>
+    public ManualResetEventSlim Entered { get; } = new(false);
+
+    /// <summary>Release gate for the parked phase.</summary>
+    public ManualResetEventSlim Release { get; } = new(false);
+
+    /// <summary>Number of Execute invocations.</summary>
+    public int Calls { get; private set; }
+
+    /// <summary>Phases reported through the request's phase callback.</summary>
+    public List<string> Phases { get; } = new();
+
+    public WorldGenCommitStats Execute(WorldGenCommitRequest request)
+    {
+        ++Calls;
+        request.Phase?.Invoke("writing segments");
+        request.Progress?.Invoke(1, 2);
+        Entered.Set();
+        Release.Wait(TimeSpan.FromSeconds(10));
+        request.CancellationToken.ThrowIfCancellationRequested();
+
+        request.Phase?.Invoke("writing decorations");
+        request.Progress?.Invoke(2, 2);
+        return new WorldGenCommitStats
+        {
+            SegmentsWritten = 1,
+            DecorationsCreated = 0,
+            DecorationsDeleted = 0,
+            WallMs = 1
+        };
+    }
+}
+
+/// <summary>
 ///     World generation pipeline test double that always throws.
 /// </summary>
 internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
@@ -411,7 +521,8 @@ internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
 
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
         int originY, string previewPath, string stagingDirectory,
-        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress)
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
+        System.Threading.CancellationToken cancellationToken = default)
     {
         throw exception;
     }

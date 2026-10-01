@@ -280,24 +280,15 @@ public sealed class WorldGenChatCommandHandler
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnAbort(ulong senderEntityId)
     {
-        try
+        var reply = controller.Abort() switch
         {
-            controller.Abort();
-        }
-        catch (NotImplementedException)
-        {
-            SendNotImplemented("abort", senderEntityId);
-        }
-    }
-
-    /// <summary>
-    ///     Replies that the given subcommand is not yet implemented.
-    /// </summary>
-    /// <param name="subcommand">Subcommand name.</param>
-    /// <param name="senderEntityId">Sender entity ID.</param>
-    private void SendNotImplemented(string subcommand, ulong senderEntityId)
-    {
-        internalController.SendSystemMessage($"Worldgen {subcommand} is not yet implemented.", senderEntityId);
+            WorldGenAbortOutcome.Requested =>
+                "Cancellation requested; the job will stop at its next checkpoint.",
+            WorldGenAbortOutcome.AlreadyRequested =>
+                "Cancellation was already requested; waiting for the job to unwind.",
+            _ => "No world generation job is running; it may have already completed."
+        };
+        internalController.SendSystemMessage(reply, senderEntityId);
     }
 
     /// <summary>

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -185,12 +186,13 @@ public sealed class WorldGenCommitRunner
             var forceNote = subscriberCount > 0
                 ? $" {subscriberCount} subscribed player(s) inside the footprint were overridden."
                 : "";
-            system.SetJobStatus(WorldGenerationJobStatus.Committing, "commit starting");
+            system.BeginJob(WorldGenerationJobStatus.Committing, "commit starting");
             chat.SendSystemMessage(
                 $"World generation {verb} started: seed {plan.Seed}, footprint {width}x{height} " +
                 $"at ({plan.OriginX}, {plan.OriginY}).{replaceNote}{forceNote}", senderEntityId);
 
-            Task.Run(() => RunCommit(plan, replacedWorld, senderEntityId));
+            var token = system.JobCancellationToken;
+            Task.Run(() => RunCommit(plan, replacedWorld, senderEntityId, token));
         }
     }
 
@@ -202,7 +204,7 @@ public sealed class WorldGenCommitRunner
     /// <param name="replacedWorld">Registered world to replace, or null.</param>
     /// <param name="senderEntityId">Entity ID of the committing player.</param>
     private void RunCommit(WorldGenPlan plan, WorldGenRegistryEntry? replacedWorld,
-        ulong senderEntityId)
+        ulong senderEntityId, CancellationToken token)
     {
         try
         {
@@ -212,7 +214,9 @@ public sealed class WorldGenCommitRunner
                 StagingDirectory = plan.StagingDirectory,
                 BatchSize = options.CommitBatchSize,
                 ReplaceWorld = replacedWorld,
-                Progress = progressChat.OnBatchProgress
+                Progress = progressChat.OnBatchProgress,
+                Phase = progressChat.OnPhase,
+                CancellationToken = token
             });
 
             registryStore.AppendWorld(new WorldGenRegistryEntry
@@ -231,7 +235,7 @@ public sealed class WorldGenCommitRunner
             worldController.UnloadWorldSegments(eventSender, FootprintSegments(plan).ToList());
             scratch.DeleteSessionDirectory(plan.StagingDirectory);
 
-            system.SetJobStatus(WorldGenerationJobStatus.Idle, "Commit complete");
+            system.EndJob("Commit complete");
             chat.SendSystemMessage(
                 $"World generation committed: seed {plan.Seed}; {stats.SegmentsWritten} " +
                 $"segments written, {stats.DecorationsCreated} decorations created" +
@@ -240,10 +244,20 @@ public sealed class WorldGenCommitRunner
                     : "") +
                 $" in {stats.WallMs / 1000.0:F1} s.", senderEntityId);
         }
+        catch (OperationCanceledException)
+        {
+            var phase = system.LastStatusMessage ?? "commit";
+            logger.LogInformation("World generation commit aborted at {Phase} (seed {Seed}).",
+                phase, plan.Seed);
+            system.EndJob($"Commit aborted at {phase}");
+            chat.SendSystemMessage(
+                $"World generation commit aborted at {phase}; the batched writes are " +
+                "idempotent, so re-run /worldgen commit to finish.", senderEntityId);
+        }
         catch (Exception e)
         {
             logger.LogError(e, "World generation commit failed (seed {Seed}).", plan.Seed);
-            system.SetJobStatus(WorldGenerationJobStatus.Idle, $"Commit failed: {e.Message}");
+            system.EndJob($"Commit failed: {e.Message}");
             chat.SendSystemMessage($"World generation commit failed: {e.Message}", senderEntityId);
         }
     }
@@ -315,7 +329,7 @@ public sealed class WorldGenCommitRunner
     /// <param name="message">Refusal reason.</param>
     private void Refuse(ulong senderEntityId, string message)
     {
-        system.SetJobStatus(WorldGenerationJobStatus.Idle, "Commit refused");
+        system.EndJob("Commit refused");
         chat.SendSystemMessage(message, senderEntityId);
     }
 
@@ -381,7 +395,7 @@ public sealed class WorldGenCommitRunner
 
     /// <summary>
     ///     Reports commit progress to the job status and, at the 25/50/75% milestones, to
-    ///     chat.
+    ///     chat. Status messages carry the current write phase.
     /// </summary>
     private sealed class ProgressChat
     {
@@ -389,6 +403,7 @@ public sealed class WorldGenCommitRunner
         private readonly ServerChatInternalController chat;
         private readonly ulong senderEntityId;
         private readonly Stopwatch clock = Stopwatch.StartNew();
+        private string phase = "starting";
         private int lastMilestone;
 
         public ProgressChat(WorldGenerationSystem system, ServerChatInternalController chat,
@@ -397,6 +412,16 @@ public sealed class WorldGenCommitRunner
             this.system = system;
             this.chat = chat;
             this.senderEntityId = senderEntityId;
+        }
+
+        /// <summary>
+        ///     Called when the writer begins a new write phase.
+        /// </summary>
+        /// <param name="phase">Short phase label.</param>
+        public void OnPhase(string phase)
+        {
+            this.phase = phase;
+            system.SetJobStatus(WorldGenerationJobStatus.Committing, $"commit {phase}");
         }
 
         /// <summary>
@@ -409,13 +434,14 @@ public sealed class WorldGenCommitRunner
             if (totalBatches <= 0) return;
 
             var percent = completedBatches * 100 / totalBatches;
-            system.SetJobStatus(WorldGenerationJobStatus.Committing, $"commit {percent}%");
+            system.SetJobStatus(WorldGenerationJobStatus.Committing,
+                $"commit {percent}% ({phase})");
             var milestone = percent / 25;
             if (milestone > lastMilestone && percent < 100)
             {
                 lastMilestone = milestone;
                 chat.SendSystemMessage(
-                    $"World generation commit {percent}% complete " +
+                    $"World generation commit {percent}% complete ({phase}) " +
                     $"({clock.ElapsedMilliseconds / 1000.0:F1} s).", senderEntityId);
             }
         }

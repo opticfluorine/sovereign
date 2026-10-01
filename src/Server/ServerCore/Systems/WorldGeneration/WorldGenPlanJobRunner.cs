@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
@@ -92,7 +93,8 @@ public sealed class WorldGenPlanJobRunner
             }
 
             var name = profileName ?? DefaultProfileName;
-            system.SetJobStatus(WorldGenerationJobStatus.Planning, $"Loading profile \"{name}\"");
+            var message = $"Loading profile \"{name}\"";
+            system.BeginJob(WorldGenerationJobStatus.Planning, message);
 
             WorldGenProfile profile;
             try
@@ -101,7 +103,7 @@ public sealed class WorldGenPlanJobRunner
             }
             catch (ProfileLoadException e)
             {
-                system.SetJobStatus(WorldGenerationJobStatus.Idle, "Profile load failed");
+                system.EndJob("Profile load failed");
                 chat.SendSystemMessage($"Worldgen plan failed: {e.Message}", senderEntityId);
                 return;
             }
@@ -117,7 +119,7 @@ public sealed class WorldGenPlanJobRunner
             }
             catch (WorldGenTemplateResolutionException e)
             {
-                system.SetJobStatus(WorldGenerationJobStatus.Idle, "Template resolution failed");
+                system.EndJob("Template resolution failed");
                 chat.SendSystemMessage($"Worldgen plan failed: {e.Message}", senderEntityId);
                 return;
             }
@@ -132,8 +134,9 @@ public sealed class WorldGenPlanJobRunner
                 $"World generation started: seed {seed}, profile \"{name}\", origin ({originX}, {originY}).",
                 senderEntityId);
 
+            var token = system.JobCancellationToken;
             Task.Run(() => RunJob(seed, name, profile, originX, originY, previewPath,
-                stagingDirectory, resolvedTemplates, senderEntityId));
+                stagingDirectory, resolvedTemplates, senderEntityId, token));
         }
     }
 
@@ -155,7 +158,7 @@ public sealed class WorldGenPlanJobRunner
 
         if (!hasErrors) return true;
 
-        system.SetJobStatus(WorldGenerationJobStatus.Idle, "Profile validation failed");
+        system.EndJob("Profile validation failed");
         chat.SendSystemMessage("Worldgen plan aborted: the profile has errors.", senderEntityId);
         return false;
     }
@@ -174,15 +177,25 @@ public sealed class WorldGenPlanJobRunner
     /// <param name="resolvedTemplates">Profile template names resolved against the live
     ///     template entity set.</param>
     /// <param name="senderEntityId">Entity to reply to.</param>
+    /// <param name="token">Cancellation token of the job slot.</param>
     private void RunJob(ulong seed, string profileName, WorldGenProfile profile, int originX, int originY,
         string previewPath, string stagingDirectory,
-        WorldGenResolvedTemplates resolvedTemplates, ulong senderEntityId)
+        WorldGenResolvedTemplates resolvedTemplates, ulong senderEntityId,
+        CancellationToken token)
     {
         try
         {
             var plan = pipeline.Plan(profile, profileName, seed, originX, originY, previewPath,
                 stagingDirectory, resolvedTemplates,
-                phase => system.SetJobStatus(WorldGenerationJobStatus.Planning, phase));
+                phase =>
+                {
+                    // Progress callbacks never overwrite a Cancelling slot so that an
+                    // in-flight abort request stays visible in /worldgen status.
+                    if (system.JobStatus != WorldGenerationJobStatus.Cancelling)
+                    {
+                        system.SetJobStatus(WorldGenerationJobStatus.Planning, phase);
+                    }
+                }, token);
             WritePlanManifest(plan);
 
             // Send the completion reply before recording the plan: waiters use the recorded
@@ -195,14 +208,23 @@ public sealed class WorldGenPlanJobRunner
             }
 
             chat.SendSystemMessage(reply, senderEntityId);
-            system.SetJobStatus(WorldGenerationJobStatus.Idle, "Plan complete");
+            system.EndJob("Plan complete");
             services.RecordCompletedPlan(plan);
+        }
+        catch (OperationCanceledException)
+        {
+            var phase = system.LastStatusMessage ?? "planning";
+            scratch.DeleteSessionDirectory(stagingDirectory);
+            logger.LogInformation("World generation plan aborted at {Phase} (seed {Seed}).",
+                phase, seed);
+            system.EndJob($"Plan aborted at {phase}");
+            chat.SendSystemMessage($"World generation plan aborted at {phase}.", senderEntityId);
         }
         catch (Exception e)
         {
             scratch.DeleteSessionDirectory(stagingDirectory);
             logger.LogError(e, "World generation plan failed (seed {Seed}).", seed);
-            system.SetJobStatus(WorldGenerationJobStatus.Idle, $"Plan failed: {e.Message}");
+            system.EndJob($"Plan failed: {e.Message}");
             chat.SendSystemMessage($"World generation failed: {e.Message}", senderEntityId);
         }
     }

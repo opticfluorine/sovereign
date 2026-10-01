@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Terrain;
@@ -48,8 +49,10 @@ public sealed class MaterialStage
     /// <param name="options">Biome options.</param>
     /// <param name="seed">Sub-seed for the surface modifier jitter.</param>
     /// <returns>Per-column material assignment.</returns>
-    public ColumnMaterials Apply(TerrainMap map, BiomeMap biomes, BiomeOptions options, ulong seed)
+    public ColumnMaterials Apply(TerrainMap map, BiomeMap biomes, BiomeOptions options, ulong seed,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var width = map.Width;
         var height = map.Height;
         var definitions = ResolveDefinitions(options);

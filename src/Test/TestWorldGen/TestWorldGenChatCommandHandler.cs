@@ -199,15 +199,37 @@ public class TestWorldGenChatCommandHandler
     }
 
     [Fact]
-    public void Handle_Abort_RespondsNotYetImplemented()
+    public void Handle_Abort_WhenIdle_ReportsNoJob()
     {
         var (handler, sender, _, _) = CreateHandler();
 
         handler.Handle("abort", SenderEntityId);
 
         var message = GetSingleSystemMessage(sender);
-        Assert.Contains("abort", message, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("not yet implemented", message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("No world generation job is running", message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Handle_Abort_WhileRunning_RequestsCancellation()
+    {
+        var gate = new ManualResetEventSlim(false);
+        var (handler, sender, system, _) = CreateHandler(gate);
+
+        handler.Handle("plan 12345", SenderEntityId);
+        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Planning, "job start");
+
+        handler.Handle("abort", SenderEntityId);
+
+        Assert.Contains(SentMessages(sender),
+            m => m.Contains("Cancellation requested", StringComparison.Ordinal));
+        Assert.Equal(WorldGenerationJobStatus.Cancelling, system.JobStatus);
+
+        handler.Handle("abort", SenderEntityId);
+        Assert.Contains(SentMessages(sender),
+            m => m.Contains("already requested", StringComparison.Ordinal));
+
+        gate.Set();
+        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "job completion");
     }
 
     [Fact]
@@ -235,7 +257,8 @@ public class TestWorldGenChatCommandHandler
     /// </summary>
     /// <returns>Handler, recording event sender, the job slot system, and the services.</returns>
     private static (WorldGenChatCommandHandler Handler, FakeEventSender Sender,
-        WorldGenerationSystem System, WorldGenerationServices Services) CreateHandler()
+        WorldGenerationSystem System, WorldGenerationServices Services) CreateHandler(
+        ManualResetEventSlim? gate = null)
     {
         var sender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
@@ -243,13 +266,14 @@ public class TestWorldGenChatCommandHandler
             scratch, NullLogger<WorldGenerationSystem>.Instance);
         var services = new WorldGenerationServices(system);
         var loader = new ProfileLoader(Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
-        var runner = new WorldGenPlanJobRunner(system, services, new StubWorldGenPipeline(), loader,
+        var runner = new WorldGenPlanJobRunner(system, services,
+            new StubWorldGenPipeline { Gate = gate }, loader,
             new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
             scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
         var commitRunner = CreateCommitRunner(system, services, scratch, sender);
         var handler = new WorldGenChatCommandHandler(
-            new WorldGenerationController(runner, commitRunner), services,
+            new WorldGenerationController(runner, commitRunner, services), services,
             new ServerChatInternalController(sender));
 
         return (handler, sender, system, services);

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Threading;
 using Sovereign.WorldGen.Noise;
 
 namespace Sovereign.WorldGen.Hydrology;
@@ -74,7 +75,7 @@ public sealed class FlowRouter
     /// </summary>
     /// <param name="filledHeights">Filled height field indexed [x, y].</param>
     /// <returns>Routing receivers and flow accumulation.</returns>
-    public FlowRouting Route(int[,] filledHeights)
+    public FlowRouting Route(int[,] filledHeights, CancellationToken cancellationToken = default)
     {
         var width = filledHeights.GetLength(0);
         var height = filledHeights.GetLength(1);
@@ -82,7 +83,8 @@ public sealed class FlowRouter
         var accumulation = new int[width, height];
 
         ParallelComputeReceivers(filledHeights, receiver, width, height);
-        Accumulate(filledHeights, receiver, accumulation, width, height);
+        cancellationToken.ThrowIfCancellationRequested();
+        Accumulate(filledHeights, receiver, accumulation, width, height, cancellationToken);
 
         return new FlowRouting { Receiver = receiver, Accumulation = accumulation };
     }
@@ -156,7 +158,7 @@ public sealed class FlowRouter
     /// <param name="width">Field width.</param>
     /// <param name="height">Field height.</param>
     private static void Accumulate(int[,] filledHeights, int[,] receiver, int[,] accumulation,
-        int width, int height)
+        int width, int height, CancellationToken cancellationToken = default)
     {
         var count = width * height;
         var order = new int[count];
@@ -169,9 +171,12 @@ public sealed class FlowRouter
         }
 
         Array.Sort(keys, order);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        foreach (var flat in order)
+        for (var i = 0; i < order.Length; ++i)
         {
+            if ((i & 0xFFFF) == 0) cancellationToken.ThrowIfCancellationRequested();
+            var flat = order[i];
             var x = flat % width;
             var y = flat / width;
             var r = receiver[x, y];

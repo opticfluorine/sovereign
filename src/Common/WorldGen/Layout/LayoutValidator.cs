@@ -77,20 +77,15 @@ public sealed class LayoutValidationResult
 
 /// <summary>
 ///     Validates that the shaped terrain honored the configured layout. Counts significant
-///     land masses by 4-connectivity and requires each significant anchor to have a mass
-///     centroid within a multiple of its radius. The optional connectivity requirement also
-///     requires significant anchors to match distinct masses. Layout validation never
-///     hard-fails a plan by itself: the caller resamples and accepts the best attempt with a
-///     report, unless the profile selects strict connectivity.
+///     land masses by 4-connectivity via <see cref="MassAnalysis" /> and requires each
+///     significant anchor to have a mass centroid within a multiple of its radius. The
+///     optional connectivity requirement also requires significant anchors to match distinct
+///     masses. Layout validation never hard-fails a plan by itself: the caller resamples and
+///     accepts the best attempt with a report, unless the profile selects strict
+///     connectivity.
 /// </summary>
 public sealed class LayoutValidator
 {
-    /// <summary>
-    ///     Minimum mass size as a fraction of total land for the mass to count as
-    ///     significant.
-    /// </summary>
-    public const float SignificantMassFraction = 0.03f;
-
     /// <summary>
     ///     Maximum normalized centroid distance for an anchor, as a multiple of its radius.
     /// </summary>
@@ -99,8 +94,7 @@ public sealed class LayoutValidator
     /// <summary>
     ///     Minimum anchor weight that participates in matching.
     /// </summary>
-    public const float SignificantWeight = 0.5f;
-
+    public const float SignificantWeight = MassAnalysis.SignificantWeight;
     /// <summary>
     ///     Ranks two validation attempts for best-attempt selection. Attempts are compared by
     ///     matched distinct count, then total matched count, then by how closely the number of
@@ -135,7 +129,7 @@ public sealed class LayoutValidator
         IReadOnlyList<ResolvedAnchor> anchors, IReadOnlyList<string> warnings,
         LayoutConnectivity connectivity = LayoutConnectivity.None)
     {
-        var masses = SignificantMasses(map);
+        var masses = SignificantMasses(map, anchors);
         var count = anchors.Count;
         var matched = new bool[count];
         var sharedMass = new bool[count];
@@ -295,87 +289,24 @@ public sealed class LayoutValidator
     }
 
     /// <summary>
-    ///     Labels the 4-connected land masses and returns those at least 3% of total land,
+    ///     Analyzes the 4-connected land masses of the map and returns the significant ones
     ///     with their component ids and normalized centroids.
     /// </summary>
     /// <param name="map">Shaped terrain map.</param>
+    /// <param name="anchors">Resolved anchors.</param>
     /// <returns>Significant masses.</returns>
     private static List<(int ComponentId, float CentroidX, float CentroidY, long Size)>
-        SignificantMasses(TerrainMap map)
+        SignificantMasses(TerrainMap map, IReadOnlyList<ResolvedAnchor> anchors)
     {
-        var width = map.Width;
-        var height = map.Height;
-        var labels = new int[width, height];
-        var queue = new Queue<(int X, int Y)>();
-        var components = new List<(long Size, double SumX, double SumY)>();
-        var totalLand = 0L;
-
-        for (var y = 0; y < height; ++y)
+        var analysis = MassAnalysis.Analyze(map, anchors);
+        var masses =
+            new List<(int ComponentId, float CentroidX, float CentroidY, long Size)>();
+        foreach (var mass in analysis.Masses)
         {
-            for (var x = 0; x < width; ++x)
-            {
-                if (map.IsOcean[x, y] || labels[x, y] != 0) continue;
-
-                ++totalLand;
-                var id = components.Count + 1;
-                labels[x, y] = id;
-                queue.Enqueue((x, y));
-                long size = 0;
-                double sumX = 0;
-                double sumY = 0;
-                while (queue.Count > 0)
-                {
-                    var (cx, cy) = queue.Dequeue();
-                    ++size;
-                    sumX += cx;
-                    sumY += cy;
-                    EnqueueIfLand(map, labels, queue, cx - 1, cy, width, height, id);
-                    EnqueueIfLand(map, labels, queue, cx + 1, cy, width, height, id);
-                    EnqueueIfLand(map, labels, queue, cx, cy - 1, width, height, id);
-                    EnqueueIfLand(map, labels, queue, cx, cy + 1, width, height, id);
-                }
-
-                components.Add((size, sumX, sumY));
-            }
-        }
-
-        var masses = new List<(int ComponentId, float CentroidX, float CentroidY, long Size)>();
-        if (totalLand == 0) return masses;
-
-        var threshold = SignificantMassFraction * totalLand;
-        for (var i = 0; i < components.Count; ++i)
-        {
-            var component = components[i];
-            if (component.Size < threshold) continue;
-            masses.Add((
-                i + 1,
-                (float)(component.SumX / component.Size / width),
-                (float)(component.SumY / component.Size / height),
-                component.Size));
+            if (!mass.Significant) continue;
+            masses.Add((mass.ComponentId, mass.CentroidX, mass.CentroidY, mass.Size));
         }
 
         return masses;
-    }
-
-    /// <summary>
-    ///     Enqueues a neighbor and labels it when it is in-bounds land that is not yet
-    ///     labeled.
-    /// </summary>
-    /// <param name="map">Terrain map.</param>
-    /// <param name="labels">Component labels.</param>
-    /// <param name="queue">Flood-fill queue.</param>
-    /// <param name="x">Neighbor X coordinate.</param>
-    /// <param name="y">Neighbor Y coordinate.</param>
-    /// <param name="width">Footprint width.</param>
-    /// <param name="height">Footprint height.</param>
-    /// <param name="id">Component label to apply.</param>
-    private static void EnqueueIfLand(TerrainMap map, int[,] labels, Queue<(int X, int Y)> queue,
-        int x, int y, int width, int height, int id)
-    {
-        if (x < 0 || x >= width || y < 0 || y >= height) return;
-        if (map.IsOcean[x, y] || labels[x, y] != 0) return;
-
-        labels[x, y] = id;
-        queue.Enqueue((x, y));
     }
 }
