@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Network;
@@ -64,25 +65,32 @@ public sealed class WorldGenCommitWriter : IWorldGenCommitWriter
         var completedBatches = 0;
         var decorationsDeleted = 0;
 
+        request.CancellationToken.ThrowIfCancellationRequested();
+
         if (request.ReplaceWorld is { } replaced)
         {
+            request.Phase?.Invoke("deleting replaced world");
             decorationsDeleted = DeleteReplacedWorld(request.StagingDirectory, replaced);
             ++completedBatches;
             request.Progress?.Invoke(completedBatches, totalBatches);
             request.AfterBatch?.Invoke(completedBatches);
         }
 
+        request.Phase?.Invoke("writing segments");
         foreach (var batch in BatchesOf(segmentIndices, segmentsPerBatch))
         {
+            request.CancellationToken.ThrowIfCancellationRequested();
             WriteSegmentBatch(request.StagingDirectory, batch);
             ++completedBatches;
             request.Progress?.Invoke(completedBatches, totalBatches);
             request.AfterBatch?.Invoke(completedBatches);
         }
 
+        request.Phase?.Invoke("writing decorations");
         var decorationsCreated = 0;
         foreach (var batch in BatchesOf(decorations, decorationsPerBatch))
         {
+            request.CancellationToken.ThrowIfCancellationRequested();
             decorationsCreated += WriteDecorationBatch(batch);
             ++completedBatches;
             request.Progress?.Invoke(completedBatches, totalBatches);

@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Sovereign.WorldGen.Biomes;
 using Sovereign.WorldGen.Caves;
 using Sovereign.WorldGen.Decorations;
@@ -51,10 +52,13 @@ public interface IWorldGenPipeline
     /// <param name="resolvedTemplates">Profile template names resolved against the live
     ///     template entity set.</param>
     /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
+    /// <param name="cancellationToken">Token observed at stage and sub-stage boundaries;
+    ///     cancellation unwinds through <see cref="OperationCanceledException" />.</param>
     /// <returns>The completed plan.</returns>
     WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
         int originY, string previewPath, string stagingDirectory,
-        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress);
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -90,10 +94,12 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// <param name="resolvedTemplates">Profile template names resolved against the live
     ///     template entity set.</param>
     /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
+    /// <param name="cancellationToken">Token observed at stage and sub-stage boundaries.</param>
     /// <returns>The completed plan.</returns>
     public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
         int originY, string previewPath, string stagingDirectory,
-        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress)
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
+        CancellationToken cancellationToken = default)
     {
         var total = Stopwatch.StartNew();
         var terrainClock = new Stopwatch();
@@ -119,21 +125,25 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         if (profile.Layout is { IsActive: true } layoutOptions)
         {
             (fields, continentalness, shape, layout, layoutReport) =
-                RunLayoutTerrain(profile, seed, layoutOptions, progress);
+                RunLayoutTerrain(profile, seed, layoutOptions, progress, cancellationToken);
         }
         else
         {
             fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
                 SubSeed(seed, "TerrainFields"), profile.Terrain);
+            cancellationToken.ThrowIfCancellationRequested();
             continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
                 profile.Height, profile.Terrain);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            Report(progress, "Terrain: shaping surface");
+            Report(progress, "Terrain: shaping surface (0%)");
             shape = new TerrainShapeStage().Apply(fields, continentalness, profile,
-                SubSeed(seed, "TerrainShape"));
+                SubSeed(seed, "TerrainShape"), null, null, cancellationToken);
+            Report(progress, "Terrain: shaping surface (100%)");
         }
 
         terrainClock.Stop();
+        cancellationToken.ThrowIfCancellationRequested();
 
         var map = shape.Map;
         for (var y = 0; y < profile.Height; ++y)
@@ -144,27 +154,34 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             }
         }
 
-        Report(progress, "Hydrology: filling depressions");
+        Report(progress, "Hydrology: filling depressions (0%)");
         hydrologyClock.Start();
         var filled = (int[,])map.Heights.Clone();
-        DepressionFill.Fill(filled);
+        DepressionFill.Fill(filled, useEpsilon: true, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        Report(progress, "Hydrology: filling depressions (50%)");
         var sills = (int[,])map.Heights.Clone();
-        DepressionFill.Fill(sills, useEpsilon: false);
+        DepressionFill.Fill(sills, useEpsilon: false, cancellationToken);
+        Report(progress, "Hydrology: filling depressions (100%)");
         hydrologyClock.Stop();
+        cancellationToken.ThrowIfCancellationRequested();
 
         Report(progress, "Hydrology: routing flow");
         hydrologyClock.Start();
-        var routing = new FlowRouter(SubSeed(seed, "FlowRouting")).Route(filled);
+        var routing = new FlowRouter(SubSeed(seed, "FlowRouting")).Route(filled,
+            cancellationToken);
         hydrologyClock.Stop();
+        cancellationToken.ThrowIfCancellationRequested();
 
         Report(progress, "Hydrology: extracting rivers");
         hydrologyClock.Start();
         var extraction = new RiverExtractor(SubSeed(seed, "RiverExtraction"))
-            .Extract(map, filled, sills, routing, profile);
+            .Extract(map, filled, sills, routing, profile, cancellationToken);
         riverCount = extraction.RiverCount;
         lakeCount = extraction.LakeCount;
         longestStraightRiverRun = extraction.LongestStraightRiverRun;
         hydrologyClock.Stop();
+        cancellationToken.ThrowIfCancellationRequested();
 
         BiomeMap? biomeMap = null;
         ColumnMaterials? materials = null;
@@ -175,12 +192,14 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         {
             Report(progress, "Biomes: classifying biomes");
             biomesClock.Start();
-            biomeMap = new BiomeStage().Apply(map, continentalness, profile, SubSeed(seed, "Biomes"),
-                layout);
+            biomeMap = new BiomeStage().Apply(map, continentalness, profile,
+                SubSeed(seed, "Biomes"), layout, cancellationToken);
 
             Report(progress, "Biomes: assigning materials");
-            materials = new MaterialStage().Apply(map, biomeMap, biomes, SubSeed(seed, "MaterialJitter"));
+            materials = new MaterialStage().Apply(map, biomeMap, biomes,
+                SubSeed(seed, "MaterialJitter"), cancellationToken);
             biomesClock.Stop();
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         // Caves run after the biome stages and before decoration placement so that
@@ -189,8 +208,9 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         {
             Report(progress, "Caves: generating levels");
             cavesClock.Start();
-            caves = new CaveStage().Apply(profile, map, biomeMap, seed);
+            caves = new CaveStage().Apply(profile, map, biomeMap, seed, cancellationToken);
             cavesClock.Stop();
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         if (biomeMap is not null && profile.Biomes is { } biomePlacement)
@@ -198,16 +218,20 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             Report(progress, "Biomes: placing decorations");
             biomesClock.Start();
             decorations = new DecorationPlacer(SubSeed(seed, "Decorations"))
-                .Apply(map, biomeMap, biomePlacement, caves?.Map.Mouths).Placements;
+                .Apply(map, biomeMap, biomePlacement, caves?.Map.Mouths,
+                    cancellationToken).Placements;
             biomesClock.Stop();
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
-        Report(progress, "Rendering preview");
+        Report(progress, "Rendering preview (0%)");
         previewClock.Start();
         var maxDimension = PreviewOptions.EffectiveMaxDimension(profile);
         var showAnchorOverlay = PreviewOptions.EffectiveShowAnchorOverlay(profile);
         var preview = new PreviewRenderer().Render(map, continentalness, profile, maxDimension,
             biomeMap, caves?.Map.Mouths, layout, layoutReport, showAnchorOverlay);
+        cancellationToken.ThrowIfCancellationRequested();
+        Report(progress, "Rendering preview (85%)");
         PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
 
         var cavePreviewPaths = new List<string>();
@@ -217,23 +241,27 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             for (var i = 0; i < cavePreviews.Count; ++i)
             {
                 var path = CavePreviewPath(previewPath, i + 1);
+                Report(progress, $"Rendering preview (85% + cave level {i + 1})");
                 PngWriter.WritePng(path, cavePreviews[i].Width, cavePreviews[i].Height,
                     cavePreviews[i].Pixels);
                 cavePreviewPaths.Add(path);
             }
         }
 
+        Report(progress, "Rendering preview (100%)");
         previewClock.Stop();
+        cancellationToken.ThrowIfCancellationRequested();
 
-        Report(progress, "Assembling segments");
+        Report(progress, "Assembling segments (0%)");
         assemblyClock.Start();
         var assembler = new SegmentAssembler(profile, map, materials, caves?.Map,
             biomeMap is null ? null : decorations, resolvedTemplates, originX, originY,
             stagingDirectory);
-        var assembly = assembler.Assemble(progress);
+        var assembly = assembler.Assemble(progress, cancellationToken);
         assemblyClock.Stop();
 
         total.Stop();
+        cancellationToken.ThrowIfCancellationRequested();
 
         var statistics = new PlanStatistics
         {
@@ -296,10 +324,12 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// <param name="seed">Root world seed.</param>
     /// <param name="options">Active layout options.</param>
     /// <param name="progress">Optional progress callback.</param>
+    /// <param name="cancellationToken">Token observed at stage boundaries.</param>
     /// <returns>Terrain fields, continentalness, shaped terrain, layout fields, and report.</returns>
     private static (TerrainFields Fields, ContinentalnessResult Continentalness,
         TerrainShapeResult Shape, LayoutFields Layout, LayoutReport Report) RunLayoutTerrain(
-        WorldGenProfile profile, ulong seed, LayoutOptions options, Action<string>? progress)
+        WorldGenProfile profile, ulong seed, LayoutOptions options, Action<string>? progress,
+        CancellationToken cancellationToken)
     {
         var warnings = new List<string>();
         var maskStage = new LayoutMaskStage();
@@ -316,6 +346,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
 
         for (var attempt = 0; attempt <= LayoutResampleAttempts; ++attempt)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var layoutSeed = attempt == 0
                 ? SeedDerivation.DeriveSubSeed(seed, "Layout")
                 : SeedDerivation.DeriveSubSeed(seed, $"Layout.Resample{attempt}");
@@ -339,10 +370,15 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
                 : $"Terrain: resampling layout (attempt {attempt + 1})");
             var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
                 SubSeed(seed, "TerrainFields"), profile.Terrain, layout);
+            cancellationToken.ThrowIfCancellationRequested();
             var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,
                 profile.Height, profile.Terrain);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Report(progress, "Terrain: shaping surface (0%)");
             var shape = new TerrainShapeStage().Apply(fields, continentalness, profile,
-                SubSeed(seed, "TerrainShape"), layout);
+                SubSeed(seed, "TerrainShape"), layout, layout.Anchors, cancellationToken);
+            Report(progress, "Terrain: shaping surface (100%)");
 
             var validation = validator.Validate(shape.Map, layout.Anchors, warnings, connectivity);
             if (bestValidation is null

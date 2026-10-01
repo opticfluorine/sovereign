@@ -53,4 +53,21 @@ public class WorldGenerationServices
     {
         LastCompletedPlan = plan;
     }
+
+    /// <summary>
+    ///     Requests that the running world generation job be aborted.
+    /// </summary>
+    /// <returns>Outcome of the request.</returns>
+    public WorldGenAbortOutcome RequestAbort()
+    {
+        if (JobStatus == WorldGenerationJobStatus.Idle) return WorldGenAbortOutcome.NotRunning;
+        if (JobStatus == WorldGenerationJobStatus.Cancelling || system.IsCancelling)
+        {
+            return WorldGenAbortOutcome.AlreadyRequested;
+        }
+
+        return system.RequestCancellation("Cancellation requested")
+            ? WorldGenAbortOutcome.Requested
+            : WorldGenAbortOutcome.NotRunning;
+    }
 }

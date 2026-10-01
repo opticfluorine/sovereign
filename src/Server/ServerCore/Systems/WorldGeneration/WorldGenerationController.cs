@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Threading;
 using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
@@ -27,12 +28,14 @@ public class WorldGenerationController
 {
     private readonly WorldGenPlanJobRunner planRunner;
     private readonly WorldGenCommitRunner commitRunner;
+    private readonly WorldGenerationServices services;
 
     public WorldGenerationController(WorldGenPlanJobRunner planRunner,
-        WorldGenCommitRunner commitRunner)
+        WorldGenCommitRunner commitRunner, WorldGenerationServices services)
     {
         this.planRunner = planRunner;
         this.commitRunner = commitRunner;
+        this.services = services;
     }
 
     /// <summary>
@@ -76,13 +79,13 @@ public class WorldGenerationController
     }
 
     /// <summary>
-    ///     Requests that any in-progress world generation job be aborted. Aborting a running
-    ///     pipeline is not yet implemented; the request is always rejected.
+    ///     Requests that the in-progress world generation job be aborted. Aborting is
+    ///     cooperative: the running pipeline or commit writer observes the cancellation at
+    ///     stage boundaries or per batch and unwinds to Idle.
     /// </summary>
-    /// <exception cref="NotImplementedException">World generation abort is implemented in a
-    /// later worldgen card.</exception>
-    public void Abort()
+    /// <returns>Outcome of the request for the caller to report.</returns>
+    public WorldGenAbortOutcome Abort()
     {
-        throw new NotImplementedException("abort is not yet implemented");
+        return services.RequestAbort();
     }
 }

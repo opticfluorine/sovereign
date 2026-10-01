@@ -596,6 +596,39 @@ public class TestWorldGenPipeline
     }
 
     [Fact]
+    public void Plan_StageCallbacks_CarryPercentages()
+    {
+        var profile = TestProfiles.CreateSmall128Biomes();
+        var messages = new List<string>();
+        var staging = Path.Combine(Path.GetTempPath(), "worldgen-test-staging",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(staging);
+        var path = TempPreviewPath("progress");
+
+        try
+        {
+            new WorldGenPipeline().Plan(profile, "baseline", Seed, 0, 0, path, staging,
+                TestResolvedTemplates.ForProfile(profile), messages.Add);
+
+            Assert.Contains(messages, m =>
+                m.StartsWith("Terrain:", StringComparison.Ordinal) && m.EndsWith("%)"));
+            Assert.Contains(messages, m =>
+                m.StartsWith("Hydrology:", StringComparison.Ordinal) && m.EndsWith("%)"));
+            Assert.Contains(messages, m =>
+                m.StartsWith("Rendering preview", StringComparison.Ordinal)
+                && m.EndsWith("%)"));
+            Assert.Contains(messages, m =>
+                m.StartsWith("Assembly:", StringComparison.Ordinal) && m.EndsWith("%)"));
+        }
+        finally
+        {
+            File.Delete(path);
+            Directory.Delete(staging, true);
+        }
+    }
+
+
+    [Fact]
     public void Plan_WithInactiveLayout_IsByteIdenticalToCard5()
     {
         var profile = TestProfiles.CreateSmall128Biomes();
@@ -805,10 +838,11 @@ public class TestWorldGenPipeline
     ///
     ///     To regenerate after an intentional change: run this test once and read the actual
     ///     hash from the assertion failure message, then update this constant. Regenerated
-    ///     for the worldgen 6b zero-centered layout mask on x64 Debian, .NET 10.0.12.
+    ///     for the worldgen 7 per-mass mountain mask quotas (bias as a per-mass coverage
+    ///     control) on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenLayoutPreviewSha256 =
-        "F6C3D73AF789BB2B640A7C443165D64CC800475A228DB08D3064C3025D653F06";
+        "5EEFD235F3BD232EDB0145DEC815F63B727B67E9178C3B6B10BB43F01E77177E";
 
     [Fact]
     public void Plan_WithLayout_GoldenPreviewMatchesHash()

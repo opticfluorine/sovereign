@@ -17,6 +17,28 @@
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
 /// <summary>
+///     Outcome of a worldgen abort request.
+/// </summary>
+public enum WorldGenAbortOutcome
+{
+    /// <summary>
+    ///     No job is running; the slot is Idle. The job may have completed just before the
+    ///     request was observed.
+    /// </summary>
+    NotRunning,
+
+    /// <summary>
+    ///     The running job was asked to cancel.
+    /// </summary>
+    Requested,
+
+    /// <summary>
+    ///     Cancellation was already requested and the job has yet to unwind.
+    /// </summary>
+    AlreadyRequested
+}
+
+/// <summary>
 ///     Status of the single world generation job slot.
 /// </summary>
 public enum WorldGenerationJobStatus
@@ -34,5 +56,12 @@ public enum WorldGenerationJobStatus
     /// <summary>
     ///     A computed world generation plan is being committed to the world.
     /// </summary>
-    Committing
+    Committing,
+
+    /// <summary>
+    ///     A running job has been asked to abort and has yet to observe the cancellation.
+    ///     The underlying work is still Planning or Committing, but further abort requests
+    ///     need no answer.
+    /// </summary>
+    Cancelling
 }

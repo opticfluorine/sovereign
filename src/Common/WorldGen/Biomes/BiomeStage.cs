@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Noise;
@@ -74,8 +75,10 @@ public sealed class BiomeStage
     /// shift the climate fields, or null for the unbiased path.</param>
     /// <returns>Biome map with every cell classified.</returns>
     public BiomeMap Apply(TerrainMap map, ContinentalnessResult continentalness,
-        WorldGenProfile profile, ulong seed, LayoutFields? layout = null)
+        WorldGenProfile profile, ulong seed, LayoutFields? layout = null,
+        CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var width = profile.Width;
         var height = profile.Height;
         var options = profile.Biomes

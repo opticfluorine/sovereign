@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Sovereign.WorldGen.Noise;
 
 namespace Sovereign.WorldGen.Hydrology;
@@ -37,9 +38,10 @@ public static class DepressionFill
     ///     epsilon lives only in the routing surface, never in the terrain map.
     /// </summary>
     /// <param name="heights">Height field indexed [x, y], updated in place.</param>
-    public static void Fill(int[,] heights)
+    /// <param name="cancellationToken">Token observed between heap pops.</param>
+    public static void Fill(int[,] heights, CancellationToken cancellationToken = default)
     {
-        Fill(heights, useEpsilon: true);
+        Fill(heights, useEpsilon: true, cancellationToken);
     }
 
     /// <summary>
@@ -48,7 +50,9 @@ public static class DepressionFill
     /// </summary>
     /// <param name="heights">Height field indexed [x, y], updated in place.</param>
     /// <param name="useEpsilon">Whether to add epsilon increments along the fill path.</param>
-    public static void Fill(int[,] heights, bool useEpsilon)
+    /// <param name="cancellationToken">Token observed between heap pops.</param>
+    public static void Fill(int[,] heights, bool useEpsilon,
+        CancellationToken cancellationToken = default)
     {
         var width = heights.GetLength(0);
         var height = heights.GetLength(1);
@@ -70,6 +74,10 @@ public static class DepressionFill
 
         while (heap.TryDequeue(out var flatIndex, out _))
         {
+            // Check cancellation every 4096 pops: a large footprint floods most of the
+            // map, so per-pop checks cost real time.
+            if ((counter & 0xFFF) == 0) cancellationToken.ThrowIfCancellationRequested();
+
             var x = flatIndex % width;
             var y = flatIndex / width;
             var filled = heights[x, y];

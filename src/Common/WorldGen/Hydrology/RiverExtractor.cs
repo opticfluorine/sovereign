@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Sovereign.WorldGen.Terrain;
 
 namespace Sovereign.WorldGen.Hydrology;
@@ -90,11 +91,13 @@ public sealed class RiverExtractor
     /// exactly to their sill level, which is the water plane of a lake.</param>
     /// <param name="routing">Flow routing over the filled surface.</param>
     /// <param name="profile">World generation profile.</param>
+    /// <param name="cancellationToken">Token observed between extraction phases.</param>
     /// <returns>Extraction counts.</returns>
     public RiverExtractionResult Extract(TerrainMap map, int[,] filledHeights, int[,] sillHeights,
-        FlowRouting routing, WorldGenProfile profile)
+        FlowRouting routing, WorldGenProfile profile, CancellationToken cancellationToken = default)
     {
         var lakeCount = ExtractLakes(map, sillHeights, profile);
+        cancellationToken.ThrowIfCancellationRequested();
         if (profile.Rivers is not { } rivers)
         {
             return new RiverExtractionResult
