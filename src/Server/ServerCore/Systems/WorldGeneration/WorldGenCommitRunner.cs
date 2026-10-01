@@ -421,6 +421,10 @@ public sealed class WorldGenCommitRunner
         public void OnPhase(string phase)
         {
             this.phase = phase;
+            // Do not stomp a settling slot: after a cancel request (or settlement) the job
+            // must not be reported back as actively committing.
+            if (system.JobStatus is WorldGenerationJobStatus.Idle
+                or WorldGenerationJobStatus.Cancelling) return;
             system.SetJobStatus(WorldGenerationJobStatus.Committing, $"commit {phase}");
         }
 
@@ -432,6 +436,11 @@ public sealed class WorldGenCommitRunner
         public void OnBatchProgress(int completedBatches, int totalBatches)
         {
             if (totalBatches <= 0) return;
+
+            // Same rule as OnPhase: never resurrect a settling slot.
+            var status = system.JobStatus;
+            if (status is WorldGenerationJobStatus.Idle
+                or WorldGenerationJobStatus.Cancelling) return;
 
             var percent = completedBatches * 100 / totalBatches;
             system.SetJobStatus(WorldGenerationJobStatus.Committing,

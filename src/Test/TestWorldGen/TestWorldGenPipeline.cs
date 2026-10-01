@@ -838,11 +838,40 @@ public class TestWorldGenPipeline
     ///
     ///     To regenerate after an intentional change: run this test once and read the actual
     ///     hash from the assertion failure message, then update this constant. Regenerated
-    ///     for the worldgen 7 per-mass mountain mask quotas (bias as a per-mass coverage
-    ///     control) on x64 Debian, .NET 10.0.12.
+    ///     for the worldgen 7b per-mass climate thresholds (mountain bias lowers the
+    ///     alpine/snowcap line) on x64 Debian, .NET 10.0.12.
     /// </summary>
     private const string GoldenLayoutPreviewSha256 =
-        "5EEFD235F3BD232EDB0145DEC815F63B727B67E9178C3B6B10BB43F01E77177E";
+        "8579D9E980D04D944756892487EB4A0D90B12C71FC5443C9842F936DEC19495C";
+
+    /// <summary>
+    ///     SHA-256 hash of the masked 128x128 heightmap produced with the continents3 layout
+    ///     test profile and the fixed seed above. Card 7b shifts biome classification only, so
+    ///     this hash must match the worldgen 7 value.
+    ///
+    ///     To regenerate after an intentional terrain change: run this test once and read the
+    ///     actual hash from the assertion failure message, then update this constant.
+    /// </summary>
+    private const string GoldenLayoutHeightsSha256 =
+        "81C13F064694438EF065908B77135EEC12D40DCCF9696551887ADD681CB35EEF";
+
+    [Fact]
+    public void Plan_WithLayout_MaskedHeightsAreUnchangedByClimateBias()
+    {
+        var profile = TestProfiles.CreateSmall128ThreeLands();
+        var path = TempPreviewPath("layoutheights");
+
+        try
+        {
+            var plan = Plan(profile, "threelands", Seed, 0, 0, path);
+            Assert.Equal(GoldenLayoutHeightsSha256,
+                Sha256(HeightsBytes(plan.Terrain)).ToUpperInvariant());
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
 
     [Fact]
     public void Plan_WithLayout_GoldenPreviewMatchesHash()

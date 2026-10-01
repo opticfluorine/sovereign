@@ -128,7 +128,8 @@ public sealed class LayoutAnchor
     public float Jitter { get; set; }
 
     /// <summary>
-    ///     Mountain bias at the anchor in [-1, 1].
+    ///     Mountain bias at the anchor in [-1, 1]. Positive bias makes the anchor's continent
+    ///     more mountainous: more ridge peaks and a lower alpine/snowcap line.
     /// </summary>
     public float MountainBias { get; set; }
 
