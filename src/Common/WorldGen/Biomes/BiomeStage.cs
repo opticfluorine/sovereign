@@ -24,6 +24,91 @@ using Sovereign.WorldGen.Terrain;
 namespace Sovereign.WorldGen.Biomes;
 
 /// <summary>
+///     Elevation thresholds for one classification pass: the profile snowcap and alpine
+///     scalars plus the optional quarter-resolution mountain-bias shift fields that lower
+///     or raise them per cell.
+/// </summary>
+internal sealed class ClimateThresholds
+{
+    /// <summary>
+    ///     Minimum Z between sea level and the snowcap line.
+    /// </summary>
+    public const int SnowcapFloorAboveSea = 4;
+
+    /// <summary>
+    ///     Minimum Z between sea level and the alpine line.
+    /// </summary>
+    public const int AlpineFloorAboveSea = 2;
+
+    /// <summary>
+    ///     Profile snowcap threshold in Z.
+    /// </summary>
+    public required int SnowcapZ { get; init; }
+
+    /// <summary>
+    ///     Profile alpine threshold in Z.
+    /// </summary>
+    public required int AlpineZ { get; init; }
+
+    /// <summary>
+    ///     Sea level in Z, the floor reference for the shifted thresholds.
+    /// </summary>
+    public required int SeaLevelZ { get; init; }
+
+    /// <summary>
+    ///     Quarter-grid width of the shift fields.
+    /// </summary>
+    public int QuarterWidth { get; init; }
+
+    /// <summary>
+    ///     Quarter-grid height of the shift fields.
+    /// </summary>
+    public int QuarterHeight { get; init; }
+
+    /// <summary>
+    ///     Quarter-resolution snowcap shift field in Z, or null for the unshifted line.
+    /// </summary>
+    public float[,]? SnowcapShift { get; init; }
+
+    /// <summary>
+    ///     Quarter-resolution alpine shift field in Z, or null for the unshifted line.
+    /// </summary>
+    public float[,]? AlpineShift { get; init; }
+
+    /// <summary>
+    ///     Computes the effective snowcap threshold at a cell, clamped between the snowcap
+    ///     floor and the profile value raised by the full negative shift.
+    /// </summary>
+    /// <param name="x">Cell X coordinate.</param>
+    /// <param name="y">Cell Y coordinate.</param>
+    /// <returns>Effective snowcap threshold in Z.</returns>
+    public int EffectiveSnowcapZ(int x, int y)
+    {
+        if (SnowcapShift is null) return SnowcapZ;
+        var shift = (int)MathF.Round(LayoutMaskStage.SampleQuarter(SnowcapShift, QuarterWidth,
+            QuarterHeight, x, y));
+        return Math.Clamp(SnowcapZ - shift, SeaLevelZ + SnowcapFloorAboveSea,
+            SnowcapZ + (int)LayoutBiasStage.SnowcapBiasCoefficient);
+    }
+
+    /// <summary>
+    ///     Computes the effective alpine threshold at a cell, clamped between the alpine
+    ///     floor and the profile value raised by the full negative shift.
+    /// </summary>
+    /// <param name="x">Cell X coordinate.</param>
+    /// <param name="y">Cell Y coordinate.</param>
+    /// <returns>Effective alpine threshold in Z.</returns>
+    public int EffectiveAlpineZ(int x, int y)
+    {
+        if (AlpineShift is null) return AlpineZ;
+        var shift = (int)MathF.Round(LayoutMaskStage.SampleQuarter(AlpineShift, QuarterWidth,
+            QuarterHeight, x, y));
+        return Math.Clamp(AlpineZ - shift, SeaLevelZ + AlpineFloorAboveSea,
+            AlpineZ + (int)LayoutBiasStage.AlpineBiasCoefficient);
+    }
+}
+
+/// <summary>
 ///     Classifies every cell of a plan footprint into a <see cref="BiomeId" />. Water,
 ///     shelf, beach, river, and lake biomes follow the terrain map flags; remaining land
 ///     cells are classified by a Whittaker table over temperature and moisture fields, with
@@ -72,7 +157,8 @@ public sealed class BiomeStage
     /// <param name="profile">World generation profile.</param>
     /// <param name="seed">Sub-seed for biome classification.</param>
     /// <param name="layout">Resolved layout fields whose temperature and moisture biases
-    /// shift the climate fields, or null for the unbiased path.</param>
+    /// shift the climate fields and whose mountain bias shifts the alpine and snowcap lines,
+    /// or null for the unbiased path.</param>
     /// <returns>Biome map with every cell classified.</returns>
     public BiomeMap Apply(TerrainMap map, ContinentalnessResult continentalness,
         WorldGenProfile profile, ulong seed, LayoutFields? layout = null,
@@ -99,7 +185,37 @@ public sealed class BiomeStage
             moisture = ApplyBias(moisture, moistureBias, ClimateBiasCoefficient);
         }
 
-        return Apply(map, continentalness, options, ResolveTable(options), temperature, moisture);
+        return Apply(map, continentalness, options, ResolveTable(options), temperature, moisture,
+            BuildThresholds(options, profile.SeaLevelZ, layout));
+    }
+
+    /// <summary>
+    ///     Builds the per-cell elevation thresholds from the profile scalars and the layout's
+    ///     mountain-bias shift fields, or null when the layout carries no mountain bias.
+    /// </summary>
+    /// <param name="options">Biome options.</param>
+    /// <param name="seaLevelZ">Profile sea level in Z.</param>
+    /// <param name="layout">Resolved layout fields, or null.</param>
+    /// <returns>Threshold context, or null for the unshifted path.</returns>
+    private static ClimateThresholds? BuildThresholds(BiomeOptions options, int seaLevelZ,
+        LayoutFields? layout)
+    {
+        if (layout is null
+            || layout.QuarterSnowcapShift is null && layout.QuarterAlpineShift is null)
+        {
+            return null;
+        }
+
+        return new ClimateThresholds
+        {
+            SnowcapZ = options.SnowcapZ,
+            AlpineZ = options.AlpineZ,
+            SeaLevelZ = seaLevelZ,
+            QuarterWidth = layout.QuarterWidth,
+            QuarterHeight = layout.QuarterHeight,
+            SnowcapShift = layout.QuarterSnowcapShift,
+            AlpineShift = layout.QuarterAlpineShift
+        };
     }
 
     /// <summary>
@@ -135,9 +251,12 @@ public sealed class BiomeStage
     /// <param name="table">Resolved Whittaker table indexed [temperature, moisture].</param>
     /// <param name="temperature">Normalized temperature field in [0, 1].</param>
     /// <param name="moisture">Normalized moisture field in [0, 1].</param>
+    /// <param name="thresholds">Per-cell elevation thresholds, or null for the profile
+    /// scalars unchanged.</param>
     /// <returns>Biome map with every cell classified.</returns>
     internal BiomeMap Apply(TerrainMap map, ContinentalnessResult continentalness,
-        BiomeOptions options, BiomeId[,] table, float[,] temperature, float[,] moisture)
+        BiomeOptions options, BiomeId[,] table, float[,] temperature, float[,] moisture,
+        ClimateThresholds? thresholds = null)
     {
         var width = map.Width;
         var height = map.Height;
@@ -147,7 +266,7 @@ public sealed class BiomeStage
             for (var x = 0; x < width; ++x)
             {
                 biome[x, y] = Classify(map, continentalness, options, table, temperature, moisture,
-                    x, y);
+                    thresholds, x, y);
             }
         });
 
@@ -163,12 +282,14 @@ public sealed class BiomeStage
     /// <param name="table">Resolved Whittaker table indexed [temperature, moisture].</param>
     /// <param name="temperature">Normalized temperature field in [0, 1].</param>
     /// <param name="moisture">Normalized moisture field in [0, 1].</param>
+    /// <param name="thresholds">Per-cell elevation thresholds, or null for the profile
+    /// scalars unchanged.</param>
     /// <param name="x">Cell X coordinate.</param>
     /// <param name="y">Cell Y coordinate.</param>
     /// <returns>Biome ID of the cell.</returns>
     private static BiomeId Classify(TerrainMap map, ContinentalnessResult continentalness,
         BiomeOptions options, BiomeId[,] table, float[,] temperature, float[,] moisture,
-        int x, int y)
+        ClimateThresholds? thresholds, int x, int y)
     {
         if (map.IsOcean[x, y])
         {
@@ -182,8 +303,10 @@ public sealed class BiomeStage
         if (map.IsBeach[x, y]) return BiomeId.Beach;
 
         var h = map.Heights[x, y];
-        if (h >= options.SnowcapZ) return BiomeId.Snowcap;
-        if (h >= options.AlpineZ) return BiomeId.Alpine;
+        var snowcapZ = thresholds?.EffectiveSnowcapZ(x, y) ?? options.SnowcapZ;
+        if (h >= snowcapZ) return BiomeId.Snowcap;
+        var alpineZ = thresholds?.EffectiveAlpineZ(x, y) ?? options.AlpineZ;
+        if (h >= alpineZ) return BiomeId.Alpine;
 
         var tableBiome = table[TemperatureBand(temperature[x, y]), MoistureBand(moisture[x, y])];
         if (options.Swamp is { } swamp && tableBiome is not (BiomeId.Desert or BiomeId.Alpine

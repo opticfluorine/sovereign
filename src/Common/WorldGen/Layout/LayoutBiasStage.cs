@@ -96,6 +96,18 @@ public sealed class LayoutBiasFields
     ///     Roughness bias field.
     /// </summary>
     public required float[,] Roughness { get; init; }
+
+    /// <summary>
+    ///     Snowcap climate-line shift field in Z: the mountain bias scaled by
+    ///     <see cref="LayoutBiasStage.SnowcapBiasCoefficient" />.
+    /// </summary>
+    public required float[,] SnowcapShift { get; init; }
+
+    /// <summary>
+    ///     Alpine climate-line shift field in Z: the mountain bias scaled by
+    ///     <see cref="LayoutBiasStage.AlpineBiasCoefficient" />.
+    /// </summary>
+    public required float[,] AlpineShift { get; init; }
 }
 
 /// <summary>
@@ -105,7 +117,18 @@ public sealed class LayoutBiasFields
 public static class LayoutBiasStage
 {
     /// <summary>
-    ///     Builds the four bias fields over a quarter-resolution grid.
+    ///     Z that a full positive mountain bias lowers the snowcap line by.
+    /// </summary>
+    public const float SnowcapBiasCoefficient = 4f;
+
+    /// <summary>
+    ///     Z that a full positive mountain bias lowers the alpine line by.
+    /// </summary>
+    public const float AlpineBiasCoefficient = 3f;
+
+    /// <summary>
+    ///     Builds the four bias fields and the two climate-line shift fields over a
+    ///     quarter-resolution grid.
     /// </summary>
     /// <param name="anchors">Resolved anchors.</param>
     /// <param name="quarterWidth">Quarter-grid width.</param>
@@ -120,6 +143,8 @@ public static class LayoutBiasStage
         var temperature = new float[quarterWidth, quarterHeight];
         var moisture = new float[quarterWidth, quarterHeight];
         var roughness = new float[quarterWidth, quarterHeight];
+        var snowcapShift = new float[quarterWidth, quarterHeight];
+        var alpineShift = new float[quarterWidth, quarterHeight];
 
         for (var qy = 0; qy < quarterHeight; ++qy)
         {
@@ -142,10 +167,13 @@ public static class LayoutBiasStage
                     roughnessSum += bump * anchor.RoughnessBias;
                 }
 
-                mountain[qx, qy] = Math.Clamp(mountainSum, -1f, 1f);
+                var mountainBias = Math.Clamp(mountainSum, -1f, 1f);
+                mountain[qx, qy] = mountainBias;
                 temperature[qx, qy] = Math.Clamp(temperatureSum, -1f, 1f);
                 moisture[qx, qy] = Math.Clamp(moistureSum, -1f, 1f);
                 roughness[qx, qy] = Math.Clamp(roughnessSum, -1f, 1f);
+                snowcapShift[qx, qy] = mountainBias * SnowcapBiasCoefficient;
+                alpineShift[qx, qy] = mountainBias * AlpineBiasCoefficient;
             }
         }
 
@@ -154,7 +182,9 @@ public static class LayoutBiasStage
             Mountain = mountain,
             Temperature = temperature,
             Moisture = moisture,
-            Roughness = roughness
+            Roughness = roughness,
+            SnowcapShift = snowcapShift,
+            AlpineShift = alpineShift
         };
     }
 }

@@ -87,6 +87,18 @@ public sealed class LayoutFields
     ///     Continentalness mask on the quarter-resolution grid, or null when the mask is off.
     /// </summary>
     public float[,]? QuarterMask { get; init; }
+
+    /// <summary>
+    ///     Snowcap climate-line shift on the quarter-resolution grid, or null when no anchor
+    ///     biases mountains.
+    /// </summary>
+    public float[,]? QuarterSnowcapShift { get; init; }
+
+    /// <summary>
+    ///     Alpine climate-line shift on the quarter-resolution grid, or null when no anchor
+    ///     biases mountains.
+    /// </summary>
+    public float[,]? QuarterAlpineShift { get; init; }
 }
 
 /// <summary>
@@ -161,12 +173,19 @@ public sealed class LayoutMaskStage
         float[,]? temperature = null;
         float[,]? moisture = null;
         float[,]? roughness = null;
+        float[,]? snowcapShift = null;
+        float[,]? alpineShift = null;
         if (hasMask || hasMountain || hasTemperature || hasMoisture || hasRoughness)
         {
             var biasFields = LayoutBiasStage.Build(anchors, quarterWidth, quarterHeight, width, height);
             if (hasMask) mask = Upsample(quarterMask, quarterWidth, quarterHeight, width, height);
             if (hasMountain)
+            {
                 mountain = Upsample(biasFields.Mountain, quarterWidth, quarterHeight, width, height);
+                snowcapShift = biasFields.SnowcapShift;
+                alpineShift = biasFields.AlpineShift;
+            }
+
             if (hasTemperature)
                 temperature = Upsample(biasFields.Temperature, quarterWidth, quarterHeight, width, height);
             if (hasMoisture)
@@ -188,7 +207,9 @@ public sealed class LayoutMaskStage
             TemperatureBias = temperature,
             MoistureBias = moisture,
             RoughnessBias = roughness,
-            QuarterMask = hasMask ? quarterMask : null
+            QuarterMask = hasMask ? quarterMask : null,
+            QuarterSnowcapShift = snowcapShift,
+            QuarterAlpineShift = alpineShift
         };
     }
 
@@ -309,6 +330,24 @@ public sealed class LayoutMaskStage
         }
 
         return result;
+    }
+
+    /// <summary>
+    ///     Bilinearly samples a quarter-resolution field at one block cell using the same
+    ///     half-cell mapping as <see cref="Upsample" />.
+    /// </summary>
+    /// <param name="quarter">Quarter-resolution field.</param>
+    /// <param name="quarterWidth">Quarter-grid width.</param>
+    /// <param name="quarterHeight">Quarter-grid height.</param>
+    /// <param name="x">Block cell X coordinate.</param>
+    /// <param name="y">Block cell Y coordinate.</param>
+    /// <returns>Interpolated value.</returns>
+    public static float SampleQuarter(float[,] quarter, int quarterWidth, int quarterHeight,
+        int x, int y)
+    {
+        var qx = (x - 1.5f) / DownsampleFactor;
+        var qy = (y - 1.5f) / DownsampleFactor;
+        return SampleBilinear(quarter, quarterWidth, quarterHeight, qx, qy);
     }
 
     /// <summary>
