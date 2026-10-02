@@ -47,54 +47,59 @@ public class TestWorldGenAbort
     public void AbortPlan_MidPipeline_SettlesIdleCleansStagingAndReports()
     {
         var pipeline = new CancellableStubPipeline();
-        var (controller, system, services, sender, _) = CreateController(pipeline);
+        var (controller, system, services, sender, jobSender, _, _) = CreateController(pipeline);
 
-        controller.Plan(12345, "default", null, SenderEntityId);
+        controller.Plan(jobSender, 12345, "default", null, SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
         WaitUntil(() => pipeline.Entered.IsSet, "pipeline start");
 
-        Assert.Equal(WorldGenAbortOutcome.Requested, controller.Abort());
-        Assert.Equal(WorldGenerationJobStatus.Cancelling, system.JobStatus);
+        controller.Abort(jobSender);
+        WorldGenFixture.Pump(system, jobSender);
+        Assert.Equal(WorldGenerationJobStatus.Cancelling, services.JobStatus);
 
         pipeline.Release.Set();
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "abort settle");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "abort settle");
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
-        Assert.Contains("Plan aborted at", system.LastStatusMessage);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
+        Assert.Contains("Plan aborted at", services.LastStatusMessage);
         Assert.NotNull(pipeline.StagingDirectorySeen);
         Assert.False(
             Directory.Exists(Path.Combine(pipeline.StagingDirectorySeen!, "segments")),
             "An aborted plan's staged segments must be cleaned up by the runner.");
         Assert.Contains(SentMessages(sender), m => m.Contains("aborted at"));
-        Assert.Contains(SentMessages(sender), m => m.Contains("Cancellation requested"));
 
         // The slot is usable again immediately after the abort settles.
-        controller.Plan(777, "default", null, SenderEntityId);
+        controller.Plan(jobSender, 777, "default", null, SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
         WaitUntil(() => services.LastCompletedPlan?.Seed == 777UL, "next plan");
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
     }
 
     [Fact]
     public void AbortCommit_MidBatch_SettlesIdleAndReCommitCompletes()
     {
         var writer = new GatedCancellableCommitWriter();
-        var (controller, system, services, sender, registry) =
+        var (controller, system, services, sender, jobSender, registry, commitWriter) =
             CreateController(new StubWorldGenPipeline(), writer);
 
         // Stage a plan first; the slot must have settled to Idle before the commit is
         // offered, since the plan task records the plan just after its EndJob call.
-        controller.Plan(555, "default", null, SenderEntityId);
+        controller.Plan(jobSender, 555, "default", null, SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
         WaitUntil(() => services.LastCompletedPlan is not null
-            && system.JobStatus == WorldGenerationJobStatus.Idle, "plan completion");
+            && services.JobStatus == WorldGenerationJobStatus.Idle, "plan completion");
 
-        controller.Commit(555, false, SenderEntityId);
+        controller.Commit(jobSender, 555, false, SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
         WaitUntil(() => writer.Entered.IsSet, "commit start");
-        Assert.Equal(WorldGenAbortOutcome.Requested, controller.Abort());
+        controller.Abort(jobSender);
+        WorldGenFixture.Pump(system, jobSender);
 
         writer.Release.Set();
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "commit abort settle");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "commit abort settle");
 
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
-        Assert.Contains("Commit aborted at", system.LastStatusMessage);
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
+        Assert.Contains("Commit aborted at", services.LastStatusMessage);
         Assert.Contains(SentMessages(sender),
             m => m.Contains("commit aborted") && m.Contains("idempotent"));
         Assert.Empty(registry.Worlds);
@@ -103,25 +108,24 @@ public class TestWorldGenAbort
 
         // Re-commit completes and registers the world.
         writer.Release.Set();
-        controller.Commit(555, false, SenderEntityId);
-        WaitUntil(() => registry.Worlds.Count == 1, "re-commit");
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        controller.Commit(jobSender, 555, false, SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
+        WaitUntil(() => registry.Worlds.Count == 1
+            && services.JobStatus == WorldGenerationJobStatus.Idle, "re-commit");
+        Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
         Assert.Contains(SentMessages(sender), m => m.Contains("World generation committed"));
     }
 
     [Fact]
     public void Abort_WhenIdle_ReportsNoJob()
     {
-        var (controller, _, _, sender, _) = CreateController(new StubWorldGenPipeline());
-
-        Assert.Equal(WorldGenAbortOutcome.NotRunning, controller.Abort());
-        Assert.Equal(WorldGenAbortOutcome.NotRunning, controller.Abort());
-
-        // The chat handler translates the outcome into the user-facing reply.
         var gate = new ManualResetEventSlim(false);
-        var (handler, handlerSender, _, _) = CreateHandler(gate);
+        var (handler, sender, jobSender, system, _, _) = CreateHandler(gate);
+
         handler.Handle("abort", SenderEntityId);
-        Assert.Contains(SentMessages(handlerSender),
+        WorldGenFixture.Pump(system, jobSender);
+
+        Assert.Contains(SentMessages(sender),
             m => m.Contains("No world generation job is running"));
         gate.Set();
     }
@@ -131,52 +135,44 @@ public class TestWorldGenAbort
     {
         // A pipeline that finishes before observing the token: the abort request races the
         // completion. Either the job completes or aborts; either way the slot ends Idle and
-        // the abort reply is coherent.
+        // never wedges.
         for (var i = 0; i < 20; ++i)
         {
             var pipeline = new StubWorldGenPipeline();
-            var (controller, system, services, _, _) = CreateController(pipeline);
+            var (controller, system, services, _, jobSender, _, _) = CreateController(pipeline);
 
-            controller.Plan(1000UL + (ulong)i, "default", null, SenderEntityId);
-            controller.Abort();
-            WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "settle");
+            controller.Plan(jobSender, 1000UL + (ulong)i, "default", null, SenderEntityId);
+            WorldGenFixture.Pump(system, jobSender);
+            controller.Abort(jobSender);
+            WorldGenFixture.Pump(system, jobSender);
+            WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "settle");
 
-            Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+            Assert.Equal(WorldGenerationJobStatus.Idle, services.JobStatus);
             Assert.True(services.LastCompletedPlan is not null
-                        || system.LastStatusMessage!.Contains("aborted"),
+                        || services.LastStatusMessage!.Contains("aborted"),
                 "The job must either complete or abort, never wedge the slot.");
         }
     }
 
     [Fact]
-    public void Abort_Twice_ReportsAlreadyRequested()
+    public void Abort_Twice_RequestsCancellationTwice()
     {
         var pipeline = new CancellableStubPipeline();
-        var (controller, system, _, sender, _) = CreateController(pipeline);
+        var (controller, system, services, _, jobSender, _, _) = CreateController(pipeline);
 
-        controller.Plan(12345, "default", null, SenderEntityId);
+        controller.Plan(jobSender, 12345, "default", null, SenderEntityId);
+        WorldGenFixture.Pump(system, jobSender);
         WaitUntil(() => pipeline.Entered.IsSet, "pipeline start");
 
-        Assert.Equal(WorldGenAbortOutcome.Requested, controller.Abort());
-        Assert.Equal(WorldGenAbortOutcome.AlreadyRequested, controller.Abort());
+        controller.Abort(jobSender);
+        WorldGenFixture.Pump(system, jobSender);
+        Assert.Equal(WorldGenerationJobStatus.Cancelling, services.JobStatus);
 
-        var gate = new ManualResetEventSlim(false);
-        var (handler, handlerSender, handlerSystem, _) = CreateHandler(gate);
-        handler.Handle("plan 12345", SenderEntityId);
-        WaitUntil(() => handlerSystem.JobStatus == WorldGenerationJobStatus.Planning,
-            "second job start");
-        handler.Handle("abort", SenderEntityId);
-        handler.Handle("abort", SenderEntityId);
-        Assert.Contains(SentMessages(handlerSender),
-            m => m.Contains("already requested", StringComparison.Ordinal));
-        Assert.Contains(SentMessages(handlerSender),
-            m => m.Contains("Cancellation requested", StringComparison.Ordinal));
-        gate.Set();
-        WaitUntil(() => handlerSystem.JobStatus == WorldGenerationJobStatus.Idle,
-            "second job settle");
+        controller.Abort(jobSender);
+        WorldGenFixture.Pump(system, jobSender);
 
         pipeline.Release.Set();
-        WaitUntil(() => system.JobStatus == WorldGenerationJobStatus.Idle, "abort settle");
+        WaitUntil(() => services.JobStatus == WorldGenerationJobStatus.Idle, "abort settle");
     }
 
     /// <summary>
@@ -184,42 +180,41 @@ public class TestWorldGenAbort
     ///     assertions through the chat path.
     /// </summary>
     /// <param name="gate">Gate the stub pipeline parks on.</param>
-    /// <returns>Handler, chat sender, system, and services.</returns>
+    /// <returns>Handler, chat sender, controller event sender, system, state manager,
+    ///     and services.</returns>
     private static (WorldGenChatCommandHandler Handler, FakeEventSender Sender,
-        WorldGenerationSystem System, WorldGenerationServices Services) CreateHandler(
-        ManualResetEventSlim gate)
+        FakeEventSender JobSender, WorldGenerationSystem System, WorldGenStateManager StateManager,
+        WorldGenerationServices Services) CreateHandler(ManualResetEventSlim gate)
     {
         var sender = new FakeEventSender();
+        var jobSender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            scratch, NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
+        var stateManager = new WorldGenStateManager(NullLogger<WorldGenStateManager>.Instance);
+        var services = new WorldGenerationServices(stateManager);
         var loader = new ProfileLoader(Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
-        var runner = new WorldGenPlanJobRunner(system, services,
+        var runner = new WorldGenPlanJobRunner(stateManager, services,
             new StubWorldGenPipeline { Gate = gate }, loader,
             new ProfileValidator(),
             new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
             scratch, new ServerChatInternalController(sender),
             NullLogger<WorldGenPlanJobRunner>.Instance);
-        var commitRunner = new WorldGenCommitRunner(system, services, scratch,
-            new FakeWorldGenRegistryStore(), new FakeWorldGenCommitWriter(),
-            new FakeSegmentSubscriptionProbe(), new WorldManagementController(), sender,
-            new ServerChatInternalController(sender), Options.Create(new WorldGenOptions()),
-            NullLogger<WorldGenCommitRunner>.Instance);
+        var commitRunner = WorldGenFixture.BuildCommitRunner(stateManager, services, scratch, sender);
+        var system = WorldGenFixture.BuildSystem(stateManager, runner, commitRunner, scratch);
         var handler = new WorldGenChatCommandHandler(
-            new WorldGenerationController(runner, commitRunner, services), services,
-            new ServerChatInternalController(sender));
-        return (handler, sender, system, services);
+            new WorldGenerationController(), services,
+            new ServerChatInternalController(sender), jobSender);
+        return (handler, sender, jobSender, system, stateManager, services);
     }
 
     /// <summary>
     ///     Creates a controller with the given pipeline and default fakes.
     /// </summary>
     /// <param name="pipeline">Pipeline test double.</param>
-    /// <returns>Controller, system, services, chat sender, and registry store.</returns>
+    /// <returns>Controller, system, services, chat sender, job sender, and registry store.</returns>
     private static (WorldGenerationController Controller, WorldGenerationSystem System,
-        WorldGenerationServices Services, FakeEventSender Sender,
-        FakeWorldGenRegistryStore Registry) CreateController(IWorldGenPipeline pipeline)
+        WorldGenerationServices Services, FakeEventSender Sender, FakeEventSender JobSender,
+        FakeWorldGenRegistryStore Registry, IWorldGenCommitWriter Writer) CreateController(
+            IWorldGenPipeline pipeline)
     {
         return CreateController(pipeline, new FakeWorldGenCommitWriter());
     }
@@ -229,29 +224,27 @@ public class TestWorldGenAbort
     /// </summary>
     /// <param name="pipeline">Pipeline test double.</param>
     /// <param name="writer">Commit writer test double.</param>
-    /// <returns>Controller, system, services, chat sender, and registry store.</returns>
+    /// <returns>Controller, system, services, chat sender, job sender, and registry store.</returns>
     private static (WorldGenerationController Controller, WorldGenerationSystem System,
-        WorldGenerationServices Services, FakeEventSender Sender,
-        FakeWorldGenRegistryStore Registry) CreateController(IWorldGenPipeline pipeline,
-        IWorldGenCommitWriter writer)
+        WorldGenerationServices Services, FakeEventSender Sender, FakeEventSender JobSender,
+        FakeWorldGenRegistryStore Registry, IWorldGenCommitWriter Writer) CreateController(
+            IWorldGenPipeline pipeline, IWorldGenCommitWriter writer)
     {
         var sender = new FakeEventSender();
+        var jobSender = new FakeEventSender();
         var scratch = new WorldGenScratch(Options.Create(new WorldGenOptions()));
-        var system = new WorldGenerationSystem(new EventCommunicator(), new FakeEventLoop(),
-            scratch, NullLogger<WorldGenerationSystem>.Instance);
-        var services = new WorldGenerationServices(system);
-        var loader = new ProfileLoader(Path.Combine(AppContext.BaseDirectory, "Data", "Worldgen"));
-        var runner = new WorldGenPlanJobRunner(system, services, pipeline, loader,
-            new ProfileValidator(), new WorldGenTemplateResolver(TestTemplateIndexers.CreateDefault()),
-            scratch, new ServerChatInternalController(sender),
-            NullLogger<WorldGenPlanJobRunner>.Instance);
+        var stateManager = new WorldGenStateManager(NullLogger<WorldGenStateManager>.Instance);
+        var services = new WorldGenerationServices(stateManager);
         var registry = new FakeWorldGenRegistryStore();
-        var commitRunner = new WorldGenCommitRunner(system, services, scratch, registry, writer,
-            new FakeSegmentSubscriptionProbe(), new WorldManagementController(), sender,
+        var planRunner = WorldGenFixture.BuildPlanRunner(stateManager, services, pipeline, sender,
+            scratch);
+        var commitRunner = new WorldGenCommitRunner(stateManager, services, scratch, registry,
+            writer, new FakeSegmentSubscriptionProbe(), new WorldManagementController(), sender,
             new ServerChatInternalController(sender), Options.Create(new WorldGenOptions()),
             NullLogger<WorldGenCommitRunner>.Instance);
-        var controller = new WorldGenerationController(runner, commitRunner, services);
-        return (controller, system, services, sender, registry);
+        var system = WorldGenFixture.BuildSystem(stateManager, planRunner, commitRunner, scratch);
+        var controller = new WorldGenerationController();
+        return (controller, system, services, sender, jobSender, registry, writer);
     }
 
     /// <summary>

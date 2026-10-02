@@ -44,8 +44,8 @@ public class TestWorldGenServiceRegistration
 
         using var provider = services.BuildServiceProvider();
 
-        var system = provider.GetRequiredService<WorldGenerationSystem>();
-        Assert.Equal(WorldGenerationJobStatus.Idle, system.JobStatus);
+        Assert.Equal(WorldGenerationJobStatus.Idle,
+            provider.GetRequiredService<WorldGenerationServices>().JobStatus);
         Assert.Contains(services,
             d => d.ServiceType == typeof(ISystem) && d.ImplementationFactory is not null);
         Assert.NotNull(provider.GetRequiredService<WorldGenerationServices>());

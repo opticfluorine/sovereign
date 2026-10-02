@@ -14,32 +14,38 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace Sovereign.ServerCore.Systems.WorldGeneration;
+using MessagePack;
+
+namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Status of the single world generation job slot.
+///     Event details for a request to commit the staged world generation plan, replacing
+///     a registered world.
 /// </summary>
-public enum WorldGenerationJobStatus
+[MessagePackObject]
+public class WorldGenReplaceEventDetails : IEventDetails
 {
     /// <summary>
-    ///     No world generation job is running.
+    ///     Seed of the staged plan.
     /// </summary>
-    Idle,
+    [Key(0)]
+    public ulong StagedSeed { get; set; }
 
     /// <summary>
-    ///     A world generation plan is being computed.
+    ///     Seed of the registered world to replace.
     /// </summary>
-    Planning,
+    [Key(1)]
+    public ulong OldSeed { get; set; }
 
     /// <summary>
-    ///     A computed world generation plan is being committed to the world.
+    ///     Whether to proceed despite subscribed players.
     /// </summary>
-    Committing,
+    [Key(2)]
+    public bool Force { get; set; }
 
     /// <summary>
-    ///     A running job has been asked to abort and has yet to observe the cancellation.
-    ///     The underlying work is still Planning or Committing, but further abort requests
-    ///     need no answer.
+    ///     Entity to reply to.
     /// </summary>
-    Cancelling
+    [Key(3)]
+    public ulong SenderEntityId { get; set; }
 }

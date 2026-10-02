@@ -14,68 +14,78 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Threading;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.WorldGeneration;
 
 /// <summary>
 ///     Public API for sending requests to the WorldGeneration system, consumed by the chat
-///     command processor.
+///     command processor. Requests are delivered asynchronously as events.
 /// </summary>
 public class WorldGenerationController
 {
-    private readonly WorldGenPlanJobRunner planRunner;
-    private readonly WorldGenCommitRunner commitRunner;
-    private readonly WorldGenerationServices services;
-
-    public WorldGenerationController(WorldGenPlanJobRunner planRunner,
-        WorldGenCommitRunner commitRunner, WorldGenerationServices services)
-    {
-        this.planRunner = planRunner;
-        this.commitRunner = commitRunner;
-        this.services = services;
-    }
-
     /// <summary>
-    ///     Requests a new world generation plan. The job slot must be Idle; profile loading,
-    ///     validation, and job startup happen synchronously, and the plan itself is computed on
-    ///     a background task. Replies are sent to the requesting entity.
+    ///     Requests a new world generation plan. Replies are sent to the requesting entity.
     /// </summary>
+    /// <param name="eventSender">Event sender.</param>
     /// <param name="seed">World generation seed.</param>
     /// <param name="profileName">World generation profile name, or null for the default profile.</param>
     /// <param name="origin">Origin of the generated world region, or null for the default origin.</param>
     /// <param name="senderEntityId">Entity to reply to.</param>
-    public void Plan(ulong seed, string? profileName, GridPosition? origin, ulong senderEntityId)
+    public void Plan(IEventSender eventSender, ulong seed, string? profileName, GridPosition? origin, 
+        ulong senderEntityId)
     {
-        planRunner.BeginPlan(seed, profileName, origin, senderEntityId);
+        var details = new WorldGenPlanEventDetails
+        {
+            Seed = seed,
+            ProfileName = profileName,
+            Origin = origin,
+            SenderEntityId = senderEntityId
+        };
+        eventSender.SendEvent(new Event(EventId.Server_WorldGen_Plan, details));
     }
 
     /// <summary>
     ///     Requests that the staged world generation plan be committed to the world in
-    ///     batched, idempotent transactions. Validation, the registry check, and the player
-    ///     interlock run synchronously; the writes run on a background task.
+    ///     batched, idempotent transactions.
     /// </summary>
+    /// <param name="eventSender">Event sender.</param>
     /// <param name="seed">Seed to confirm, or null to confirm the staged seed.</param>
     /// <param name="force">Whether to proceed despite subscribed players.</param>
     /// <param name="senderEntityId">Entity to reply to.</param>
-    public void Commit(ulong? seed, bool force, ulong senderEntityId)
+    public void Commit(IEventSender eventSender, ulong? seed, bool force, ulong senderEntityId)
     {
-        commitRunner.BeginCommit(seed, force, senderEntityId);
+        var details = new WorldGenCommitEventDetails
+        {
+            Seed = seed,
+            Force = force,
+            SenderEntityId = senderEntityId
+        };
+        eventSender.SendEvent(new Event(EventId.Server_WorldGen_Commit, details));
     }
 
     /// <summary>
     ///     Requests that the staged world generation plan be committed, replacing a
     ///     registered world whose footprint it fully contains.
     /// </summary>
+    /// <param name="eventSender">Event sender.</param>
     /// <param name="stagedSeed">Seed of the staged plan.</param>
     /// <param name="oldSeed">Seed of the registered world to replace.</param>
     /// <param name="force">Whether to proceed despite subscribed players.</param>
     /// <param name="senderEntityId">Entity to reply to.</param>
-    public void Replace(ulong stagedSeed, ulong oldSeed, bool force, ulong senderEntityId)
+    public void Replace(IEventSender eventSender, ulong stagedSeed, ulong oldSeed, bool force, ulong senderEntityId)
     {
-        commitRunner.BeginReplace(stagedSeed, oldSeed, force, senderEntityId);
+        var details = new WorldGenReplaceEventDetails
+        {
+            StagedSeed = stagedSeed,
+            OldSeed = oldSeed,
+            Force = force,
+            SenderEntityId = senderEntityId
+        };
+        eventSender.SendEvent(new Event(EventId.Server_WorldGen_Replace, details));
     }
 
     /// <summary>
@@ -83,9 +93,9 @@ public class WorldGenerationController
     ///     cooperative: the running pipeline or commit writer observes the cancellation at
     ///     stage boundaries or per batch and unwinds to Idle.
     /// </summary>
-    /// <returns>Outcome of the request for the caller to report.</returns>
-    public WorldGenAbortOutcome Abort()
+    /// <param name="eventSender">Event sender.</param>
+    public void Abort(IEventSender eventSender)
     {
-        return services.RequestAbort();
+        eventSender.SendEvent(new Event(EventId.Server_WorldGen_Abort));
     }
 }
