@@ -62,6 +62,7 @@ public static class ServerNetworkServiceCollectionExtensions
         services
             .TryAddSingleton<IConnectionMappingOutboundPipelineStage, ServerConnectionMappingOutboundPipelineStage>();
         services.TryAddSingleton<IOutboundEventSet, ServerOutboundEventSet>();
+        services.TryAddSingleton<ServerRebroadcastedEventSet>();
     }
 
     private static void AddEntities(IServiceCollection services)
@@ -77,6 +78,8 @@ public static class ServerNetworkServiceCollectionExtensions
             .Singleton<IInboundPipelineStage, SourceEntityMappingInboundPipelineStage>());
         services.TryAddEnumerable(ServiceDescriptor
             .Singleton<IInboundPipelineStage, ServerAllowedEventsInboundPipelineStage>());
+        services.TryAddEnumerable(ServiceDescriptor
+            .Singleton<IInboundPipelineStage, RebroadcastedInboundPipelineStage>());
     }
 
     private static void AddChat(IServiceCollection services)

@@ -58,6 +58,7 @@ public sealed class ClientEntityFactory(
     LevelComponentCollection levels,
     ExperienceComponentCollection experiences,
     RadiantDataComponentCollection radiantDatas,
+    AttackDetailsComponentCollection attackDetails,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -85,6 +86,6 @@ public sealed class ClientEntityFactory(
             orientations, admins, blockPositions, castBlockShadows, pointLightSources,
             physics, boundingBoxes, castShadows, entityTypes, serverOnly, stackables, quantities,
             itemUses, npcFlags, playerFlags, useRanges, healths, staminas, manas, stats, equipmentTypes, levels, experiences,
-            radiantDatas, entityTable);
+            radiantDatas, attackDetails, entityTable);
     }
 }

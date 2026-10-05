@@ -60,6 +60,7 @@ public sealed class ServerEntityFactory(
     LevelComponentCollection levels,
     ExperienceComponentCollection experiences,
     RadiantDataComponentCollection radiantDatas,
+    AttackDetailsComponentCollection attackDetails,
     EntityTable entityTable,
     EntityAssigner entityAssigner)
     : IEntityFactory
@@ -115,6 +116,7 @@ public sealed class ServerEntityFactory(
             levels,
             experiences,
             radiantDatas,
+            attackDetails,
             entityTable);
     }
 }

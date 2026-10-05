@@ -31,6 +31,7 @@ using Sovereign.EngineCore.Performance;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Block;
+using Sovereign.EngineCore.Systems.Combat;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Systems.Dialogue;
 using Sovereign.EngineCore.Systems.Interaction;
@@ -70,6 +71,8 @@ public static class CoreServiceCollectionExtensions
             configuration.GetSection($"Sovereign:{nameof(PerformanceOptions)}"));
         services.Configure<InventoryOptions>(
             configuration.GetSection($"Sovereign:{nameof(InventoryOptions)}"));
+        services.Configure<CombatOptions>(
+            configuration.GetSection($"Sovereign:{nameof(CombatOptions)}"));
         services.Configure<RadiantOptions>(
             configuration.GetSection($"Sovereign:{nameof(RadiantOptions)}"));
 
@@ -143,6 +146,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddComponentCollection<NpcFlagsComponentCollection>();
         services.TryAddComponentCollection<PlayerFlagsComponentCollection>();
         services.TryAddComponentCollection<UseRangeComponentCollection>();
+        services.TryAddComponentCollection<AttackDetailsComponentCollection>();
         services.TryAddComponentCollection<HealthComponentCollection>();
         services.TryAddComponentCollection<StaminaComponentCollection>();
         services.TryAddComponentCollection<ManaComponentCollection>();
@@ -236,6 +240,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<ChangeVitalsEventDetailsValidator>();
         services.TryAddSingleton<EquipEventDetailsValidator>();
         services.TryAddSingleton<UnequipEventDetailsValidator>();
+        services.TryAddSingleton<AttackEventDetailsValidator>();
     }
 
     private static void AddLogging(IServiceCollection services)
@@ -265,6 +270,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddTransient<SystemExecutor>();
 
         AddBlockSystem(services);
+        AddCombat(services);
         AddDataSystem(services);
         AddDialogueSystem(services);
         AddInteractionSystem(services);
@@ -286,6 +292,13 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<BlockGridTracker>();
         services.TryAddSingleton<BlockInternalController>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, BlockSystem>());
+    }
+
+    private static void AddCombat(IServiceCollection services)
+    {
+        services.TryAddSingleton<CombatController>();
+        services.TryAddSingleton<CombatInternalController>();
+        services.TryAddSingleton<EntityKilledByPlayerHandler>();
     }
 
     private static void AddDataSystem(IServiceCollection services)

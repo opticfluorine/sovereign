@@ -58,6 +58,7 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
         ChangeVitalsEventDetailsValidator changeVitalsValidator,
         EquipEventDetailsValidator equipValidator,
         UnequipEventDetailsValidator unequipValidator,
+        AttackEventDetailsValidator attackValidator,
         ILogger<ValidationInboundPipelineStage> logger)
     {
         this.logger = logger;
@@ -99,7 +100,8 @@ public class ValidationInboundPipelineStage : IInboundPipelineStage
             { EventId.Core_Inventory_Equip, equipValidator },
             { EventId.Core_Inventory_Unequip, unequipValidator },
             { EventId.Core_Vitals_Kill, entityValidator },
-            { EventId.Core_Vitals_ChangeVitals, changeVitalsValidator }
+            { EventId.Core_Vitals_ChangeVitals, changeVitalsValidator },
+            { EventId.Server_Combat_Attack, attackValidator }
         };
     }
 

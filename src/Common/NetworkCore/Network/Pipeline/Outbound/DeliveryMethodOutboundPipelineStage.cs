@@ -69,7 +69,8 @@ public class DeliveryMethodOutboundPipelineStage : IOutboundPipelineStage
         { EventId.Core_Inventory_Equip, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Inventory_Unequip, DeliveryMethod.ReliableUnordered },
         { EventId.Core_Vitals_Kill, DeliveryMethod.ReliableUnordered },
-        { EventId.Core_Vitals_ChangeVitals, DeliveryMethod.ReliableUnordered }
+        { EventId.Core_Vitals_ChangeVitals, DeliveryMethod.ReliableUnordered },
+        { EventId.Server_Combat_Attack, DeliveryMethod.ReliableUnordered }
     };
 
     public DeliveryMethodOutboundPipelineStage(ILogger<DeliveryMethodOutboundPipelineStage> logger)
