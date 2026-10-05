@@ -228,6 +228,20 @@ internal sealed class StubWorldGenPipeline : IWorldGenPipeline
             PreviewPath = previewPath
         };
     }
+
+    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, Span<byte> previewBuffer, Memory<byte>[]? cavePreviewBuffers,
+        string stagingDirectory, WorldGenResolvedTemplates resolvedTemplates,
+        Action<string>? progress, System.Threading.CancellationToken cancellationToken = default)
+    {
+        return Plan(profile, profileName, seed, originX, originY, "", stagingDirectory,
+            resolvedTemplates, progress, cancellationToken);
+    }
+
+    public int PreviewBufferLength(WorldGenProfile profile)
+    {
+        return new WorldGenPipeline().PreviewBufferLength(profile);
+    }
 }
 
 /// <summary>
@@ -471,6 +485,20 @@ internal sealed class CancellableStubPipeline : IWorldGenPipeline
             PreviewPath = previewPath
         };
     }
+
+    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, Span<byte> previewBuffer, Memory<byte>[]? cavePreviewBuffers,
+        string stagingDirectory, WorldGenResolvedTemplates resolvedTemplates,
+        Action<string>? progress, System.Threading.CancellationToken cancellationToken = default)
+    {
+        return Plan(profile, profileName, seed, originX, originY, "", stagingDirectory,
+            resolvedTemplates, progress, cancellationToken);
+    }
+
+    public int PreviewBufferLength(WorldGenProfile profile)
+    {
+        return new WorldGenPipeline().PreviewBufferLength(profile);
+    }
 }
 
 /// <summary>
@@ -530,6 +558,19 @@ internal sealed class ThrowingWorldGenPipeline : IWorldGenPipeline
         System.Threading.CancellationToken cancellationToken = default)
     {
         throw exception;
+    }
+
+    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, Span<byte> previewBuffer, Memory<byte>[]? cavePreviewBuffers,
+        string stagingDirectory, WorldGenResolvedTemplates resolvedTemplates,
+        Action<string>? progress, System.Threading.CancellationToken cancellationToken = default)
+    {
+        throw exception;
+    }
+
+    public int PreviewBufferLength(WorldGenProfile profile)
+    {
+        return new WorldGenPipeline().PreviewBufferLength(profile);
     }
 }
 

@@ -13,6 +13,7 @@
         <ProjectReference Include="..\..\Common\EngineCore\EngineCore.csproj"/>
         <ProjectReference Include="..\..\Common\NetworkCore\NetworkCore.csproj"/>
         <ProjectReference Include="..\..\Common\UpdaterCore\UpdaterCore.csproj"/>
+        <ProjectReference Include="..\..\Common\WorldGen\WorldGen.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

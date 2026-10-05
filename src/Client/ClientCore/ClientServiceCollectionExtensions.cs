@@ -271,6 +271,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<GenerateAnimatedSpritesPopup>();
         services.TryAddSingleton<SpritesheetSelector>();
         services.TryAddSingleton<TemplateEditorGui>();
+        services.TryAddSingleton<WorldGeneratorGui>();
         services.TryAddSingleton<BlockTemplateEditorTab>();
         services.TryAddSingleton<NpcTemplateEditorTab>();
         services.TryAddSingleton<ItemTemplateEditorTab>();

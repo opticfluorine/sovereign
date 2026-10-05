@@ -255,6 +255,35 @@ public class TestWorldGenPipeline
         }
     }
 
+    [Fact]
+    public void PreviewBufferLength_MatchesRenderedPreviewSizes()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        profile.Width = 512;
+        profile.Height = 512;
+        profile.Preview = new PreviewOptions { MaxDimension = 256 };
+
+        // 512x512 footprint downscaled by factor 2: 256x256 RGB.
+        Assert.Equal(256 * 256 * 3, new WorldGenPipeline().PreviewBufferLength(profile));
+
+        var path = TempPreviewPath("buflen");
+        var cavePath = Path.Combine(Path.GetDirectoryName(path)!,
+            Path.GetFileNameWithoutExtension(path) + "_caves_1.png");
+        try
+        {
+            Plan(profile, "test512", Seed, 0, 0, path);
+            var image = PngReader.Read(path);
+            var caveImage = PngReader.Read(cavePath);
+            Assert.Equal(256 * 256 * 3, image.Width * image.Height * 3);
+            Assert.Equal(256 * 256 * 3, caveImage.Width * caveImage.Height * 3);
+        }
+        finally
+        {
+            File.Delete(path);
+            File.Delete(cavePath);
+        }
+    }
+
     /// <summary>
     ///     Runs the terrain stages for renderer tests.
     /// </summary>

@@ -116,6 +116,11 @@ public class Keybindings
     public SDL.SDL_Keycode ToggleWorldEditMode { get; }
 
     /// <summary>
+    ///     Key bound to the ShowWorldGenerator in-game shortcut.
+    /// </summary>
+    public SDL.SDL_Keycode ShowWorldGenerator { get; }
+
+    /// <summary>
     ///     Key bound to jumping.
     /// </summary>
     public SDL.SDL_Keycode Jump { get; }
@@ -210,6 +215,8 @@ public class Keybindings
                 inGameShortcuts.ShowTemplateEntityEditor);
         ToggleWorldEditMode = BindSingle(OptionPath("InGameShortcuts", nameof(inGameShortcuts.ToggleWorldEditMode)),
             inGameShortcuts.ToggleWorldEditMode);
+        ShowWorldGenerator = BindSingle(OptionPath("InGameShortcuts", nameof(inGameShortcuts.ShowWorldGenerator)),
+            inGameShortcuts.ShowWorldGenerator);
 
         MoveUp = BindList(OptionPath("InGameActions", nameof(inGameActions.MoveUp)), inGameActions.MoveUp);
         MoveDown = BindList(OptionPath("InGameActions", nameof(inGameActions.MoveDown)), inGameActions.MoveDown);
@@ -265,6 +272,7 @@ public class Keybindings
             ClientStateFlag.ShowRendererDebug => ShowRendererDebug,
             ClientStateFlag.ShowTemplateEntityEditor => ShowTemplateEntityEditor,
             ClientStateFlag.WorldEditMode => ToggleWorldEditMode,
+            ClientStateFlag.ShowWorldGenerator => ShowWorldGenerator,
             _ => SDL.SDL_Keycode.SDLK_UNKNOWN
         };
     }

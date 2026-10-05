@@ -529,6 +529,11 @@ public sealed class InGameShortcutsOptions
     ///     Key to toggle world edit mode (admins only).
     /// </summary>
     public string ToggleWorldEditMode { get; set; } = "Delete";
+
+    /// <summary>
+    ///     Key to toggle the world generator window (admins only).
+    /// </summary>
+    public string ShowWorldGenerator { get; set; } = "F6";
 }
 
 /// <summary>
