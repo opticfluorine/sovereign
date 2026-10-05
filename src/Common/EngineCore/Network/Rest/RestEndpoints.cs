@@ -56,4 +56,9 @@ public sealed class RestEndpoints
     ///     Entity data endpoint.
     /// </summary>
     public const string EntityData = "/entitydata";
+
+    /// <summary>
+    ///     Relative path to REST endpoint for world generation profile services.
+    /// </summary>
+    public const string WorldGenProfiles = "/worldgen/profiles";
 }
