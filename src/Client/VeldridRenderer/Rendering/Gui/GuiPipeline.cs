@@ -35,6 +35,12 @@ public class GuiPipeline : IDisposable
     /// </summary>
     public Pipeline? Pipeline { get; private set; }
 
+    /// <summary>
+    ///     Resource layout shared by the GUI pipeline and any resource sets
+    ///     that must be interchangeable with the GUI atlas resource set.
+    /// </summary>
+    public ResourceLayout? ResourceLayout { get; private set; }
+
     public void Dispose()
     {
         Pipeline?.Dispose();
@@ -131,6 +137,7 @@ public class GuiPipeline : IDisposable
             ResourceKind.Sampler,
             ShaderStages.Fragment
         ));
-        return device.Device.ResourceFactory.CreateResourceLayout(desc);
+        ResourceLayout = device.Device.ResourceFactory.CreateResourceLayout(desc);
+        return ResourceLayout;
     }
 }

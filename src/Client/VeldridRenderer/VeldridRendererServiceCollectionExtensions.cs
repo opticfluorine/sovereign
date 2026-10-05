@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Rendering.Configuration;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.VeldridRenderer.Rendering;
 using Sovereign.VeldridRenderer.Rendering.Configuration;
 using Sovereign.VeldridRenderer.Rendering.Gui;
@@ -65,6 +66,7 @@ public static class VeldridRendererServiceCollectionExtensions
         services.TryAddSingleton<GuiPipeline>();
         services.TryAddSingleton<GuiRenderer>();
         services.TryAddSingleton<GuiResourceManager>();
+        services.TryAddSingleton<IDynamicTextureManager, VeldridDynamicTextureManager>();
     }
 
     private static void AddResources(IServiceCollection services)

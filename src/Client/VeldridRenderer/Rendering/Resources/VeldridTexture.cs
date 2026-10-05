@@ -102,6 +102,21 @@ public class VeldridTexture : IDisposable
     }
 
     /// <summary>
+    ///     Adopts an already-created texture and creates its view.
+    /// </summary>
+    /// <param name="device">Device.</param>
+    /// <param name="texture">Existing texture. Ownership transfers to this instance.</param>
+    public VeldridTexture(VeldridDevice device, Texture texture)
+    {
+        if (device.Device == null)
+            throw new InvalidOperationException("Device not ready.");
+
+        Texture = texture;
+        var desc = new TextureViewDescription(Texture);
+        TextureView = device.Device.ResourceFactory.CreateTextureView(desc);
+    }
+
+    /// <summary>
     ///     Backing Veldrid texture.
     /// </summary>
     public Texture Texture { get; }
