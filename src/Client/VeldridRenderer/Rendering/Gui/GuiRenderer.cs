@@ -268,15 +268,16 @@ public class GuiRenderer : IDisposable
             throw new InvalidOperationException("Dynamic texture manager not available.");
 
         var dynTex = manager.GetTexture(texData.DynamicTextureHandle);
-        var resourceSet = dynTex?.ResourceSet;
-        if (resourceSet == null)
+        var dynamicResourceSet = dynTex?.ResourceSet;
+        if (dynamicResourceSet == null)
         {
             // Texture not yet uploaded or already removed; skip the draw this frame.
             return;
         }
 
-        // Bind the dynamic texture's resource set, draw, then restore the atlas.
-        commandList.SetGraphicsResourceSet(0, resourceSet);
+        // Bind the dynamic texture's resource set, draw, then restore the atlas
+        // binding for subsequent draw commands in this frame.
+        commandList.SetGraphicsResourceSet(0, dynamicResourceSet);
         try
         {
             DrawTextureLayer(commandList, curCmd, curCmd.GetTexID(), systemTime,
