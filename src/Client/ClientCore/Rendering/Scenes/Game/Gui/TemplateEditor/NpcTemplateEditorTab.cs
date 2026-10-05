@@ -60,6 +60,9 @@ public class NpcTemplateEditorTab
     private readonly TemplateEntityDataClient templateEntityDataClient;
 
     private bool initialized;
+    private float inputAttackRange;
+    private bool inputAttackRangeEnabled;
+    private int inputAttackDelayUs;
     private EntityDefinition selectedDefinition = new();
     private ulong selectedEntityId;
     private int selectedIndex;
@@ -238,6 +241,7 @@ public class NpcTemplateEditorTab
         behaviorControlGroup.Render(selectedDefinition);
         RenderNpcFlags();
         RenderStats();
+        RenderCombatControls();
         entityDataControlGroup.Render();
 
         ImGui.EndTable();
@@ -352,6 +356,45 @@ public class NpcTemplateEditorTab
     }
 
     /// <summary>
+    ///     Renders the combat-specific component controls.
+    /// </summary>
+    private void RenderCombatControls()
+    {
+        if (!ImGui.CollapsingHeader("Combat", ImGuiTreeNodeFlags.DefaultOpen)) return;
+        if (!ImGui.BeginTable("CombatControls", 2, ImGuiTableFlags.SizingFixedFit)) return;
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Attack:");
+        ImGui.TableNextColumn();
+        ImGui.Checkbox("##attackEnabled", ref inputAttackRangeEnabled);
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Attack Range:");
+        ImGui.TableNextColumn();
+        ImGui.BeginDisabled(!inputAttackRangeEnabled);
+        ImGui.InputFloat("##attackRange", ref inputAttackRange, 0.1f, 1.0f, "%.2f");
+        ImGui.EndDisabled();
+
+        ImGui.TableNextColumn();
+        ImGui.Text("Attack Delay (us):");
+        ImGui.TableNextColumn();
+        ImGui.BeginDisabled(!inputAttackRangeEnabled);
+        ImGui.InputInt("##attackDelayUs", ref inputAttackDelayUs);
+        if (inputAttackDelayUs < 0) inputAttackDelayUs = 0;
+        ImGui.EndDisabled();
+
+        ImGui.EndTable();
+
+        selectedDefinition.AttackDetails = inputAttackRangeEnabled
+            ? new AttackDetails
+            {
+                AttackRange = inputAttackRange,
+                AttackDelayUs = (uint)inputAttackDelayUs
+            }
+            : null;
+    }
+
+    /// <summary>
     ///     Renders the save/cancel controls at the bottom of the editor.
     /// </summary>
     private void RenderEditorControls()
@@ -447,6 +490,9 @@ public class NpcTemplateEditorTab
             selectedEntityId = sortedTemplateEntityIds[index];
             selectedDefinition = definitionGenerator.GenerateDefinition(selectedEntityId);
             entityDataControlGroup.SelectEntity(selectedEntityId);
+            inputAttackRangeEnabled = selectedDefinition.AttackDetails.HasValue;
+            inputAttackRange = selectedDefinition.AttackDetails?.AttackRange ?? 0f;
+            inputAttackDelayUs = (int)(selectedDefinition.AttackDetails?.AttackDelayUs ?? 0);
         }
     }
 

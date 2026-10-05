@@ -44,6 +44,7 @@ public class ClientOutboundEventSet : IOutboundEventSet
         EventId.Server_WorldEdit_SetBlock,
         EventId.Server_WorldEdit_RemoveBlock,
         EventId.Server_WorldEdit_AddNonBlock,
-        EventId.Server_WorldEdit_RemoveNonBlock
+        EventId.Server_WorldEdit_RemoveNonBlock,
+        EventId.Server_Combat_Attack
     };
 }

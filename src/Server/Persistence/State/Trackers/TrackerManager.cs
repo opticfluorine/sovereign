@@ -24,6 +24,7 @@ namespace Sovereign.Persistence.State.Trackers;
 public sealed class TrackerManager
 {
     private readonly AdminStateTracker adminStateTracker;
+    private readonly AttackDetailsStateTracker attackDetailsStateTracker;
     private readonly BoundingBoxStateTracker boundingBoxStateTracker;
     private readonly CastBlockShadowsStateTracker castBlockShadowsStateTracker;
     private readonly CastShadowsStateTracker castShadowsStateTracker;
@@ -78,7 +79,8 @@ public sealed class TrackerManager
         LevelStateTracker levelStateTracker,
         ExperienceStateTracker experienceStateTracker,
         RadiantDataStateTracker radiantDataStateTracker,
-        PlayerFlagsStateTracker playerFlagsStateTracker)
+        PlayerFlagsStateTracker playerFlagsStateTracker,
+        AttackDetailsStateTracker attackDetailsStateTracker)
     {
         this.adminStateTracker = adminStateTracker;
         this.templateStateTracker = templateStateTracker;
@@ -103,6 +105,7 @@ public sealed class TrackerManager
         this.experienceStateTracker = experienceStateTracker;
         this.radiantDataStateTracker = radiantDataStateTracker;
         this.playerFlagsStateTracker = playerFlagsStateTracker;
+        this.attackDetailsStateTracker = attackDetailsStateTracker;
         OrientationStateTracker = orientationStateTracker;
         KinematicsStateTracker = kinematicsStateTracker;
         BlockTileStateTracker = blockTileStateTracker;

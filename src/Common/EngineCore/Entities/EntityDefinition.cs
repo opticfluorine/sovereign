@@ -72,6 +72,7 @@ public class EntityDefinition
         Level = other.Level;
         Experience = other.Experience;
         RadiantData = other.RadiantData;
+        AttackDetails = other.AttackDetails;
     }
 
     /// <summary>
@@ -265,4 +266,10 @@ public class EntityDefinition
     /// </summary>
     [Key(31)]
     public RadiantData? RadiantData { get; set; }
+
+    /// <summary>
+    ///     AttackDetails component, or null if the entity has no attack details.
+    /// </summary>
+    [Key(32)]
+    public AttackDetails? AttackDetails { get; set; }
 }

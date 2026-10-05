@@ -8,6 +8,23 @@ The scripting engine uses Lua tables with specific entries to communicate inform
 :depth: 2
 :::
 
+(script-types-attackdetails)=
+## AttackDetails
+
+```{eval-rst}
+.. lua:class:: AttackDetails
+
+    Describes the attack capabilities of an entity.
+
+    .. lua:attribute:: AttackRange: number
+
+        Maximum attack range in world units.
+
+    .. lua:attribute:: AttackDelayUs: integer
+
+        Minimum time between attacks in microseconds.
+```
+
 (script-types-blocktile)=
 ## BlockTile
 
@@ -156,6 +173,24 @@ The scripting engine uses Lua tables with specific entries to communicate inform
 
         Absolute system time in microseconds at which the mute expires, or 0
         if the mute was removed before expiring.
+```
+
+(script-types-playerkilledeventdetails)=
+## PlayerKilledEventDetails
+
+```{eval-rst}
+.. lua:class:: PlayerKilledEventDetails
+
+    Event details type describing the death of a player at the hands of
+    another entity.
+
+    .. lua:attribute:: VictimEntityId: integer
+
+        The entity ID of the slain player.
+
+    .. lua:attribute:: KillerEntityId: integer
+
+        The entity ID of the killer, or 0 if unknown.
 ```
 
 (script-types-playernamematch)=

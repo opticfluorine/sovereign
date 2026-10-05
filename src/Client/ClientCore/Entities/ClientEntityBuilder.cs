@@ -60,12 +60,14 @@ public sealed class ClientEntityBuilder : AbstractEntityBuilder
         LevelComponentCollection levels,
         ExperienceComponentCollection experiences,
         RadiantDataComponentCollection radiantDatas,
+        AttackDetailsComponentCollection attackDetails,
         EntityTable entityTable)
         : base(entityId, isLoad, entityManager, kinematics, blockTiles,
             aboveBlocks, playerCharacterTags, names, parents, drawables, animatedSprites,
             orientations, admins, blockPositions, castBlockShadows, pointLightSources, physics, boundingBoxes,
             castShadows, entityTypes, serverOnly, stackables, quantities, itemUses, npcFlags, playerFlags, useRanges,
-            healths, staminas, manas, stats, equipmentTypes, levels, experiences, radiantDatas, entityTable)
+            healths, staminas, manas, stats, equipmentTypes, levels, experiences, radiantDatas, attackDetails,
+            entityTable)
     {
     }
 

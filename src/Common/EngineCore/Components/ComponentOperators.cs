@@ -285,4 +285,13 @@ public static class ComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for AttackDetails-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation, Func<AttackDetails, AttackDetails, AttackDetails>>
+        AttackDetailsOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }
