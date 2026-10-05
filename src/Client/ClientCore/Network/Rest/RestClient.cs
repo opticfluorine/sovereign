@@ -134,6 +134,24 @@ public sealed class RestClient
     }
 
     /// <summary>
+    ///     Asynchronously makes a PUT request to the REST server with a JSON payload.
+    /// </summary>
+    /// <param name="url">Relative URL of the REST endpoint.</param>
+    /// <param name="content">Request content.</param>
+    /// <param name="includeFields">Whether to include fields.</param>
+    /// <returns>Task awaiting the response.</returns>
+    /// <exception cref="NetworkException">Thrown if the REST client is not in the connected state.</exception>
+    public Task<HttpResponseMessage> PutJson<T>(string url, T content, bool includeFields = false)
+    {
+        if (!Connected) throw new NetworkException("REST client is not connected.");
+        var uri = new Uri(baseUri, url);
+        var jsonContent = JsonContent.Create(content, null,
+            includeFields ? MessageConfig.JsonOptionsWithFields : MessageConfig.JsonOptions);
+        jsonContent.Headers.ContentLength = jsonContent.ReadAsStream().Length;
+        return httpClient.PutAsync(uri, jsonContent);
+    }
+
+    /// <summary>
     ///     Asynchronously makes a DELETE request to the REST server.
     /// </summary>
     /// <param name="url">Relative URL of the REST endpoint.</param>

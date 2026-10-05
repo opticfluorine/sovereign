@@ -59,6 +59,48 @@ public interface IWorldGenPipeline
         int originY, string previewPath, string stagingDirectory,
         WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Runs the full world generation plan pipeline, writing raw preview pixels into
+    ///     caller-provided buffers instead of encoding PNG files.
+    /// </summary>
+    /// <param name="profile">Validated world generation profile.</param>
+    /// <param name="profileName">Name of the profile.</param>
+    /// <param name="seed">Root world seed.</param>
+    /// <param name="originX">World X coordinate of the footprint origin.</param>
+    /// <param name="originY">World Y coordinate of the footprint origin.</param>
+    /// <param name="previewBuffer">Caller-owned buffer receiving the preview's raw pixels
+    ///     as packed RGBA quads with alpha 255 in row-major order, top row first.</param>
+    /// <param name="cavePreviewBuffers">Caller-owned buffers receiving one cave level
+    ///     preview's raw pixels each in level order, or null when the profile has no cave
+    ///     levels.</param>
+    /// <param name="stagingDirectory">Absolute path of the plan's staging directory, to
+    ///     which the segment blobs and staged decorations are written.</param>
+    /// <param name="resolvedTemplates">Profile template names resolved against the live
+    ///     template entity set.</param>
+    /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
+    /// <param name="cancellationToken">Token observed at stage and sub-stage boundaries;
+    ///     cancellation unwinds through <see cref="OperationCanceledException" />.</param>
+    /// <returns>The completed plan, whose preview paths are empty in this mode.</returns>
+    /// <remarks>
+    ///     Each buffer must hold <c>width * height * 4</c> bytes for its rendered preview,
+    ///     whose dimensions are the profile footprint downscaled by
+    ///     <c>max(1, ceiling(longSide / maxDimension))</c> using the profile's preview max
+    ///     dimension clamped to [256, 8192]. One buffer per cave level is required when the
+    ///     profile enables cave levels; otherwise an exception is thrown.
+    /// </remarks>
+    WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, Span<byte> previewBuffer, Memory<byte>[]? cavePreviewBuffers,
+        string stagingDirectory, WorldGenResolvedTemplates resolvedTemplates,
+        Action<string>? progress, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Computes the number of bytes required for a single preview buffer.
+    /// </summary>
+    /// <param name="profile">World generation profile.</param>
+    /// <returns>Number of bytes required for the main preview buffer and for each cave
+    ///     level preview buffer, which are always the same size.</returns>
+    int PreviewBufferLength(WorldGenProfile profile);
 }
 
 /// <summary>
@@ -100,6 +142,95 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         int originY, string previewPath, string stagingDirectory,
         WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
         CancellationToken cancellationToken = default)
+    {
+        return PlanCore(profile, profileName, seed, originX, originY, previewPath, default,
+            null, stagingDirectory, resolvedTemplates, progress,
+            cancellationToken);
+    }
+
+    /// <summary>
+    ///     Runs the full world generation plan pipeline, writing raw preview pixels into
+    ///     caller-provided buffers instead of encoding PNG files.
+    /// </summary>
+    /// <param name="profile">Validated world generation profile.</param>
+    /// <param name="profileName">Name of the profile.</param>
+    /// <param name="seed">Root world seed.</param>
+    /// <param name="originX">World X coordinate of the footprint origin.</param>
+    /// <param name="originY">World Y coordinate of the footprint origin.</param>
+    /// <param name="previewBuffer">Caller-owned buffer receiving the preview's raw pixels
+    ///     as packed RGBA quads with alpha 255 in row-major order, top row first.</param>
+    /// <param name="cavePreviewBuffers">Caller-owned buffers receiving one cave level
+    ///     preview's raw pixels each in level order, or null when the profile has no cave
+    ///     levels.</param>
+    /// <param name="stagingDirectory">Absolute path of the plan's staging directory, to
+    ///     which the segment blobs and staged decorations are written.</param>
+    /// <param name="resolvedTemplates">Profile template names resolved against the live
+    ///     template entity set.</param>
+    /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
+    /// <param name="cancellationToken">Token observed at stage and sub-stage boundaries.</param>
+    /// <returns>The completed plan, whose preview paths are empty in this mode.</returns>
+    /// <remarks>
+    ///     Each buffer must hold <c>width * height * 4</c> bytes for its rendered preview,
+    ///     whose dimensions are the profile footprint downscaled by
+    ///     <c>max(1, ceiling(longSide / maxDimension))</c> using the profile's preview max
+    ///     dimension clamped to [256, 8192]. One buffer per cave level is required when the
+    ///     profile enables cave levels; otherwise an exception is thrown.
+    /// </remarks>
+    public WorldGenPlan Plan(WorldGenProfile profile, string profileName, ulong seed, int originX,
+        int originY, Span<byte> previewBuffer, Memory<byte>[]? cavePreviewBuffers,
+        string stagingDirectory, WorldGenResolvedTemplates resolvedTemplates,
+        Action<string>? progress, CancellationToken cancellationToken = default)
+    {
+        return PlanCore(profile, profileName, seed, originX, originY, null, previewBuffer,
+            cavePreviewBuffers, stagingDirectory, resolvedTemplates, progress,
+            cancellationToken);
+    }
+
+    /// <summary>
+    ///     Computes the number of bytes required for a single preview buffer.
+    /// </summary>
+    /// <param name="profile">World generation profile.</param>
+    /// <returns>Number of bytes required for the main preview buffer and for each cave
+    ///     level preview buffer, which are always the same size.</returns>
+    public int PreviewBufferLength(WorldGenProfile profile)
+    {
+        var cap = Math.Clamp(PreviewOptions.EffectiveMaxDimension(profile),
+            PreviewOptions.MinMaxDimension, PreviewOptions.MaxMaxDimension);
+        var longSide = Math.Max(profile.Width, profile.Height);
+        var factor = longSide <= cap ? 1 : (longSide + cap - 1) / cap;
+        var width = (profile.Width + factor - 1) / factor;
+        var height = (profile.Height + factor - 1) / factor;
+        return width * height * 4;
+    }
+
+    /// <summary>
+    ///     Runs the full world generation plan pipeline, encoding PNG previews when a
+    ///     preview path is given and otherwise writing raw preview pixels into caller
+    ///     buffers.
+    /// </summary>
+    /// <param name="profile">Validated world generation profile.</param>
+    /// <param name="profileName">Name of the profile.</param>
+    /// <param name="seed">Root world seed.</param>
+    /// <param name="originX">World X coordinate of the footprint origin.</param>
+    /// <param name="originY">World Y coordinate of the footprint origin.</param>
+    /// <param name="previewPath">Absolute path to which the preview PNGs are written, or
+    ///     null to write raw preview pixels into the caller's buffers.</param>
+    /// <param name="previewBuffer">Buffer receiving the preview's raw pixels as packed RGB
+    ///     triples in row-major order, top row first.</param>
+    /// <param name="cavePreviewBuffers">Buffers receiving one cave level preview's raw
+    ///     pixels each in level order, or null.</param>
+    /// <param name="stagingDirectory">Absolute path of the plan's staging directory, to
+    ///     which the segment blobs and staged decorations are written.</param>
+    /// <param name="resolvedTemplates">Profile template names resolved against the live
+    ///     template entity set.</param>
+    /// <param name="progress">Optional callback invoked at stage boundaries with the stage name.</param>
+    /// <param name="cancellationToken">Token observed at stage and sub-stage boundaries.</param>
+    /// <returns>The completed plan.</returns>
+    private WorldGenPlan PlanCore(WorldGenProfile profile, string profileName, ulong seed,
+        int originX, int originY, string? previewPath, Span<byte> previewBuffer,
+        Memory<byte>[]? cavePreviewBuffers, string stagingDirectory,
+        WorldGenResolvedTemplates resolvedTemplates, Action<string>? progress,
+        CancellationToken cancellationToken)
     {
         var total = Stopwatch.StartNew();
         var terrainClock = new Stopwatch();
@@ -232,19 +363,40 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             biomeMap, caves?.Map.Mouths, layout, layoutReport, showAnchorOverlay);
         cancellationToken.ThrowIfCancellationRequested();
         Report(progress, "Rendering preview (85%)");
-        PngWriter.WritePng(previewPath, preview.Width, preview.Height, preview.Pixels);
+        if (previewPath is { } path)
+        {
+            PngWriter.WritePng(path, preview.Width, preview.Height, preview.Pixels);
+        }
+        else
+        {
+            WritePreviewPixels(previewBuffer, preview);
+        }
 
         var cavePreviewPaths = new List<string>();
         if (caves is not null)
         {
             var cavePreviews = new CavePreviewRenderer().Render(caves.Map, maxDimension);
+            var cavePreviewCount = cavePreviewBuffers?.Length ?? 0;
+            if (previewPath is null && cavePreviewCount < cavePreviews.Count)
+            {
+                throw new ArgumentException(
+                    $"World generation with cave levels requires {cavePreviews.Count} cave preview buffers, but {cavePreviewCount} were provided.");
+            }
+
             for (var i = 0; i < cavePreviews.Count; ++i)
             {
-                var path = CavePreviewPath(previewPath, i + 1);
                 Report(progress, $"Rendering preview (85% + cave level {i + 1})");
-                PngWriter.WritePng(path, cavePreviews[i].Width, cavePreviews[i].Height,
-                    cavePreviews[i].Pixels);
-                cavePreviewPaths.Add(path);
+                if (previewPath is { } previewFilePath)
+                {
+                    var cavePath = CavePreviewPath(previewFilePath, i + 1);
+                    PngWriter.WritePng(cavePath, cavePreviews[i].Width, cavePreviews[i].Height,
+                        cavePreviews[i].Pixels);
+                    cavePreviewPaths.Add(cavePath);
+                }
+                else
+                {
+                    WritePreviewPixels(cavePreviewBuffers![i].Span, cavePreviews[i]);
+                }
             }
         }
 
@@ -302,7 +454,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
             Caves = caves?.Map,
             CavePreviewPaths = cavePreviewPaths,
             Statistics = statistics,
-            PreviewPath = previewPath
+            PreviewPath = previewPath ?? ""
         };
     }
 
@@ -479,6 +631,32 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         }
 
         return Path.Combine(directory, file + ".png");
+    }
+
+    /// <summary>
+    ///     Copies a rendered preview's raw pixels into a caller-owned buffer as packed RGBA
+    ///     quads with alpha 255.
+    /// </summary>
+    /// <param name="buffer">Destination buffer.</param>
+    /// <param name="preview">Rendered preview image.</param>
+    private static void WritePreviewPixels(Span<byte> buffer, PreviewImage preview)
+    {
+        var pixelCount = preview.Width * preview.Height;
+        var length = pixelCount * 4;
+        if (buffer.Length < length)
+        {
+            throw new ArgumentException(
+                $"Preview buffer is too small: {length} bytes required, but the buffer holds {buffer.Length} bytes.");
+        }
+
+        var pixels = preview.Pixels;
+        for (var i = 0; i < pixelCount; ++i)
+        {
+            buffer[i * 4] = pixels[i * 3];
+            buffer[i * 4 + 1] = pixels[i * 3 + 1];
+            buffer[i * 4 + 2] = pixels[i * 3 + 2];
+            buffer[i * 4 + 3] = 0xff;
+        }
     }
 
     /// <summary>

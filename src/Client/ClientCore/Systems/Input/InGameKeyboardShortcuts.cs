@@ -52,6 +52,7 @@ public class InGameKeyboardShortcuts
         Register(keybindings, ClientStateFlag.ShowEntityDebug);
         Register(keybindings, ClientStateFlag.ShowRendererDebug);
         Register(keybindings, ClientStateFlag.ShowTemplateEntityEditor);
+        Register(keybindings, ClientStateFlag.ShowWorldGenerator);
         RegisterWorldEditModeShortcut(keybindings);
     }
 

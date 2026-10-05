@@ -32,6 +32,7 @@ using Sovereign.ServerNetwork.Network.Rest;
 using Sovereign.ServerNetwork.Network.Rest.Accounts;
 using Sovereign.ServerNetwork.Network.Rest.Players;
 using Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
+using Sovereign.ServerNetwork.Network.Rest.WorldGen;
 using Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 using Sovereign.ServerNetwork.Network.ServerNetwork;
 using Sovereign.ServerNetwork.Systems.Network;
@@ -112,6 +113,7 @@ public static class ServerNetworkServiceCollectionExtensions
         services.TryAddSingleton<ScriptInfoRestService>();
         services.TryAddSingleton<SelectPlayerRestService>();
         services.TryAddSingleton<SetTemplateEntityRestService>();
+        services.TryAddSingleton<SetWorldGenProfileRestService>();
         services.TryAddSingleton<TemplateEntitiesRestService>();
         services.TryAddSingleton<WorldSegmentRestService>();
 
