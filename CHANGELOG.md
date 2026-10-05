@@ -2,6 +2,12 @@
 
 ## 2026
 
+### October
+
+#### 5 October 2026
+
+* Add dynamically updated GUI textures. A new `IDynamicTextureManager` interface (ClientCore) allows any system to add, update, and remove standalone RGBA8 textures from any thread, hiding all renderer details behind the interface; the Veldrid renderer provides the implementation, which queues operations and applies them on the render thread at the start of each GUI frame. Dynamic textures are referenced by integer handle, integrated into the ImGui texture ID table with a new `GuiTextureMapper` source type, sampled with per-texture point or linear interpolation chosen at creation time, and drawn by temporarily binding a per-texture resource set before restoring the default texture atlas binding. New `GuiExtensions.Image` and `GuiExtensions.ImageButton` methods render dynamic textures in GUI screens.
+
 ### September
 
 #### 27 September 2026

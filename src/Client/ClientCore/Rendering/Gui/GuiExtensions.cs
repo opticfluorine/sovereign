@@ -38,16 +38,49 @@ public class GuiExtensions
 
     private readonly RendererOptions rendererOptions;
 
+    private readonly IDynamicTextureManager dynamicTextureManager;
+
     private readonly ScriptInfoClient scriptInfoClient;
 
     private readonly GuiTextureMapper textureMapper;
 
     public GuiExtensions(GuiTextureMapper textureMapper, ScriptInfoClient scriptInfoClient,
-        IOptions<RendererOptions> rendererOptions)
+        IOptions<RendererOptions> rendererOptions, IDynamicTextureManager dynamicTextureManager)
     {
         this.textureMapper = textureMapper;
         this.scriptInfoClient = scriptInfoClient;
         this.rendererOptions = rendererOptions.Value;
+        this.dynamicTextureManager = dynamicTextureManager;
+    }
+
+    /// <summary>
+    ///     Renders a dynamically updated texture to the GUI.
+    /// </summary>
+    /// <param name="handle">Dynamic texture handle.</param>
+    /// <param name="size">Draw size in pixels.</param>
+    /// <returns>true if the texture was drawn, false if the handle is no longer valid.</returns>
+    public bool Image(int handle, Vector2 size)
+    {
+        if (!dynamicTextureManager.TryGetDimensions(handle, out var width, out var height))
+            return false;
+        var texId = textureMapper.GetTextureIdForDynamicTexture(handle, width, height);
+        ImGui.Image(texId, size);
+        return true;
+    }
+
+    /// <summary>
+    ///     Renders a dynamically updated texture to the GUI as a clickable button.
+    /// </summary>
+    /// <param name="id">Button ID.</param>
+    /// <param name="handle">Dynamic texture handle.</param>
+    /// <param name="size">Draw size in pixels.</param>
+    /// <returns>true if button clicked, false otherwise.</returns>
+    public bool ImageButton(string id, int handle, Vector2 size)
+    {
+        if (!dynamicTextureManager.TryGetDimensions(handle, out var width, out var height))
+            return false;
+        var texId = textureMapper.GetTextureIdForDynamicTexture(handle, width, height);
+        return ImGui.ImageButton(id, texId, size);
     }
 
     /// <summary>
@@ -57,7 +90,7 @@ public class GuiExtensions
     public void Sprite(int spriteId)
     {
         var texId = textureMapper.GetTextureIdForSprite(spriteId);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         // Render GUI component.
         ImGui.Image(texId, GetSpriteDimensions(texData));
@@ -72,7 +105,7 @@ public class GuiExtensions
     public bool SpriteButton(string id, int spriteId)
     {
         var texId = textureMapper.GetTextureIdForSprite(spriteId);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
         var result = ImGui.ImageButton(id, texId, GetSpriteDimensions(texData));
@@ -90,7 +123,7 @@ public class GuiExtensions
     public void AnimatedSprite(int animatedSpriteId, Orientation orientation, AnimationPhase phase)
     {
         var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         // Render GUI component.
         ImGui.Image(texId, GetSpriteDimensions(texData));
@@ -122,7 +155,7 @@ public class GuiExtensions
     public Vector2 CalcAnimatedSpriteSize(int animatedSpriteId, Orientation orientation, AnimationPhase phase)
     {
         var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         return GetSpriteDimensions(texData);
     }
@@ -138,7 +171,7 @@ public class GuiExtensions
         AnimationPhase phase)
     {
         var texId = textureMapper.GetTextureIdForCustomAnimatedSprite(customId, customSprite, orientation, phase);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         ImGui.Image(texId, GetSpriteDimensions(texData));
     }
@@ -154,7 +187,7 @@ public class GuiExtensions
     public bool AnimatedSpriteButton(string id, int animatedSpriteId, Orientation orientation, AnimationPhase phase)
     {
         var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
         var result = ImGui.ImageButton(id, texId, GetSpriteDimensions(texData));
@@ -174,7 +207,7 @@ public class GuiExtensions
         Vector2 position)
     {
         var texId = textureMapper.GetTextureIdForAnimatedSprite(animatedSpriteId, orientation, phase);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
         var end = position + GetSpriteDimensions(texData);
 
         ImGui.GetForegroundDrawList().AddImage(texId, position, end);
@@ -188,7 +221,7 @@ public class GuiExtensions
     public void TileSprite(int tileSpriteId, TileContextKey contextKey)
     {
         var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, contextKey);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         ImGui.Image(texId, GetSpriteDimensions(texData));
     }
@@ -203,7 +236,7 @@ public class GuiExtensions
     public void TileSprite(string customId, TileSprite customSprite, TileContextKey contextKey, bool obscured = false)
     {
         var texId = textureMapper.GetTextureIdForCustomTileSprite(customId, customSprite, contextKey, obscured);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         ImGui.Image(texId, GetSpriteDimensions(texData));
     }
@@ -218,7 +251,7 @@ public class GuiExtensions
     public bool TileSpriteButton(string id, int tileSpriteId, TileContextKey contextKey)
     {
         var texId = textureMapper.GetTextureIdForTileSprite(tileSpriteId, contextKey);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
         var result = ImGui.ImageButton(id, texId, GetSpriteDimensions(texData));
@@ -235,7 +268,7 @@ public class GuiExtensions
     public void Spritesheet(string spritesheet, float zoom = 1.0f)
     {
         var texId = textureMapper.GetTextureIdForSpritesheet(spritesheet);
-        var texData = textureMapper.GetTextureDataForTextureId(texId);
+        var texData = textureMapper.GetTextureDataForTextureId(texId)!;
 
         // Render GUI component.
         ImGui.Image(texId, GetSpriteDimensions(texData) * new Vector2(zoom));

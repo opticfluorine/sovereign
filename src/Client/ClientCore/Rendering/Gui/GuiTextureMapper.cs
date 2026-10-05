@@ -61,7 +61,12 @@ public class GuiTextureMapper
         /// <summary>
         ///     Texture is a custom animated sprite not in the animated sprite table.
         /// </summary>
-        CustomAnimatedSprite
+        CustomAnimatedSprite,
+
+        /// <summary>
+        ///     Texture is a dynamically updated standalone texture.
+        /// </summary>
+        Dynamic
     }
 
     /// <summary>
@@ -83,6 +88,11 @@ public class GuiTextureMapper
     ///     Map from custom ID to corresponding texture list entry.
     /// </summary>
     private readonly Dictionary<string, int> customIndices = new();
+
+    /// <summary>
+    ///     Map from dynamic texture handle to corresponding texture list entry.
+    /// </summary>
+    private readonly Dictionary<int, int> dynamicIndices = new();
 
     /// <summary>
     ///     Queue of indices that can be reclaimed for use.
@@ -135,11 +145,52 @@ public class GuiTextureMapper
     /// <summary>
     ///     Gets the texture data associated with the given texture index.
     /// </summary>
-    /// <param name="textureId"></param>
-    /// <returns></returns>
-    public TextureData GetTextureDataForTextureId(ImTextureID textureId)
+    /// <param name="textureId">ImGui texture ID.</param>
+    /// <returns>Texture data, or null if the ID is invalid or refers to the font atlas.</returns>
+    public TextureData? GetTextureDataForTextureId(ImTextureID textureId)
     {
-        return textures[(int)textureId.Handle - IndexOffset];
+        var index = (int)textureId.Handle - IndexOffset;
+        if (index < 0 || index >= textures.Count) return null;
+        return textures[index];
+    }
+
+    /// <summary>
+    ///     Gets the ImGui texture ID for a dynamically updated texture.
+    /// </summary>
+    /// <param name="handle">Dynamic texture handle from <see cref="IDynamicTextureManager"/>.</param>
+    /// <param name="width">Width in pixels.</param>
+    /// <param name="height">Height in pixels.</param>
+    /// <returns>ImGui texture ID.</returns>
+    public ImTextureID GetTextureIdForDynamicTexture(int handle, uint width, uint height)
+    {
+        if (!dynamicIndices.TryGetValue(handle, out var index))
+        {
+            index = AddTextureData(new TextureData
+            {
+                SourceType = SourceType.Dynamic,
+                Id = handle,
+                Width = width,
+                Height = height
+            });
+            dynamicIndices[handle] = index;
+        }
+
+        return new ImTextureID(index + IndexOffset);
+    }
+
+    /// <summary>
+    ///     Drops the cached entry for a removed dynamic texture.
+    /// </summary>
+    /// <remarks>
+    ///     The list index is intentionally not reclaimed: ImGui draw commands from the
+    ///     current frame may still reference it, and reissuing it would make those commands
+    ///     resolve to an unrelated new texture. The stale entry stays unreachable, and the
+    ///     renderer skips draws whose dynamic handle is no longer live.
+    /// </remarks>
+    /// <param name="handle">Dynamic texture handle that was removed.</param>
+    public void OnDynamicTextureRemoved(int handle)
+    {
+        dynamicIndices.Remove(handle);
     }
 
     /// <summary>
@@ -300,7 +351,7 @@ public class GuiTextureMapper
 
             // Assume constant sprite size through all layers. Use first layer as source.
             var firstLayerTexId = GetTextureIdForAnimatedSprite(layers[0], Orientation.South, AnimationPhase.Default);
-            var firstLayerTexData = GetTextureDataForTextureId(firstLayerTexId);
+            var firstLayerTexData = GetTextureDataForTextureId(firstLayerTexId)!;
 
             // Create texture record.
             index = AddTextureData(new TextureData
@@ -457,6 +508,11 @@ public class GuiTextureMapper
         ///     For ID-based source types, the ID of the underlying resource.
         /// </summary>
         public int Id;
+
+        /// <summary>
+        ///     For SourceType "Dynamic", the dynamic texture handle.
+        /// </summary>
+        public int DynamicTextureHandle;
 
         /// <summary>
         ///     For SourceType "Multiple", the layers to be drawn.

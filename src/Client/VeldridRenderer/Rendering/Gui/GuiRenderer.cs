@@ -38,6 +38,7 @@ public class GuiRenderer : IDisposable
     private readonly TextureAtlasManager atlasManager;
     private readonly AtlasMap atlasMap;
     private readonly VeldridDevice device;
+    private readonly IDynamicTextureManager dynamicTextureManager;
     private readonly CommonGuiManager guiManager;
     private readonly GuiPipeline guiPipeline;
     private readonly GuiResourceManager guiResourceManager;
@@ -65,7 +66,7 @@ public class GuiRenderer : IDisposable
     public GuiRenderer(CommonGuiManager guiManager, GuiResourceManager guiResourceManager, GuiPipeline guiPipeline,
         TextureAtlasManager atlasManager, ISystemTimer systemTimer, AnimatedSpriteManager animatedSpriteManager,
         AtlasMap atlasMap, VeldridDevice device, VeldridResourceManager resourceManager,
-        GuiTextureMapper textureMapper)
+        GuiTextureMapper textureMapper, IDynamicTextureManager dynamicTextureManager)
     {
         this.guiManager = guiManager;
         this.guiResourceManager = guiResourceManager;
@@ -77,6 +78,7 @@ public class GuiRenderer : IDisposable
         this.device = device;
         this.resourceManager = resourceManager;
         this.textureMapper = textureMapper;
+        this.dynamicTextureManager = dynamicTextureManager;
     }
 
     public void Dispose()
@@ -147,6 +149,8 @@ public class GuiRenderer : IDisposable
             throw new InvalidOperationException("GUI resource set is null.");
 
         // First stage, convert pending ImGui commands to drawing-level data
+        if (dynamicTextureManager is VeldridDynamicTextureManager veldridDynamicTextureManager)
+            veldridDynamicTextureManager.ApplyPendingOps();
         var drawData = guiManager.Render();
         if (drawData.CmdListsCount == 0) return;
         drawData.ScaleClipRects(scaleFactor);
@@ -189,10 +193,15 @@ public class GuiRenderer : IDisposable
                 {
                     var texId = curCmd.GetTexID();
                     var texData = textureMapper.GetTextureDataForTextureId(texId);
+                    if (texData == null) continue;
+
                     if (texData is { SourceType: GuiTextureMapper.SourceType.Multiple, Layers: not null })
                         foreach (var layerTexId in texData.Layers)
                             DrawTextureLayer(commandList, curCmd, layerTexId, systemTime, indexOffset, listIndexOffset,
                                 vertexOffset);
+                    else if (texData.SourceType == GuiTextureMapper.SourceType.Dynamic)
+                        DrawDynamicTexture(commandList, curCmd, texData, systemTime, indexOffset, listIndexOffset,
+                            vertexOffset);
                     else
                         DrawTextureLayer(commandList, curCmd, texId, systemTime, indexOffset, listIndexOffset,
                             vertexOffset);
@@ -242,6 +251,44 @@ public class GuiRenderer : IDisposable
     }
 
     /// <summary>
+    ///     Draws a dynamically updated GUI texture.
+    /// </summary>
+    /// <param name="commandList">Active command list.</param>
+    /// <param name="curCmd">Current ImGui draw command.</param>
+    /// <param name="texData">Texture data for the dynamic texture.</param>
+    /// <param name="systemTime">Current frame system time.</param>
+    /// <param name="indexOffset">Overall offset into GUI index buffer.</param>
+    /// <param name="listIndexOffset">Current list relative offset into GUI index buffer.</param>
+    /// <param name="vertexOffset">Overall offset into GUI vertex buffer.</param>
+    private void DrawDynamicTexture(CommandList commandList, ImDrawCmd curCmd,
+        GuiTextureMapper.TextureData texData, ulong systemTime,
+        int indexOffset, int listIndexOffset, int vertexOffset)
+    {
+        if (dynamicTextureManager is not VeldridDynamicTextureManager manager)
+            throw new InvalidOperationException("Dynamic texture manager not available.");
+
+        var dynTex = manager.GetTexture(texData.DynamicTextureHandle);
+        var resourceSet = dynTex?.ResourceSet;
+        if (resourceSet == null)
+        {
+            // Texture not yet uploaded or already removed; skip the draw this frame.
+            return;
+        }
+
+        // Bind the dynamic texture's resource set, draw, then restore the atlas.
+        commandList.SetGraphicsResourceSet(0, resourceSet);
+        try
+        {
+            DrawTextureLayer(commandList, curCmd, curCmd.GetTexID(), systemTime,
+                indexOffset, listIndexOffset, vertexOffset);
+        }
+        finally
+        {
+            commandList.SetGraphicsResourceSet(0, resourceSet!);
+        }
+    }
+
+    /// <summary>
     ///     Binds the texture for a draw call.
     /// </summary>
     /// <param name="texId">GUI texture ID of next layer.</param>
@@ -264,9 +311,17 @@ public class GuiRenderer : IDisposable
         else
         {
             // Something else being rendered - what?
-            var textureData = textureMapper.GetTextureDataForTextureId(texId);
+            var textureData = textureMapper.GetTextureDataForTextureId(texId)!;
             switch (textureData.SourceType)
             {
+                case GuiTextureMapper.SourceType.Dynamic:
+                    // Standalone texture: sample the full [0,1] UV range.
+                    startX = 0.0f;
+                    startY = 0.0f;
+                    endX = 1.0f;
+                    endY = 1.0f;
+                    break;
+
                 case GuiTextureMapper.SourceType.AnimatedSprite:
                     BindAnimatedSprite(textureData.Id, textureData.Orientation, textureData.AnimationPhase, systemTime,
                         out startX, out startY, out endX, out endY);
