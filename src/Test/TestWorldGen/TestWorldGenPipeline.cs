@@ -263,8 +263,8 @@ public class TestWorldGenPipeline
         profile.Height = 512;
         profile.Preview = new PreviewOptions { MaxDimension = 256 };
 
-        // 512x512 footprint downscaled by factor 2: 256x256 RGB.
-        Assert.Equal(256 * 256 * 3, new WorldGenPipeline().PreviewBufferLength(profile));
+        // 512x512 footprint downscaled by factor 2: 256x256 RGBA.
+        Assert.Equal(256 * 256 * 4, new WorldGenPipeline().PreviewBufferLength(profile));
 
         var path = TempPreviewPath("buflen");
         var cavePath = Path.Combine(Path.GetDirectoryName(path)!,
@@ -279,6 +279,68 @@ public class TestWorldGenPipeline
         }
         finally
         {
+            File.Delete(path);
+            File.Delete(cavePath);
+        }
+    }
+
+    [Fact]
+    public void Plan_BufferOverload_WritesRgbaPixelsMatchingPngPreview()
+    {
+        var profile = TestProfiles.CreateSmall128();
+        var pipeline = new WorldGenPipeline();
+        var bufferLength = pipeline.PreviewBufferLength(profile);
+        var previewBuffer = new byte[bufferLength];
+
+        Memory<byte>[]? caveBuffers = null;
+        if (profile.CaveLevels is { Count: > 0 } caveLevels)
+        {
+            caveBuffers = new Memory<byte>[caveLevels.Count];
+            for (var i = 0; i < caveBuffers.Length; ++i)
+            {
+                caveBuffers[i] = new Memory<byte>(new byte[bufferLength]);
+            }
+        }
+
+        var staging = Path.Combine(Path.GetTempPath(), "worldgen-test-staging",
+            Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(staging);
+        var path = TempPreviewPath("rgba");
+        var cavePath = Path.Combine(Path.GetDirectoryName(path)!,
+            Path.GetFileNameWithoutExtension(path) + "_caves_1.png");
+        try
+        {
+            var bufferedPlan = pipeline.Plan(profile, "test128", Seed, 0, 0, previewBuffer,
+                caveBuffers, staging, TestResolvedTemplates.ForProfile(profile), null);
+            Plan(profile, "test128", Seed, 0, 0, path);
+            var image = PngReader.Read(path);
+
+            Assert.Equal("", bufferedPlan.PreviewPath);
+            Assert.Equal(image.Width * image.Height * 4, previewBuffer.Length);
+            for (var i = 0; i < image.Width * image.Height; ++i)
+            {
+                Assert.Equal(0xff, previewBuffer[i * 4 + 3]);
+                Assert.Equal(image.Pixels[i * 3], previewBuffer[i * 4]);
+                Assert.Equal(image.Pixels[i * 3 + 1], previewBuffer[i * 4 + 1]);
+                Assert.Equal(image.Pixels[i * 3 + 2], previewBuffer[i * 4 + 2]);
+            }
+
+            if (caveBuffers is not null)
+            {
+                foreach (var caveBuffer in caveBuffers)
+                {
+                    var span = caveBuffer.Span;
+                    Assert.Equal(bufferLength, span.Length);
+                    for (var i = 0; i < span.Length; i += 4)
+                    {
+                        Assert.Equal(0xff, span[i + 3]);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            Directory.Delete(staging, true);
             File.Delete(path);
             File.Delete(cavePath);
         }

@@ -83,6 +83,7 @@ using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Systems.Network;
+using Sovereign.WorldGen;
 
 namespace Sovereign.ClientCore;
 
@@ -245,6 +246,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<ItemContextGui>();
         services.TryAddSingleton<RendererDebugGui>();
         services.TryAddSingleton<HotbarGui>();
+        services.TryAddSingleton<IWorldGenPipeline, WorldGenPipeline>();
+        services.TryAddSingleton<WorldGenTemplateResolver>();
     }
 
     private static void AddScenes(IServiceCollection services)

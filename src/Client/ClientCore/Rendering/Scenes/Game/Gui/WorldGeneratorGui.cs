@@ -16,8 +16,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Numerics;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Hexa.NET.ImGui;
+using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Rendering.Gui;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Layout;
 
@@ -34,11 +41,83 @@ public sealed class WorldGeneratorGui
     private const int MaxTemplateNameLength = 64;
 
     /// <summary>
+    ///     Longest allowed side of a generated preview image in pixels.
+    /// </summary>
+    private const int PreviewMaxDimension = 1024;
+
+    /// <summary>
+    ///     Name reported for preview plans run by the world generator GUI.
+    /// </summary>
+    private const string PreviewProfileName = "preview";
+
+    /// <summary>
+    ///     Name of the preview staging directory root below the system temporary path.
+    /// </summary>
+    private const string PreviewScratchDirectoryName = "sovereign-worldgen-preview";
+
+    private readonly IWorldGenPipeline pipeline;
+    private readonly WorldGenTemplateResolver templateResolver;
+    private readonly GuiExtensions gui;
+    private readonly IDynamicTextureManager textureManager;
+    private readonly ILogger<WorldGeneratorGui> logger;
+
+    /// <summary>
     ///     Profile under edit; not yet submitted to the server.
     /// </summary>
     private readonly WorldGenProfile profile = NewDefaultProfile();
 
     private int seed;
+
+    /// <summary>
+    ///     Signature of the profile and seed at the time of the last scheduled preview run.
+    /// </summary>
+    private string? previewSignature;
+
+    /// <summary>
+    ///     Most recently scheduled preview run, or null before the first schedule.
+    /// </summary>
+    private PreviewRun? previewRun;
+
+    /// <summary>
+    ///     Background task running the most recently scheduled preview plan.
+    /// </summary>
+    private Task? previewTask;
+
+    /// <summary>
+    ///     Error raised while scheduling the most recent preview run, if any.
+    /// </summary>
+    private string? scheduleError;
+
+    /// <summary>
+    ///     Handle of the dynamic texture displaying the terrain preview, or 0 for none.
+    /// </summary>
+    private int textureHandle;
+
+    /// <summary>
+    ///     Width of the dynamic texture in pixels.
+    /// </summary>
+    private uint textureWidth;
+
+    /// <summary>
+    ///     Height of the dynamic texture in pixels.
+    /// </summary>
+    private uint textureHeight;
+
+    /// <summary>
+    ///     Whether the dynamic texture has been populated by a completed preview run.
+    /// </summary>
+    private bool textureReady;
+
+    public WorldGeneratorGui(IWorldGenPipeline pipeline, WorldGenTemplateResolver templateResolver,
+        GuiExtensions gui, IDynamicTextureManager textureManager,
+        ILogger<WorldGeneratorGui> logger)
+    {
+        this.pipeline = pipeline;
+        this.templateResolver = templateResolver;
+        this.gui = gui;
+        this.textureManager = textureManager;
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Renders the world generator GUI.
@@ -48,6 +127,8 @@ public sealed class WorldGeneratorGui
         var fontSize = ImGui.GetFontSize();
         ImGui.SetNextWindowSize(fontSize * new Vector2(84.0f, 44.0f), ImGuiCond.Once);
         if (!ImGui.Begin("World Generator")) return;
+
+        UpdatePreview();
 
         if (ImGui.BeginTable("layout", 3, ImGuiTableFlags.Resizable))
         {
@@ -364,6 +445,262 @@ public sealed class WorldGeneratorGui
     }
 
     /// <summary>
+    ///     Schedules preview generation when the profile or seed changes, and publishes the
+    ///     result of a completed preview run to its dynamic texture.
+    /// </summary>
+    private void UpdatePreview()
+    {
+        var signature = ComputeSignature();
+        if (signature != previewSignature)
+        {
+            previewSignature = signature;
+            SchedulePreview();
+        }
+
+        if (previewTask is not { IsCompleted: true }) return;
+        if (previewRun is not { PlanCompleted: true, Published: false } run) return;
+
+        run.Published = true;
+        textureManager.UpdateTexture(textureHandle, run.PreviewBuffer);
+        textureReady = true;
+    }
+
+    /// <summary>
+    ///     Cancels any in-flight preview run and schedules a new one from the current
+    ///     profile and seed.
+    /// </summary>
+    private void SchedulePreview()
+    {
+        previewRun?.Cts.Cancel();
+        scheduleError = null;
+        textureReady = false;
+
+        PreviewRun run;
+        try
+        {
+            run = CreateRun();
+        }
+        catch (Exception e)
+        {
+            scheduleError = e.Message;
+            logger.LogError(e, "World generator preview could not be scheduled.");
+            return;
+        }
+
+        RecreateTextureIfNeeded(run);
+        previewRun = run;
+        previewTask = RunPreview(run, previewTask);
+    }
+
+    /// <summary>
+    ///     Creates the state of one preview run from the current profile and seed.
+    /// </summary>
+    /// <returns>The new preview run.</returns>
+    private PreviewRun CreateRun()
+    {
+        // The pipeline reads the profile snapshot on a background task, so the snapshot
+        // must be isolated from later edits made by the GUI.
+        var snapshot = CloneProfile(profile);
+        snapshot.Preview = new PreviewOptions { MaxDimension = PreviewMaxDimension };
+        var resolvedTemplates = templateResolver.Resolve(snapshot, PreviewProfileName);
+
+        var bufferLength = pipeline.PreviewBufferLength(snapshot);
+        var caveLevelCount = snapshot.CaveLevels?.Count ?? 0;
+        return new PreviewRun
+        {
+            Profile = snapshot,
+            Seed = unchecked((ulong)seed),
+            Templates = resolvedTemplates,
+            StagingDirectory = NewStagingDirectory(),
+            PreviewBuffer = new byte[bufferLength],
+            CavePreviewBuffers = caveLevelCount > 0
+                ? Enumerable.Range(0, caveLevelCount)
+                    .Select(_ => new Memory<byte>(new byte[bufferLength]))
+                    .ToArray()
+                : null,
+            Cts = new CancellationTokenSource()
+        };
+    }
+
+    /// <summary>
+    ///     Replaces the preview texture when a run's preview dimensions differ from the
+    ///     current texture dimensions; otherwise the existing texture is updated in place.
+    /// </summary>
+    /// <param name="run">Scheduled preview run.</param>
+    private void RecreateTextureIfNeeded(PreviewRun run)
+    {
+        var (width, height) = PreviewDimensions(run.Profile);
+        if (textureHandle != 0 && textureWidth == (uint)width && textureHeight == (uint)height)
+            return;
+
+        if (textureHandle != 0) textureManager.RemoveTexture(textureHandle);
+        textureHandle = textureManager.AddTexture((uint)width, (uint)height,
+            DynamicTextureSampling.Linear);
+        textureWidth = (uint)width;
+        textureHeight = (uint)height;
+    }
+
+    /// <summary>
+    ///     Runs the pipeline for a preview run on a background task that first waits for
+    ///     the superseded preview task to unwind.
+    /// </summary>
+    /// <param name="run">Preview run to execute.</param>
+    /// <param name="previousTask">Task of the superseded preview run, if any.</param>
+    /// <returns>The background task.</returns>
+    private Task RunPreview(PreviewRun run, Task? previousTask)
+    {
+        var token = run.Cts.Token;
+        return Task.Run(async () =>
+        {
+            try
+            {
+                if (previousTask is not null)
+                {
+                    try
+                    {
+                        await previousTask;
+                    }
+                    catch
+                    {
+                        // The superseded run failed or was canceled; its error, if any, is
+                        // already reported through its own run state.
+                    }
+                }
+
+                token.ThrowIfCancellationRequested();
+                Directory.CreateDirectory(run.StagingDirectory);
+                pipeline.Plan(run.Profile, PreviewProfileName, run.Seed, 0, 0, run.PreviewBuffer,
+                    run.CavePreviewBuffers, run.StagingDirectory, run.Templates, null, token);
+                run.PlanCompleted = true;
+            }
+            catch (OperationCanceledException)
+            {
+                // The run was superseded by a newer preview request.
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "World generator preview failed.");
+                run.ErrorMessage = e.Message;
+            }
+            finally
+            {
+                try
+                {
+                    Directory.Delete(run.StagingDirectory, true);
+                }
+                catch (Exception e)
+                {
+                    logger.LogWarning(e, "Failed to remove preview staging directory {Directory}.",
+                        run.StagingDirectory);
+                }
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Computes the change-detection signature of the current profile and seed.
+    /// </summary>
+    /// <returns>Signature string.</returns>
+    private string ComputeSignature()
+    {
+        return JsonSerializer.Serialize(profile) + "|" + seed;
+    }
+
+    /// <summary>
+    ///     Creates a deep copy of the given profile via a JSON round trip.
+    /// </summary>
+    /// <param name="source">Profile to copy.</param>
+    /// <returns>Deep copy of the profile.</returns>
+    private static WorldGenProfile CloneProfile(WorldGenProfile source)
+    {
+        return JsonSerializer.Deserialize<WorldGenProfile>(JsonSerializer.Serialize(source))!;
+    }
+
+    /// <summary>
+    ///     Computes the dimensions of a profile's preview image: the footprint box-downscaled
+    ///     by an equal factor on both axes so that the long side is at most the preview
+    ///     maximum dimension.
+    /// </summary>
+    /// <param name="profile">World generation profile.</param>
+    /// <returns>Preview width and height in pixels.</returns>
+    private static (int Width, int Height) PreviewDimensions(WorldGenProfile profile)
+    {
+        var longSide = Math.Max(profile.Width, profile.Height);
+        var factor = longSide <= PreviewMaxDimension
+            ? 1
+            : (longSide + PreviewMaxDimension - 1) / PreviewMaxDimension;
+        return ((profile.Width + factor - 1) / factor, (profile.Height + factor - 1) / factor);
+    }
+
+    /// <summary>
+    ///     Resolves a fresh staging directory path for one preview run below the system
+    ///     temporary path.
+    /// </summary>
+    /// <returns>Absolute path of the staging directory.</returns>
+    private static string NewStagingDirectory()
+    {
+        return Path.Combine(Path.GetTempPath(), PreviewScratchDirectoryName,
+            "staging_" + Guid.NewGuid().ToString("N"));
+    }
+
+    /// <summary>
+    ///     State of one background preview generation run.
+    /// </summary>
+    private sealed class PreviewRun
+    {
+        /// <summary>
+        ///     Snapshot of the profile used by this run.
+        /// </summary>
+        public required WorldGenProfile Profile { get; init; }
+
+        /// <summary>
+        ///     Root world seed of this run.
+        /// </summary>
+        public required ulong Seed { get; init; }
+
+        /// <summary>
+        ///     Profile template names resolved against the live template entity set.
+        /// </summary>
+        public required WorldGenResolvedTemplates Templates { get; init; }
+
+        /// <summary>
+        ///     Staging directory receiving the run's segment blobs.
+        /// </summary>
+        public required string StagingDirectory { get; init; }
+
+        /// <summary>
+        ///     Buffer receiving the terrain preview as packed RGBA quads with alpha 255.
+        /// </summary>
+        public required byte[] PreviewBuffer { get; init; }
+
+        /// <summary>
+        ///     Buffers receiving one cave level preview each, or null when the profile has
+        ///     no cave levels.
+        /// </summary>
+        public required Memory<byte>[]? CavePreviewBuffers { get; init; }
+
+        /// <summary>
+        ///     Cancellation source of this run.
+        /// </summary>
+        public required CancellationTokenSource Cts { get; init; }
+
+        /// <summary>
+        ///     Whether the pipeline plan completed successfully.
+        /// </summary>
+        public volatile bool PlanCompleted;
+
+        /// <summary>
+        ///     Whether the run's preview buffer has been published to the texture.
+        /// </summary>
+        public bool Published;
+
+        /// <summary>
+        ///     Error raised by the pipeline, if any.
+        /// </summary>
+        public volatile string? ErrorMessage;
+    }
+
+    /// <summary>
     ///     Renders the live preview section.
     /// </summary>
     private void RenderPreviewSection()
@@ -372,9 +709,37 @@ public sealed class WorldGeneratorGui
         if (ImGui.BeginChild("##preview", Vector2.Zero, ImGuiChildFlags.Borders,
                 ImGuiWindowFlags.HorizontalScrollbar))
         {
-            ImGui.TextDisabled("Live preview is not yet implemented.");
+            if (scheduleError is { } scheduleMessage)
+            {
+                ImGui.TextWrapped(scheduleMessage);
+            }
+            else if (previewTask is not { IsCompleted: true } || !textureReady)
+            {
+                ImGui.TextDisabled("Loading...");
+            }
+            else if (previewRun is { ErrorMessage: { } errorMessage })
+            {
+                ImGui.TextWrapped(errorMessage);
+            }
+            else
+            {
+                gui.Image(textureHandle, PreviewDrawSize());
+            }
         }
         ImGui.EndChild();
+    }
+
+    /// <summary>
+    ///     Computes the draw size of the preview image, scaled down to fit the available
+    ///     region while preserving the aspect ratio.
+    /// </summary>
+    /// <returns>Draw size in pixels.</returns>
+    private Vector2 PreviewDrawSize()
+    {
+        var avail = ImGui.GetContentRegionAvail();
+        var scale = Math.Min(Math.Min(avail.X / textureWidth, avail.Y / textureHeight), 1.0f);
+        if (!float.IsFinite(scale) || scale <= 0.0f) scale = 1.0f;
+        return new Vector2(textureWidth * scale, textureHeight * scale);
     }
 
     /// <summary>

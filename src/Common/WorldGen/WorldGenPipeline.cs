@@ -70,7 +70,7 @@ public interface IWorldGenPipeline
     /// <param name="originX">World X coordinate of the footprint origin.</param>
     /// <param name="originY">World Y coordinate of the footprint origin.</param>
     /// <param name="previewBuffer">Caller-owned buffer receiving the preview's raw pixels
-    ///     as packed RGB triples in row-major order, top row first.</param>
+    ///     as packed RGBA quads with alpha 255 in row-major order, top row first.</param>
     /// <param name="cavePreviewBuffers">Caller-owned buffers receiving one cave level
     ///     preview's raw pixels each in level order, or null when the profile has no cave
     ///     levels.</param>
@@ -83,7 +83,7 @@ public interface IWorldGenPipeline
     ///     cancellation unwinds through <see cref="OperationCanceledException" />.</param>
     /// <returns>The completed plan, whose preview paths are empty in this mode.</returns>
     /// <remarks>
-    ///     Each buffer must hold <c>width * height * 3</c> bytes for its rendered preview,
+    ///     Each buffer must hold <c>width * height * 4</c> bytes for its rendered preview,
     ///     whose dimensions are the profile footprint downscaled by
     ///     <c>max(1, ceiling(longSide / maxDimension))</c> using the profile's preview max
     ///     dimension clamped to [256, 8192]. One buffer per cave level is required when the
@@ -158,7 +158,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// <param name="originX">World X coordinate of the footprint origin.</param>
     /// <param name="originY">World Y coordinate of the footprint origin.</param>
     /// <param name="previewBuffer">Caller-owned buffer receiving the preview's raw pixels
-    ///     as packed RGB triples in row-major order, top row first.</param>
+    ///     as packed RGBA quads with alpha 255 in row-major order, top row first.</param>
     /// <param name="cavePreviewBuffers">Caller-owned buffers receiving one cave level
     ///     preview's raw pixels each in level order, or null when the profile has no cave
     ///     levels.</param>
@@ -170,7 +170,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     /// <param name="cancellationToken">Token observed at stage and sub-stage boundaries.</param>
     /// <returns>The completed plan, whose preview paths are empty in this mode.</returns>
     /// <remarks>
-    ///     Each buffer must hold <c>width * height * 3</c> bytes for its rendered preview,
+    ///     Each buffer must hold <c>width * height * 4</c> bytes for its rendered preview,
     ///     whose dimensions are the profile footprint downscaled by
     ///     <c>max(1, ceiling(longSide / maxDimension))</c> using the profile's preview max
     ///     dimension clamped to [256, 8192]. One buffer per cave level is required when the
@@ -200,7 +200,7 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
         var factor = longSide <= cap ? 1 : (longSide + cap - 1) / cap;
         var width = (profile.Width + factor - 1) / factor;
         var height = (profile.Height + factor - 1) / factor;
-        return width * height * 3;
+        return width * height * 4;
     }
 
     /// <summary>
@@ -634,20 +634,29 @@ public sealed class WorldGenPipeline : IWorldGenPipeline
     }
 
     /// <summary>
-    ///     Copies a rendered preview's raw pixels into a caller-owned buffer.
+    ///     Copies a rendered preview's raw pixels into a caller-owned buffer as packed RGBA
+    ///     quads with alpha 255.
     /// </summary>
     /// <param name="buffer">Destination buffer.</param>
     /// <param name="preview">Rendered preview image.</param>
     private static void WritePreviewPixels(Span<byte> buffer, PreviewImage preview)
     {
-        var length = preview.Width * preview.Height * 3;
+        var pixelCount = preview.Width * preview.Height;
+        var length = pixelCount * 4;
         if (buffer.Length < length)
         {
             throw new ArgumentException(
                 $"Preview buffer is too small: {length} bytes required, but the buffer holds {buffer.Length} bytes.");
         }
 
-        preview.Pixels.AsSpan(0, length).CopyTo(buffer);
+        var pixels = preview.Pixels;
+        for (var i = 0; i < pixelCount; ++i)
+        {
+            buffer[i * 4] = pixels[i * 3];
+            buffer[i * 4 + 1] = pixels[i * 3 + 1];
+            buffer[i * 4 + 2] = pixels[i * 3 + 2];
+            buffer[i * 4 + 3] = 0xff;
+        }
     }
 
     /// <summary>
