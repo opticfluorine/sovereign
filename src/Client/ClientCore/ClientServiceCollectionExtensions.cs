@@ -211,6 +211,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<RegistrationClient>();
         services.TryAddSingleton<ScriptInfoClient>();
         services.TryAddSingleton<TemplateEntityDataClient>();
+        services.TryAddSingleton<WorldGenProfileClient>();
         services.TryAddSingleton<WorldSegmentDataClient>();
         services.TryAddSingleton<ClientNetworkInternalController>();
         services.TryAddSingleton<INetworkClient, NetworkClient>();

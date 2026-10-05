@@ -69,6 +69,11 @@ public sealed class WorldGeneratorGui
     private int seed;
 
     /// <summary>
+    ///     Whether the preview regenerates automatically when settings change.
+    /// </summary>
+    private bool autoPreview = true;
+
+    /// <summary>
     ///     Signature of the profile and seed at the time of the last scheduled preview run.
     /// </summary>
     private string? previewSignature;
@@ -125,7 +130,7 @@ public sealed class WorldGeneratorGui
     public void Render()
     {
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextWindowSize(fontSize * new Vector2(84.0f, 44.0f), ImGuiCond.Once);
+        ImGui.SetNextWindowSize(fontSize * new Vector2(84.0f, 46.0f), ImGuiCond.Once);
         if (!ImGui.Begin("World Generator")) return;
 
         UpdatePreview();
@@ -167,7 +172,43 @@ public sealed class WorldGeneratorGui
             ImGui.EndTable();
         }
 
+        RenderActionRow();
+
         ImGui.End();
+    }
+
+    /// <summary>
+    ///     Renders the bottom action row: the auto-preview toggle on the left and the
+    ///     action buttons right-aligned. Button behaviors are not wired up yet.
+    /// </summary>
+    private void RenderActionRow()
+    {
+        ImGui.Checkbox("Auto Preview", ref autoPreview);
+
+        var style = ImGui.GetStyle();
+        var buttonsWidth = CalcButtonWidth("Preview", style)
+                           + CalcButtonWidth("Save Profile", style)
+                           + CalcButtonWidth("Save and Generate", style)
+                           + style.ItemSpacing.X * 2.0f;
+        var offsetX = ImGui.GetContentRegionAvail().X - buttonsWidth;
+        if (offsetX > 0.0f) ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offsetX);
+
+        ImGui.Button("Preview");
+        ImGui.SameLine();
+        ImGui.Button("Save Profile");
+        ImGui.SameLine();
+        ImGui.Button("Save and Generate");
+    }
+
+    /// <summary>
+    ///     Computes the rendered width of a button with the given label.
+    /// </summary>
+    /// <param name="label">Button label.</param>
+    /// <param name="style">Current ImGui style.</param>
+    /// <returns>Button width in pixels.</returns>
+    private static float CalcButtonWidth(string label, ImGuiStylePtr style)
+    {
+        return ImGui.CalcTextSize(label).X + style.FramePadding.X * 2.0f;
     }
 
     /// <summary>
