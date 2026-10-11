@@ -44,7 +44,7 @@ public class TestClientServiceRegistration
 
         using var provider = services.BuildServiceProvider();
 
-        Assert.NotNull(provider.GetRequiredService<ActiveAnimationController>());
+        Assert.NotNull(provider.GetRequiredService<EntityAnimationController>());
         Assert.NotNull(provider.GetRequiredService<ActiveAnimationManager>());
         Assert.NotNull(provider.GetRequiredService<IActiveAnimationServices>());
         Assert.NotNull(provider.GetRequiredService<ActiveAnimationPhaseComponentCollection>());

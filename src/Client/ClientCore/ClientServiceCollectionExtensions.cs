@@ -385,7 +385,7 @@ public static class ClientServiceCollectionExtensions
             s => s.GetRequiredService<EntityAnimationSystem>()));
         services.TryAddSingleton<AnimationPhaseStateMachine>();
         services.TryAddSingleton<AnimationPhaseSelector>();
-        services.TryAddSingleton<ActiveAnimationController>();
+        services.TryAddSingleton<EntityAnimationController>();
         services.TryAddSingleton<ActiveAnimationManager>();
         services.TryAddSingleton<IActiveAnimationServices, ActiveAnimationServices>();
 

@@ -26,7 +26,7 @@ namespace Sovereign.ClientCore.Systems.EntityAnimation;
 ///     Public API for starting one-shot animation overrides on client entities.
 ///     Requests are delivered asynchronously as events.
 /// </summary>
-public sealed class ActiveAnimationController
+public sealed class EntityAnimationController
 {
     /// <summary>
     ///     Starts an animation override that plays the given phase for exactly the given number of

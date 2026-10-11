@@ -43,7 +43,7 @@ public class TestActiveAnimationPhase
     private readonly AnimationPhaseComponentCollection basePhases;
     private readonly OrientationComponentCollection orientations;
     private readonly AnimationPhaseSelector selector;
-    private readonly ActiveAnimationController controller;
+    private readonly EntityAnimationController controller;
     private readonly EntityAnimationSystem system;
     private readonly ForwardingEventSender eventSender;
     private readonly FakeSystemTimer systemTimer = new();
@@ -65,7 +65,7 @@ public class TestActiveAnimationPhase
                 animatedSprites, orientations, animatedSpriteManager, systemTimer),
             NullLogger<EntityAnimationSystem>.Instance);
         eventSender = new ForwardingEventSender(system);
-        controller = new ActiveAnimationController();
+        controller = new EntityAnimationController();
     }
 
     [Fact]
