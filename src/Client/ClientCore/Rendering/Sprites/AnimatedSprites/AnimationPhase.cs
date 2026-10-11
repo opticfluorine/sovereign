@@ -30,5 +30,10 @@ public enum AnimationPhase
     /// <summary>
     ///     Animation phase when the entity is moving.
     /// </summary>
-    Moving
+    Moving,
+
+    /// <summary>
+    ///     Animation phase when the entity is performing an attack.
+    /// </summary>
+    Attack
 }

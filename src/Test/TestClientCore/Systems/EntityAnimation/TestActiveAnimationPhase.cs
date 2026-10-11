@@ -25,6 +25,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Events.Details;
 using TestClientCore.TestSupport;
 using Xunit;
 
@@ -221,6 +222,44 @@ public class TestActiveAnimationPhase
     }
 
     [Fact]
+    public void AttackEvent_PlaysOneLoopAttackOverrideOnActor()
+    {
+        const ulong actorId = 0x7fff00000000abcd;
+        const ulong startTime = 2000;
+
+        AddSprite(CreateSprite(
+            (AnimationPhase.Default, Orientation.South, 4),
+            (AnimationPhase.Attack, Orientation.South, 2)), actorId);
+
+        systemTimer.Time = startTime;
+        system.EventCommunicator.SendEventToSystem(new Event(
+            EventId.Server_Combat_Attack,
+            new AttackEventDetails { ActorId = actorId }));
+        Assert.Equal(1, system.ExecuteOnce());
+        activePhases.ApplyComponentUpdates();
+
+        // The attack override targets the attacking actor with the Attack phase, one loop.
+        Assert.True(activePhases.HasComponentForEntity(actorId));
+        Assert.Equal(AnimationPhase.Attack, activePhases[actorId].Phase);
+        Assert.Equal(1, activePhases[actorId].Loops);
+
+        // The first scan pins the loop duration from the sprite (2 frames x 100).
+        Scan(startTime);
+        activePhases.ApplyComponentUpdates();
+        Assert.Equal(200UL, activePhases[actorId].LoopDurationUs);
+
+        // Still present immediately before the expiry time.
+        Scan(startTime + 200 - 1);
+        activePhases.ApplyComponentUpdates();
+        Assert.True(activePhases.HasComponentForEntity(actorId));
+
+        // Removed by ExpireCompletedOverrides after one loop.
+        Scan(startTime + 200);
+        activePhases.ApplyComponentUpdates();
+        Assert.False(activePhases.HasComponentForEntity(actorId));
+    }
+
+    [Fact]
     public void PlayAnimation_ThrowsForNonPositiveLoopCount()
     {
         Assert.Throws<ArgumentOutOfRangeException>(
@@ -341,12 +380,13 @@ public class TestActiveAnimationPhase
     ///     Adds an animated sprite to the manager and assigns it to the test entity.
     /// </summary>
     /// <param name="sprite">Animated sprite.</param>
+    /// <param name="entityId">Entity to which the sprite is assigned.</param>
     /// <returns>Animated sprite.</returns>
-    private AnimatedSprite AddSprite(AnimatedSprite sprite)
+    private AnimatedSprite AddSprite(AnimatedSprite sprite, ulong entityId = EntityId)
     {
         var spriteId = animatedSpriteManager.AnimatedSprites.Count;
         animatedSpriteManager.AnimatedSprites.Add(sprite);
-        animatedSprites.AddOrUpdateComponent(EntityId, spriteId);
+        animatedSprites.AddOrUpdateComponent(entityId, spriteId);
         return sprite;
     }
 
