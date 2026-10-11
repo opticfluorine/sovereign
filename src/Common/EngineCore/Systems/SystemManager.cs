@@ -64,6 +64,13 @@ public class SystemManager : BackgroundService
     {
         logger.LogInformation("SystemManager started.");
 
+        /* In single-threaded mode, systems run on the main loop thread instead. */
+        if (performanceOptions.SystemExecutorCount <= 0)
+        {
+            logger.LogInformation("Single-threaded execution enabled; systems run on the main thread.");
+            return;
+        }
+
         /* Create executors. */
         CreateExecutors();
 

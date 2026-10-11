@@ -199,7 +199,7 @@ Movement-related options should match between client and server.
  - **SearchRange**: Range in world units around a queried position within which `RadiantData` field contributions are considered when evaluating `Radiant.GetValue`. Larger values scan more world segments per query.
 
 ### PerformanceOptions
- - **SystemExecutorCount**: Number of threads to use for executing systems.
+ - **SystemExecutorCount**: Number of threads to use for executing systems. Set to `0` to run all systems serially on the main thread (single-threaded execution); this is intended for debugging and platforms where threading is unavailable or undesirable.
  - **YieldEventLoop**: Whether to periodically yield control of the event loop thread. Lowers CPU usage at the cost of increased event latency.
  - **YieldSystemLoop**: Whether to periodically yield control of each system exeuctor thread. Lowers CPU usage at the cost of increased system latency.
  - **NetworkUpdateTimeMs**: Polling interval for the network thread. Higher values reduce CPU usage at the cost of increased (effective) network latency.

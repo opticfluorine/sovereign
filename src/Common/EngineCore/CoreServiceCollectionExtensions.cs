@@ -247,6 +247,8 @@ public static class CoreServiceCollectionExtensions
     {
         services.TryAddTransient<FatalErrorHandler>();
         services.TryAddSingleton<CoreController>();
+
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IMainLoopAction, SystemExecutionMainLoopAction>());
     }
 
     private static void AddPerformance(IServiceCollection services)

@@ -4,6 +4,10 @@
 
 ### October
 
+#### 11 October 2026
+
+* Add support for single-threaded execution in the engine core. Setting `Sovereign:PerformanceOptions:SystemExecutorCount` to `0` now runs all systems serially on the main loop thread (interleaved with component updates, the event pump, network polling, and rendering) instead of spawning system executor threads, and systems are initialized and cleaned up on that same thread so shutdown is race-free. Values greater than `0` keep the existing multi-threaded behavior, and the default remains unchanged.
+
 #### 5 October 2026
 
 * Add dynamically updated GUI textures. A new `IDynamicTextureManager` interface (ClientCore) allows any system to add, update, and remove standalone RGBA8 textures from any thread, hiding all renderer details behind the interface; the Veldrid renderer provides the implementation, which queues operations and applies them on the render thread at the start of each GUI frame. Dynamic textures are referenced by integer handle, integrated into the ImGui texture ID table with a new `GuiTextureMapper` source type, sampled with per-texture point or linear interpolation chosen at creation time, and drawn by temporarily binding a per-texture resource set before restoring the default texture atlas binding. New `GuiExtensions.Image` and `GuiExtensions.ImageButton` methods render dynamic textures in GUI screens.
