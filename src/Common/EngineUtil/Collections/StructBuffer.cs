@@ -111,6 +111,31 @@ public class StructBuffer<T> : IEnumerable<T>
     }
 
     /// <summary>
+    ///     Removes all items matching the given predicate, preserving the relative
+    ///     order of the remaining items.
+    /// </summary>
+    /// <param name="match">Predicate identifying the items to be removed.</param>
+    /// <returns>The number of items removed.</returns>
+    public int RemoveAll(Predicate<T> match)
+    {
+        lock (list)
+        {
+            /* Compact the surviving items to the front of the buffer. */
+            var target = 0;
+            for (var i = 0; i < Count; ++i)
+            {
+                if (match(list[i])) continue;
+                if (target != i) list[target] = list[i];
+                ++target;
+            }
+
+            var removedCount = Count - target;
+            Count = target;
+            return removedCount;
+        }
+    }
+
+    /// <summary>
     ///     Increases the size of the backing list.
     /// </summary>
     private void ResizeList()

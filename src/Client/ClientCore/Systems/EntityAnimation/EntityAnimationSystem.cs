@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
+using Sovereign.ClientCore.Events.Details;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -25,13 +26,25 @@ namespace Sovereign.ClientCore.Systems.EntityAnimation;
 
 public class EntityAnimationSystem : ISystem
 {
+    private readonly ActiveAnimationManager animationManager;
     private readonly AnimationPhaseStateMachine animationPhaseStateMachine;
     private readonly ILogger<EntityAnimationSystem> logger;
 
+    /// <summary>
+    ///     Creates a new entity animation system.
+    /// </summary>
+    /// <param name="eventCommunicator">Event communicator.</param>
+    /// <param name="eventLoop">Event loop.</param>
+    /// <param name="animationPhaseStateMachine">Animation phase state machine.</param>
+    /// <param name="animationManager">Active animation manager.</param>
+    /// <param name="logger">Logger.</param>
     public EntityAnimationSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
-        AnimationPhaseStateMachine animationPhaseStateMachine, ILogger<EntityAnimationSystem> logger)
+        AnimationPhaseStateMachine animationPhaseStateMachine,
+        ActiveAnimationManager animationManager,
+        ILogger<EntityAnimationSystem> logger)
     {
         this.animationPhaseStateMachine = animationPhaseStateMachine;
+        this.animationManager = animationManager;
         this.logger = logger;
         EventCommunicator = eventCommunicator;
 
@@ -42,10 +55,11 @@ public class EntityAnimationSystem : ISystem
 
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
-        EventId.Core_Movement_Move
+        EventId.Core_Movement_Move,
+        EventId.Client_EntityAnimation_PlayOverride
     };
 
-    public int WorkloadEstimate => 30;
+    public int WorkloadEstimate => 50;
 
     public void Initialize()
     {
@@ -58,6 +72,7 @@ public class EntityAnimationSystem : ISystem
     public int ExecuteOnce()
     {
         var processed = 0;
+
         while (EventCommunicator.GetIncomingEvent(out var ev))
         {
             processed++;
@@ -74,8 +89,22 @@ public class EntityAnimationSystem : ISystem
                     animationPhaseStateMachine.OnMovement(details);
                 }
                     break;
+
+                case EventId.Client_EntityAnimation_PlayOverride:
+                {
+                    if (ev.EventDetails is not ActiveAnimationPhaseEventDetails details)
+                    {
+                        logger.LogError("Received PlayOverride event without details.");
+                        break;
+                    }
+
+                    animationManager.OnPlayOverride(details);
+                }
+                    break;
             }
         }
+
+        animationManager.ExpireCompletedOverrides();
 
         return processed;
     }

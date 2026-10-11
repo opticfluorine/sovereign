@@ -134,6 +134,17 @@ public sealed class AnimatedSprite
         }
 
         /// <summary>
+        ///     Gets the duration of a single animation loop for the given orientation.
+        /// </summary>
+        /// <param name="orientation">Orientation.</param>
+        /// <returns>Loop duration in microseconds.</returns>
+        public ulong GetLoopDurationUs(Orientation orientation)
+        {
+            var sprites = GetSpritesForOrientation(orientation);
+            return FrameTime * (ulong)sprites.Count;
+        }
+
+        /// <summary>
         ///     Gets the sprite list for the given orientation, applying fallback logic if the specified
         ///     orientation does not have a defined face for this sprite.
         /// </summary>

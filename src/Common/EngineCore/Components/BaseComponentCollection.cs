@@ -294,6 +294,25 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Cancels any pending removal of the component associated with the given entity.
+    /// </summary>
+    /// This method is intended for the case in which a component removal has been enqueued
+    /// but not yet applied, and the component has since been re-triggered; cancelling the
+    /// stale removal prevents it from silently deleting the component when the pending
+    /// operations are next applied. If the entity has no pending removal, this method is a
+    /// cheap no-op.
+    /// <param name="entityId">Entity ID whose pending removal is to be cancelled.</param>
+    public void CancelPendingRemove(ulong entityId)
+    {
+        /* Fast path when there is nothing pending. */
+        if (!hasRemoves) return;
+
+        /* Drop all pending removals for the entity. */
+        pendingRemoves.RemoveAll(pendingRemove => pendingRemove.EntityId == entityId);
+        hasRemoves = pendingRemoves.Count > 0;
+    }
+
+    /// <summary>
     ///     Applies pending component updates.
     /// </summary>
     public void ApplyComponentUpdates()
@@ -447,6 +466,49 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public bool HasPendingComponentForEntity(ulong entityId)
     {
         return pendingAddEntityIds.Contains(entityId);
+    }
+
+    /// <summary>
+    ///     Determines whether a component update for the given entity is enqueued but not
+    ///     yet applied. When true, component reads may not reflect the most recently
+    ///     enqueued value for the entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if there is a pending add or modification, false otherwise.</returns>
+    public bool HasPendingUpdateForEntity(ulong entityId)
+    {
+        if (HasPendingComponentForEntity(entityId)) return true;
+        if (!hasModifications) return false;
+
+        foreach (var operation in pendingModifications.Keys)
+        {
+            var queue = pendingModifications[operation];
+            for (var i = 0; i < queue.Count; ++i)
+            {
+                ref var pendingModify = ref queue[i];
+                if (!TryResolveComponentIndexForModify(ref pendingModify, out _)) continue;
+                if (pendingModify.EntityId == entityId) return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Determines whether a removal of the component associated with the given
+    ///     entity is enqueued but not yet applied.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if there is a pending remove, false otherwise.</returns>
+    public bool HasPendingRemoveForEntity(ulong entityId)
+    {
+        if (!hasRemoves) return false;
+
+        foreach (var pendingRemove in pendingRemoves)
+        {
+            if (pendingRemove.EntityId == entityId) return true;
+        }
+        return false;
     }
 
     /// <summary>

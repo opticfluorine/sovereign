@@ -96,6 +96,81 @@ public class TestBaseComponentCollection
     }
 
     [Fact]
+    public void CancelPendingRemove_CancelsPendingRemoval()
+    {
+        ulong entityId = 1;
+        var initialValue = 42;
+
+        collection.AddComponent(entityId, initialValue);
+        collection.ApplyComponentUpdates();
+        collection.RemoveComponent(entityId);
+        collection.CancelPendingRemove(entityId);
+        collection.ApplyComponentUpdates();
+
+        Assert.True(collection.HasComponentForEntity(entityId));
+        Assert.Equal(initialValue, collection[entityId]);
+    }
+
+    [Fact]
+    public void CancelPendingRemove_NoPendingRemoveIsHarmlessNoOp()
+    {
+        ulong entityId = 1;
+        ulong otherEntityId = 2;
+        var initialValue = 42;
+
+        collection.AddComponent(entityId, initialValue);
+        collection.ApplyComponentUpdates();
+
+        // Cancel for an entity with a component but no pending remove.
+        collection.CancelPendingRemove(entityId);
+
+        // Cancel for an entity with no component at all.
+        collection.CancelPendingRemove(otherEntityId);
+
+        collection.ApplyComponentUpdates();
+
+        Assert.True(collection.HasComponentForEntity(entityId));
+        Assert.Equal(initialValue, collection[entityId]);
+        Assert.False(collection.HasComponentForEntity(otherEntityId));
+    }
+
+    [Fact]
+    public void CancelPendingRemove_OnlyCancelsTargetEntity()
+    {
+        ulong entityId1 = 1;
+        ulong entityId2 = 2;
+
+        collection.AddComponent(entityId1, 42);
+        collection.AddComponent(entityId2, 84);
+        collection.ApplyComponentUpdates();
+
+        collection.RemoveComponent(entityId1);
+        collection.RemoveComponent(entityId2);
+        collection.CancelPendingRemove(entityId1);
+        collection.ApplyComponentUpdates();
+
+        Assert.True(collection.HasComponentForEntity(entityId1));
+        Assert.False(collection.HasComponentForEntity(entityId2));
+    }
+
+    [Fact]
+    public void HasPendingRemoveForEntity_ReflectsPendingRemovalLifecycle()
+    {
+        ulong entityId = 1;
+
+        collection.AddComponent(entityId, 42);
+        collection.ApplyComponentUpdates();
+        Assert.False(collection.HasPendingRemoveForEntity(entityId));
+
+        collection.RemoveComponent(entityId);
+        Assert.True(collection.HasPendingRemoveForEntity(entityId));
+
+        collection.ApplyComponentUpdates();
+        Assert.False(collection.HasPendingRemoveForEntity(entityId));
+        Assert.False(collection.HasComponentForEntity(entityId));
+    }
+
+    [Fact]
     public void ModifyComponent_SetsComponentSuccessfully()
     {
         ulong entityId = 1;

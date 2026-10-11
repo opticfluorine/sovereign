@@ -187,6 +187,7 @@ public static class ClientServiceCollectionExtensions
     private static void AddComponents(IServiceCollection services)
     {
         services.TryAddComponentCollection<AnimationPhaseComponentCollection>();
+        services.TryAddComponentCollection<ActiveAnimationPhaseComponentCollection>();
 
         services.TryAddSingleton<BlockTemplateEntityFilter>();
         services.TryAddSingleton<BlockTemplateEntityIndexer>();
@@ -379,8 +380,14 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<DialogueQueue>();
         services.TryAddSingleton<IDialogueServices, DialogueServices>();
 
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntityAnimationSystem>());
+        services.TryAddSingleton<EntityAnimationSystem>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntityAnimationSystem>(
+            s => s.GetRequiredService<EntityAnimationSystem>()));
         services.TryAddSingleton<AnimationPhaseStateMachine>();
+        services.TryAddSingleton<AnimationPhaseSelector>();
+        services.TryAddSingleton<EntityAnimationController>();
+        services.TryAddSingleton<ActiveAnimationManager>();
+        services.TryAddSingleton<IActiveAnimationServices, ActiveAnimationServices>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, EntitySynchronizationSystem>());
         services.TryAddSingleton<ClientEntityUnloader>();

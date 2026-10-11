@@ -69,7 +69,7 @@ public sealed class WorldEntityRetriever
     private readonly IPerspectiveController perspectiveController;
 
     private readonly IPerspectiveServices perspectiveServices;
-    private readonly AnimationPhaseComponentCollection phases;
+    private readonly AnimationPhaseSelector phaseSelector;
     private readonly PlayerCharacterTagCollection playerCharacters;
     private readonly WorldRangeSelector rangeSelector;
 
@@ -98,7 +98,7 @@ public sealed class WorldEntityRetriever
         BlockPositionComponentCollection blockPositions,
         AnimatedSpriteComponentCollection animatedSprites,
         AnimatedSpriteManager animatedSpriteManager,
-        OrientationComponentCollection orientations, AnimationPhaseComponentCollection phases,
+        OrientationComponentCollection orientations, AnimationPhaseSelector phaseSelector,
         IBlockAnimatedSpriteCache blockSpriteCache, CastBlockShadowsTagCollection castBlockShadows,
         LightSourceTable lightSourceTable, PlayerCharacterTagCollection playerCharacters,
         WorldRangeSelector rangeSelector, AtlasMap atlasMap,
@@ -118,7 +118,7 @@ public sealed class WorldEntityRetriever
         this.animatedSprites = animatedSprites;
         this.animatedSpriteManager = animatedSpriteManager;
         this.orientations = orientations;
-        this.phases = phases;
+        this.phaseSelector = phaseSelector;
         this.blockSpriteCache = blockSpriteCache;
         this.castBlockShadows = castBlockShadows;
         this.lightSourceTable = lightSourceTable;
@@ -359,10 +359,10 @@ public sealed class WorldEntityRetriever
 
         var animatedSpriteId = animatedSprites[entityId];
         var orientation = orientations.HasComponentForEntity(entityId) ? orientations[entityId] : Orientation.South;
-        var phase = phases.HasComponentForEntity(entityId) ? phases[entityId] : AnimationPhase.Default;
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[animatedSpriteId];
-        var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(systemTime, orientation);
+        phaseSelector.Select(entityId, systemTime, out var phase, out var effectiveTime);
+        var sprite = animatedSprite.GetPhaseData(phase).GetSpriteForTime(effectiveTime, orientation);
 
         var spritePlane = SpritePlane.Xz;
         if (entityTypes.TryGetValue(entityId, out var entityType) && entityType == EntityType.Item)

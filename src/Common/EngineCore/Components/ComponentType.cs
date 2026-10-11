@@ -198,6 +198,11 @@ public enum ComponentType
     /// </summary>
     AnimationPhase = 0x1000,
 
+    /// <summary>
+    ///     Client-only one-shot animation phase override component.
+    /// </summary>
+    ActiveAnimationPhase = 0x1001,
+
     #endregion Client
 
     #region Server
