@@ -34,4 +34,14 @@ public static class ClientComponentOperators
         {
             { ComponentOperation.Set, (_, b) => b }
         };
+
+    /// <summary>
+    ///     Standard operators for active-animation-phase-valued components.
+    /// </summary>
+    public static readonly Dictionary<ComponentOperation,
+            Func<ActiveAnimationPhase, ActiveAnimationPhase, ActiveAnimationPhase>>
+        ActiveAnimationPhaseOperators = new()
+        {
+            { ComponentOperation.Set, (_, b) => b }
+        };
 }

@@ -7,6 +7,7 @@
 #### 11 October 2026
 
 * Add support for single-threaded execution in the engine core. Setting `Sovereign:PerformanceOptions:SystemExecutorCount` to `0` now runs all systems serially on the main loop thread (interleaved with component updates, the event pump, network polling, and rendering) instead of spawning system executor threads, and systems are initialized and cleaned up on that same thread so shutdown is race-free. Values greater than `0` keep the existing multi-threaded behavior, and the default remains unchanged.
+* Add client-side one-shot animation overrides. A new client-only `ActiveAnimationPhase` component (`ComponentType.ActiveAnimationPhase`) overrides an entity's movement-driven `AnimationPhase` for a bounded number of animation loops, phase-locking the animation to its first frame from the moment the override is set, then clearing itself so the entity reverts to its current base phase. `AnimationPhaseSelector` centralizes the phase and time-shift precedence for the render path, `EntityAnimationSystem` expires completed overrides each event-loop iteration (pinning the loop duration on the first scan so orientation and sprite-definition changes cannot alter total playback time), and the new `ActiveAnimationService.PlayAnimation(entityId, phase, loops)` entry point starts or restarts an override.
 
 #### 5 October 2026
 
