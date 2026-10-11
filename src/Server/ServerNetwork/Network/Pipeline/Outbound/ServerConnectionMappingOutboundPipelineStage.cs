@@ -134,6 +134,12 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
             return new Maybe<ulong>(details.EntityId);
         });
 
+        var attackMapper = entityWorldSegmentMapperFactory.Create(evInfo =>
+        {
+            if (evInfo.Event.EventDetails is not AttackEventDetails details) return new Maybe<ulong>();
+            return new Maybe<ulong>(details.ActorId);
+        });
+
         // Configure specific connection mappers.
         specificMappers[EventId.Core_Ping_Ping] = globalMapper;
         specificMappers[EventId.Core_WorldManagement_Subscribe] = worldSubEventMapper;
@@ -154,6 +160,7 @@ public class ServerConnectionMappingOutboundPipelineStage : IConnectionMappingOu
         specificMappers[EventId.Client_Dialogue_Enqueue] = dialogueMapepr;
         specificMappers[EventId.Core_Vitals_Kill] = killMapper;
         specificMappers[EventId.Core_Vitals_ChangeVitals] = changeVitalsMapper;
+        specificMappers[EventId.Server_Combat_Attack] = attackMapper;
     }
 
     public void Process(OutboundEventInfo evInfo)

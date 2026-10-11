@@ -71,7 +71,9 @@ public sealed class EntityProcessor
     private const int IndexItemUse = IndexQuantity + 1;
     private const int IndexNpcFlags = IndexItemUse + 1;
     private const int IndexUseRange = IndexNpcFlags + 1;
-    private const int IndexHealthValue = IndexUseRange + 1;
+    private const int IndexAttackRange = IndexUseRange + 1;
+    private const int IndexAttackDelayUs = IndexAttackRange + 1;
+    private const int IndexHealthValue = IndexAttackDelayUs + 1;
     private const int IndexHealthMaxValue = IndexHealthValue + 1;
     private const int IndexHealthChangeRate = IndexHealthMaxValue + 1;
     private const int IndexHealthChangeInterval = IndexHealthChangeRate + 1;
@@ -173,6 +175,7 @@ public sealed class EntityProcessor
             ProcessItemUse(reader, builder);
             ProcessNpcFlags(reader, builder);
             ProcessUseRange(reader, builder);
+            ProcessAttackDetails(reader, builder);
             ProcessHealth(reader, builder);
             ProcessStamina(reader, builder);
             ProcessMana(reader, builder);
@@ -531,6 +534,21 @@ public sealed class EntityProcessor
     {
         if (reader.IsDBNull(IndexUseRange)) return;
         builder.UseRange(reader.GetFloat(IndexUseRange));
+    }
+
+    /// <summary>
+    ///     Processes the AttackDetails component.
+    /// </summary>
+    /// <param name="reader">Reader.</param>
+    /// <param name="builder">Builder.</param>
+    private void ProcessAttackDetails(IDataReader reader, IEntityBuilder builder)
+    {
+        if (reader.IsDBNull(IndexAttackRange)) return;
+        builder.AttackDetails(new AttackDetails
+        {
+            AttackRange = reader.GetFloat(IndexAttackRange),
+            AttackDelayUs = (uint)reader.GetInt64(IndexAttackDelayUs)
+        });
     }
 
     /// <summary>

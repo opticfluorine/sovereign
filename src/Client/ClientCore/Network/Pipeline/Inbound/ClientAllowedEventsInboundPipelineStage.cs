@@ -52,7 +52,8 @@ public class ClientAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Core_Time_Clock,
         EventId.Client_Dialogue_Enqueue,
         EventId.Core_Vitals_Kill,
-        EventId.Core_Vitals_ChangeVitals
+        EventId.Core_Vitals_ChangeVitals,
+        EventId.Server_Combat_Attack
     };
 
     private readonly ILogger<ClientAllowedEventsInboundPipelineStage> logger;

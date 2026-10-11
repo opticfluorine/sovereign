@@ -90,6 +90,18 @@ public class VitalsEventHandler
                 break;
             }
 
+            case EventId.Server_Combat_DamagedBy:
+            {
+                if (ev.EventDetails is not DamagedByEventDetails details)
+                {
+                    logger.LogError("Received DamagedBy event with bad details.");
+                    break;
+                }
+
+                deathHandler.HandleDamagedBy(details);
+                break;
+            }
+
             case EventId.Core_Tick:
             {
                 ++TickCount;

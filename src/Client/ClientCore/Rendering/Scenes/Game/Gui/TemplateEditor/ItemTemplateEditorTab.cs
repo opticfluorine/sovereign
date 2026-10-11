@@ -53,6 +53,7 @@ public class ItemTemplateEditorTab
     private readonly AnimatedSpriteComponentCollection animatedSprites;
     private readonly AppearanceControlGroup appearanceControlGroup;
     private readonly BasicInformationControlGroup basicInformationControlGroup;
+    private readonly CombatControlGroup combatControlGroup;
     private readonly EntityDefinitionGenerator definitionGenerator;
     private readonly DrawableComponentCollection drawables;
     private readonly EditorOptions editorOptions;
@@ -80,7 +81,7 @@ public class ItemTemplateEditorTab
         EntityDefinitionGenerator definitionGenerator, NameComponentValidator nameComponentValidator,
         AnimatedSpriteComponentCollection animatedSprites, TemplateEntityDataClient templateEntityDataClient,
         BasicInformationControlGroup basicInformationControlGroup, AppearanceControlGroup appearanceControlGroup,
-        EntityDataControlGroup entityDataControlGroup,
+        EntityDataControlGroup entityDataControlGroup, CombatControlGroup combatControlGroup,
         IOptions<RendererOptions> rendererOptions, DrawableComponentCollection drawables,
         IOptions<EditorOptions> editorOptions)
     {
@@ -95,6 +96,7 @@ public class ItemTemplateEditorTab
         this.appearanceControlGroup = appearanceControlGroup;
         this.templateEntityDataClient = templateEntityDataClient;
         this.entityDataControlGroup = entityDataControlGroup;
+        this.combatControlGroup = combatControlGroup;
         this.drawables = drawables;
         this.rendererOptions = rendererOptions.Value;
         this.editorOptions = editorOptions.Value;
@@ -245,6 +247,7 @@ public class ItemTemplateEditorTab
         basicInformationControlGroup.Render(selectedDefinition);
         appearanceControlGroup.Render(selectedDefinition);
         RenderItemControls();
+        combatControlGroup.Render(selectedDefinition);
         entityDataControlGroup.Render();
 
         ImGui.EndTable();

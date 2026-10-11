@@ -52,7 +52,8 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
         EventId.Core_Inventory_Swap,
         EventId.Core_Inventory_UseItem,
         EventId.Core_Inventory_Equip,
-        EventId.Core_Inventory_Unequip
+        EventId.Core_Inventory_Unequip,
+        EventId.Server_Combat_Attack
     };
 
     private readonly IEventSender eventSender;

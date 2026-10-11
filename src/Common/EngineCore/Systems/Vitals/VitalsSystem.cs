@@ -52,6 +52,7 @@ public class VitalsSystem : ISystem
     {
         EventId.Core_Vitals_Kill,
         EventId.Core_Vitals_ChangeVitals,
+        EventId.Server_Combat_DamagedBy,
         EventId.Core_Tick
     };
 

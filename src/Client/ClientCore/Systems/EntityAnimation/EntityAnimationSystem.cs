@@ -17,6 +17,7 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Events.Details;
+using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
@@ -56,7 +57,8 @@ public class EntityAnimationSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Core_Movement_Move,
-        EventId.Client_EntityAnimation_PlayOverride
+        EventId.Client_EntityAnimation_PlayOverride,
+        EventId.Server_Combat_Attack
     };
 
     public int WorkloadEstimate => 50;
@@ -99,6 +101,23 @@ public class EntityAnimationSystem : ISystem
                     }
 
                     animationManager.OnPlayOverride(details);
+                }
+                    break;
+
+                case EventId.Server_Combat_Attack:
+                {
+                    if (ev.EventDetails is not AttackEventDetails details)
+                    {
+                        logger.LogError("Received Attack event without details.");
+                        break;
+                    }
+
+                    animationManager.OnPlayOverride(new ActiveAnimationPhaseEventDetails
+                    {
+                        EntityId = details.ActorId,
+                        Phase = AnimationPhase.Attack,
+                        Loops = 1
+                    });
                 }
                     break;
             }

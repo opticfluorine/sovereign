@@ -108,6 +108,8 @@ CREATE TABLE Entity
     item_use            INTEGER,
     npc_flags           INTEGER,
     use_range           FLOAT,
+    attack_range        FLOAT,
+    attack_delay_us     INTEGER,
     health_value        INTEGER,
     health_max_value    INTEGER,
     health_change_rate  INTEGER,

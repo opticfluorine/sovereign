@@ -49,9 +49,10 @@ public class EntityDefinitionValidator(
                IsStaminaValid(definition) &&
                IsManaValid(definition) &&
                IsStatsValid(definition) &&
-               IsEquipmentTypeValid(definition) &&
-               IsLevelValid(definition) &&
-               IsExperienceValid(definition);
+                IsEquipmentTypeValid(definition) &&
+                IsLevelValid(definition) &&
+                IsExperienceValid(definition) &&
+                IsAttackDetailsValid(definition);
     }
 
     /// <summary>
@@ -267,6 +268,25 @@ public class EntityDefinitionValidator(
         if (!result)
             logger.LogError(
                 "Definition for {Id:X} has an invalid Experience; only players and NPCs may have it.",
+                definition.EntityId);
+        return result;
+    }
+
+    /// <summary>
+    ///     Checks that the AttackDetails component, if present, is only applied to items and NPCs
+    ///     with a non-negative attack range.
+    /// </summary>
+    /// <param name="definition">Entity definition.</param>
+    /// <returns>true if valid for this rule, false otherwise.</returns>
+    private bool IsAttackDetailsValid(EntityDefinition definition)
+    {
+        if (!definition.AttackDetails.HasValue) return true;
+
+        var result = definition.EntityType is EntityType.Item or EntityType.Npc &&
+                     definition.AttackDetails.Value.AttackRange >= 0f;
+        if (!result)
+            logger.LogError(
+                "Definition for {Id:X} has an invalid AttackDetails; AttackRange must be non-negative and only items and NPCs may have it.",
                 definition.EntityId);
         return result;
     }

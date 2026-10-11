@@ -15,13 +15,18 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Systems.Combat;
 using Sovereign.EngineCore.Systems.Movement;
+using Sovereign.EngineCore.Timing;
 using Xunit;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
@@ -34,6 +39,11 @@ public class TestVitalsSystem
     private const ulong NpcEntityId = 0x7fff000000000001;
     private const ulong PlayerEntityId = 0x7fff000000000002;
 
+    /// <summary>
+    ///     Kill credit timeout used by the test CombatOptions, in microseconds.
+    /// </summary>
+    private const uint TestKillCreditTimeoutUs = 1000;
+
     private readonly EntityTable entityTable = new();
     private readonly ComponentManager componentManager;
     private readonly EntityManager entityManager;
@@ -43,9 +53,20 @@ public class TestVitalsSystem
     private readonly EntityTypeComponentCollection entityTypes;
     private readonly EventCommunicator eventCommunicator = new();
     private readonly Mock<IEventSender> mockEventSender = new();
+    private readonly Mock<ISystemTimer> mockTimer = new();
     private readonly List<Event> sentEvents = new();
     private readonly VitalsEventHandler eventHandler;
     private readonly VitalsSystem system;
+
+    /// <summary>
+    ///     Current system time reported by the mock timer, in microseconds.
+    /// </summary>
+    private ulong currentTimeUs;
+
+    /// <summary>
+    ///     Death handler under test.
+    /// </summary>
+    private EntityDeathHandler deathHandler;
 
     public TestVitalsSystem()
     {
@@ -62,8 +83,14 @@ public class TestVitalsSystem
 
         var vitalsController = new VitalsController();
         var movementController = new MovementController();
-        var deathHandler = new EntityDeathHandler(entityTypes, healths, entityManager, vitalsController,
-            movementController, mockEventSender.Object, Mock.Of<ILogger<EntityDeathHandler>>());
+        var loggingUtil = new LoggingUtil(new NameComponentCollection(entityTable, componentManager));
+        mockTimer.Setup(t => t.GetTime()).Returns(() => currentTimeUs);
+        deathHandler = new EntityDeathHandler(entityTypes, healths, entityManager, entityTable,
+            vitalsController, movementController, new CombatInternalController(),
+            new EntityKilledByPlayerHandler(Mock.Of<ILogger<EntityKilledByPlayerHandler>>(), loggingUtil),
+            loggingUtil, mockEventSender.Object, mockTimer.Object,
+            Options.Create(new CombatOptions { KillCreditTimeoutUs = TestKillCreditTimeoutUs }),
+            Mock.Of<ILogger<EntityDeathHandler>>());
         eventHandler = new VitalsEventHandler(deathHandler, healths, staminas, manas,
             Mock.Of<ILogger<VitalsEventHandler>>());
         system = new VitalsSystem(eventCommunicator, new Mock<IEventLoop>().Object, eventHandler,
@@ -194,6 +221,72 @@ public class TestVitalsSystem
 
         Assert.Equal(9, healths[NpcEntityId].Value);
         Assert.Equal(3, staminas[NpcEntityId].Value);
+    }
+
+    [Fact]
+    public void HandlePlayerDeath_CreditsAttackerWithinKillCreditWindow()
+    {
+        entityTypes.AddComponent(PlayerEntityId, EntityType.Player);
+        entityTypes.AddComponent(NpcEntityId, EntityType.Npc);
+        healths.AddComponent(PlayerEntityId, new Vital { Value = 0, MaxValue = 10 });
+        currentTimeUs = 1000;
+
+        deathHandler.HandleDamagedBy(new DamagedByEventDetails
+        {
+            VictimEntityId = PlayerEntityId,
+            AttackerEntityId = NpcEntityId
+        });
+        currentTimeUs = 1000 + TestKillCreditTimeoutUs - 1;
+        deathHandler.HandleDeath(PlayerEntityId);
+
+        var playerKilledEvents = sentEvents
+            .Where(ev => ev.EventId == EventId.Server_Combat_PlayerKilled).ToList();
+        Assert.Single(playerKilledEvents);
+        var details = Assert.IsType<PlayerKilledEventDetails>(playerKilledEvents[0].EventDetails);
+        Assert.Equal(PlayerEntityId, details.VictimEntityId);
+        Assert.Equal(NpcEntityId, details.KillerEntityId);
+    }
+
+    [Fact]
+    public void HandlePlayerDeath_DoesNotCreditExpiredAttacker()
+    {
+        entityTypes.AddComponent(PlayerEntityId, EntityType.Player);
+        entityTypes.AddComponent(NpcEntityId, EntityType.Npc);
+        healths.AddComponent(PlayerEntityId, new Vital { Value = 0, MaxValue = 10 });
+        currentTimeUs = 1000;
+
+        deathHandler.HandleDamagedBy(new DamagedByEventDetails
+        {
+            VictimEntityId = PlayerEntityId,
+            AttackerEntityId = NpcEntityId
+        });
+        currentTimeUs = 1000 + TestKillCreditTimeoutUs + 1;
+        deathHandler.HandleDeath(PlayerEntityId);
+
+        Assert.DoesNotContain(sentEvents, ev => ev.EventId == EventId.Server_Combat_PlayerKilled);
+
+        // The victim still respawns as an unknown-killer death.
+        var sentEventIds = CaptureSentEventIds();
+        Assert.Contains(EventId.Core_Movement_Teleport, sentEventIds);
+        Assert.Contains(EventId.Core_Vitals_ChangeVitals, sentEventIds);
+    }
+
+    [Fact]
+    public void HandleDamagedBy_IgnoresVictimWithoutHealth()
+    {
+        entityTypes.AddComponent(PlayerEntityId, EntityType.Player);
+        entityTypes.AddComponent(NpcEntityId, EntityType.Npc);
+        currentTimeUs = 1000;
+
+        deathHandler.HandleDamagedBy(new DamagedByEventDetails
+        {
+            VictimEntityId = PlayerEntityId,
+            AttackerEntityId = NpcEntityId
+        });
+        deathHandler.HandleDeath(PlayerEntityId);
+
+        Assert.DoesNotContain(sentEvents, ev => ev.EventId == EventId.Server_Combat_PlayerKilled);
+        Assert.Contains(EventId.Core_Movement_Teleport, CaptureSentEventIds());
     }
 
     /// <summary>
