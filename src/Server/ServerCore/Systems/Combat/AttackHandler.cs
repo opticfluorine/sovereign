@@ -22,6 +22,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Systems.Combat;
@@ -45,7 +46,9 @@ internal sealed class AttackHandler
     private readonly CombatDamageCalculator damageCalculator;
     private readonly CombatInternalController internalController;
     private readonly EntityTypeComponentCollection entityTypes;
+    private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
+    private readonly HealthComponentCollection healths;
     private readonly KinematicsComponentCollection kinematics;
     private readonly ILogger<AttackHandler> logger;
     private readonly LoggingUtil loggingUtil;
@@ -61,9 +64,11 @@ internal sealed class AttackHandler
         KinematicsComponentCollection kinematics,
         ParentComponentCollection parents,
         EntityTypeComponentCollection entityTypes,
+        HealthComponentCollection healths,
         OrientationComponentCollection orientations,
         NonBlockWorldSegmentIndexer nonBlockIndexer,
         WorldSegmentResolver segmentResolver,
+        EntityTable entityTable,
         ISystemTimer timer,
         VitalsController vitalsController,
         CombatDamageCalculator damageCalculator,
@@ -77,9 +82,11 @@ internal sealed class AttackHandler
         this.kinematics = kinematics;
         this.parents = parents;
         this.entityTypes = entityTypes;
+        this.healths = healths;
         this.orientations = orientations;
         this.nonBlockIndexer = nonBlockIndexer;
         this.segmentResolver = segmentResolver;
+        this.entityTable = entityTable;
         this.timer = timer;
         this.vitalsController = vitalsController;
         this.damageCalculator = damageCalculator;
@@ -88,6 +95,8 @@ internal sealed class AttackHandler
         this.loggingUtil = loggingUtil;
         this.options = options.Value;
         this.logger = logger;
+
+        entityTable.OnEntityRemoved += HandleEntityRemoved;
     }
 
     /// <summary>
@@ -117,6 +126,8 @@ internal sealed class AttackHandler
         foreach (var targetId in FindTargets(actorId, actorKinematics.Position, attackDetailsValue.AttackRange,
                      facing))
         {
+            if (!healths.HasComponentForEntity(targetId)) continue;
+
             var damage = damageCalculator.CalculateDamage(actorId, targetId);
             vitalsController.ChangeVitals(eventSender, targetId, VitalType.Health, -damage);
             internalController.DamagedBy(eventSender, targetId, actorId);
@@ -164,7 +175,7 @@ internal sealed class AttackHandler
             var delta = candidateKinematics.Position - actorPosition;
             if (Vector2.Dot(new Vector2(delta.X, delta.Y), new Vector2(facing.X, facing.Y)) <= 0f) continue;
 
-            var distanceSquared = delta.X * delta.X + delta.Y * delta.Y;
+            var distanceSquared = delta.X * delta.X + delta.Y * delta.Y + delta.Z * delta.Z;
             if (distanceSquared > rangeSquared) continue;
 
             targets.Add(candidateId);
@@ -174,7 +185,8 @@ internal sealed class AttackHandler
     }
 
     /// <summary>
-    ///     Enumerates all non-block entities in the world segments overlapping the attack range.
+    ///     Enumerates all non-block entities in the world segments overlapping the attack range,
+    ///     including the segments directly above and below.
     /// </summary>
     /// <param name="actorPosition">Position of the actor.</param>
     /// <param name="range">Attack range in world units.</param>
@@ -188,7 +200,7 @@ internal sealed class AttackHandler
 
         for (var x = minSegment.X; x <= maxSegment.X; ++x)
         for (var y = minSegment.Y; y <= maxSegment.Y; ++y)
-        for (var z = minSegment.Z; z <= maxSegment.Z; ++z)
+        for (var z = minSegment.Z - 1; z <= maxSegment.Z + 1; ++z)
         foreach (var entityId in nonBlockIndexer.GetEntitiesInWorldSegment(new GridPosition { X = x, Y = y, Z = z }))
             yield return entityId;
     }
@@ -208,5 +220,15 @@ internal sealed class AttackHandler
 
         lastAttackTimes[actorId] = now;
         return true;
+    }
+
+    /// <summary>
+    ///     Handles the removal of an entity by evicting its rate-limit entry.
+    /// </summary>
+    /// <param name="entityId">Entity ID of the removed entity.</param>
+    /// <param name="isUnload">true if this is an unload rather than a removal.</param>
+    private void HandleEntityRemoved(ulong entityId, bool isUnload)
+    {
+        lastAttackTimes.Remove(entityId);
     }
 }

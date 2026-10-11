@@ -30,4 +30,9 @@ public sealed class CombatOptions
     ///     Default minimum time between attacks in microseconds for attackers without an AttackDetails component.
     /// </summary>
     public uint DefaultAttackDelayUs { get; set; } = 250000;
+
+    /// <summary>
+    ///     Maximum age in microseconds of a last-attacker entry that may still be credited with a kill.
+    /// </summary>
+    public uint KillCreditTimeoutUs { get; set; } = 30000000;
 }
