@@ -634,6 +634,16 @@ public enum EventId
 
     #endregion Client_Player
 
+    #region Client_EntityAnimation
+
+    /// <summary>
+    ///     Event sent to start or restart a one-shot animation override on an entity.
+    /// </summary>
+    /// Associated details: ActiveAnimationPhaseEventDetails
+    Client_EntityAnimation_PlayOverride = 10800,
+
+    #endregion Client_EntityAnimation
+
     #endregion Client
 
     #region Server

@@ -15,54 +15,40 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Sovereign.ClientCore.Components;
+using Sovereign.ClientCore.Events.Details;
 using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
-using Sovereign.EngineCore.Timing;
+using Sovereign.EngineCore.Events;
+using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.EntityAnimation;
 
 /// <summary>
-///     Public entry point for starting one-shot animation overrides on client entities.
+///     Public API for starting one-shot animation overrides on client entities.
+///     Requests are delivered asynchronously as events.
 /// </summary>
-public sealed class ActiveAnimationService
+public sealed class ActiveAnimationController
 {
-    private readonly ActiveAnimationPhaseComponentCollection activePhases;
-    private readonly ISystemTimer systemTimer;
-
-    /// <summary>
-    ///     Creates a new active animation service.
-    /// </summary>
-    /// <param name="activePhases">Active animation phase override collection.</param>
-    /// <param name="systemTimer">System timer.</param>
-    public ActiveAnimationService(ActiveAnimationPhaseComponentCollection activePhases, ISystemTimer systemTimer)
-    {
-        this.activePhases = activePhases;
-        this.systemTimer = systemTimer;
-    }
-
     /// <summary>
     ///     Starts an animation override that plays the given phase for exactly the given number of
     ///     loops beginning at the first frame, restarting any override already in progress.
     /// </summary>
+    /// <param name="eventSender">Event sender.</param>
     /// <param name="entityId">Entity to animate.</param>
     /// <param name="phase">Phase to render while the override is active.</param>
     /// <param name="loops">Number of loops to play. Must be at least one.</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="loops" /> is less than one.</exception>
-    public void PlayAnimation(ulong entityId, AnimationPhase phase, int loops = 1)
+    public void PlayAnimation(IEventSender eventSender, ulong entityId, AnimationPhase phase, int loops = 1)
     {
         if (loops < 1)
             throw new ArgumentOutOfRangeException(nameof(loops), loops, "Loop count must be at least one.");
 
-        /* Cancel any pending expiry removal so that the re-triggered override cannot be
-           silently deleted by the stale removal when component updates are next applied. */
-        activePhases.CancelPendingRemove(entityId);
-
-        activePhases.AddOrUpdateComponent(entityId, new ActiveAnimationPhase
+        var details = new ActiveAnimationPhaseEventDetails
         {
+            EntityId = entityId,
             Phase = phase,
-            Loops = loops,
-            StartTimeUs = systemTimer.GetTime(),
-            LoopDurationUs = 0
-        });
+            Loops = loops
+        };
+        var ev = new Event(EventId.Client_EntityAnimation_PlayOverride, details);
+        eventSender.SendEvent(ev);
     }
 }

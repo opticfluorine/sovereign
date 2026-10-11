@@ -43,8 +43,9 @@ public class TestActiveAnimationPhase
     private readonly AnimationPhaseComponentCollection basePhases;
     private readonly OrientationComponentCollection orientations;
     private readonly AnimationPhaseSelector selector;
-    private readonly ActiveAnimationService service;
+    private readonly ActiveAnimationController controller;
     private readonly EntityAnimationSystem system;
+    private readonly ForwardingEventSender eventSender;
     private readonly FakeSystemTimer systemTimer = new();
 
     public TestActiveAnimationPhase()
@@ -60,9 +61,11 @@ public class TestActiveAnimationPhase
 
         selector = new AnimationPhaseSelector(basePhases, activePhases);
         system = new EntityAnimationSystem(new EventCommunicator(), new FakeEventLoop(),
-            new AnimationPhaseStateMachine(basePhases), activePhases, animatedSprites, orientations,
-            animatedSpriteManager, systemTimer, NullLogger<EntityAnimationSystem>.Instance);
-        service = new ActiveAnimationService(activePhases, systemTimer);
+            new AnimationPhaseStateMachine(basePhases), new ActiveAnimationManager(activePhases,
+                animatedSprites, orientations, animatedSpriteManager, systemTimer),
+            NullLogger<EntityAnimationSystem>.Instance);
+        eventSender = new ForwardingEventSender(system);
+        controller = new ActiveAnimationController();
     }
 
     [Fact]
@@ -74,7 +77,8 @@ public class TestActiveAnimationPhase
         const ulong startTime = 12345;
         basePhases.AddOrUpdateComponent(EntityId, AnimationPhase.Default);
         systemTimer.Time = startTime;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 2);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 2);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         // Immediately after setting the override the effective time is zero (frame zero).
@@ -114,7 +118,8 @@ public class TestActiveAnimationPhase
         // 1150 is mid-way through the underlying phase's absolute loop of 300.
         const ulong startTime = 1150;
         systemTimer.Time = startTime;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         selector.Select(EntityId, startTime, out var phase, out var effectiveTime);
@@ -139,7 +144,8 @@ public class TestActiveAnimationPhase
         orientations.ApplyComponentUpdates();
 
         systemTimer.Time = startTime;
-        service.PlayAnimation(EntityId, AnimationPhase.Default, 2);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Default, 2);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         // First scan pins the loop duration from the initial orientation (4 frames x 100 = 400).
@@ -164,7 +170,8 @@ public class TestActiveAnimationPhase
     public void Override_RemovedWhenSpriteComponentMissing()
     {
         systemTimer.Time = 100;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         Scan(100);
@@ -178,7 +185,8 @@ public class TestActiveAnimationPhase
     {
         animatedSprites.AddOrUpdateComponent(EntityId, 999);
         systemTimer.Time = 100;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         Scan(100);
@@ -195,7 +203,8 @@ public class TestActiveAnimationPhase
 
         const ulong startTime = 700;
         systemTimer.Time = startTime;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         Scan(startTime);
@@ -215,9 +224,19 @@ public class TestActiveAnimationPhase
     public void PlayAnimation_ThrowsForNonPositiveLoopCount()
     {
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => service.PlayAnimation(EntityId, AnimationPhase.Moving, 0));
+            () => controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 0));
         Assert.Throws<ArgumentOutOfRangeException>(
-            () => service.PlayAnimation(EntityId, AnimationPhase.Moving, -1));
+            () => controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, -1));
+    }
+
+    [Fact]
+    public void PlayAnimation_DoesNotSendEventForNonPositiveLoopCount()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 0));
+
+        // No event may have been sent: the system's communicator drains empty.
+        Assert.Equal(0, system.ExecuteOnce());
     }
 
     [Fact]
@@ -228,14 +247,16 @@ public class TestActiveAnimationPhase
             (AnimationPhase.Moving, Orientation.South, 4)));
 
         systemTimer.Time = 1000;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 3);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 3);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
         Scan(1000);
         activePhases.ApplyComponentUpdates();
 
         // Restart with a new phase, loop count, and start time.
         systemTimer.Time = 1500;
-        service.PlayAnimation(EntityId, AnimationPhase.Default, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Default, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         Scan(1500 + 400 - 1);
@@ -259,7 +280,8 @@ public class TestActiveAnimationPhase
         const ulong startTime = 1000;
         const ulong loopDuration = 400;
         systemTimer.Time = startTime;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
 
         // Expire the override, but do NOT apply the component updates afterwards:
@@ -270,7 +292,8 @@ public class TestActiveAnimationPhase
         // must cancel the stale removal rather than let it eat the restarted override.
         const ulong restartTime = startTime + loopDuration;
         systemTimer.Time = restartTime;
-        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        controller.PlayAnimation(eventSender, EntityId, AnimationPhase.Moving, 1);
+        system.ExecuteOnce();
         activePhases.ApplyComponentUpdates();
         Assert.True(activePhases.HasComponentForEntity(EntityId));
 
@@ -294,6 +317,24 @@ public class TestActiveAnimationPhase
     {
         systemTimer.Time = time;
         system.ExecuteOnce();
+    }
+
+    /// <summary>
+    ///     Event sender that forwards sent events into the system's event communicator so
+    ///     that the events are drained by the next system.ExecuteOnce() call.
+    /// </summary>
+    private sealed class ForwardingEventSender(EntityAnimationSystem system) : IEventSender
+    {
+        public void SendEvent(Event ev)
+        {
+            system.EventCommunicator.SendEventToSystem(ev);
+        }
+
+        public bool TryGetOutgoingEvent(out Event? ev)
+        {
+            ev = null;
+            return false;
+        }
     }
 
     /// <summary>
