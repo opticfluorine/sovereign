@@ -145,7 +145,7 @@ public class EntityAnimationSystem : ISystem
             if (pendingRemovals.Contains(entityId)) continue;
             if (!activePhases.TryGetValue(entityId, out var active)) continue;
 
-            var loopDuration = active.LoopDurationTicks;
+            var loopDuration = active.LoopDurationUs;
             if (loopDuration == 0)
             {
                 if (!TryResolveLoopDuration(entityId, active, out loopDuration))
@@ -157,11 +157,11 @@ public class EntityAnimationSystem : ISystem
 
                 // Pin the resolved duration so playback time stays stable across orientation and
                 // sprite-definition changes mid-override.
-                active.LoopDurationTicks = loopDuration;
+                active.LoopDurationUs = loopDuration;
                 activePhases.AddOrUpdateComponent(entityId, active);
             }
 
-            if (systemTime - active.StartTimeTicks >= (ulong)active.Loops * loopDuration)
+            if (systemTime - active.StartTimeUs >= (ulong)active.Loops * loopDuration)
                 RemoveOverride(entityId);
         }
     }
@@ -196,7 +196,7 @@ public class EntityAnimationSystem : ISystem
             : Orientation.South;
 
         var animatedSprite = animatedSpriteManager.AnimatedSprites[spriteId];
-        loopDuration = animatedSprite.GetPhaseData(active.Phase).GetLoopDurationTicks(orientation);
+        loopDuration = animatedSprite.GetPhaseData(active.Phase).GetLoopDurationUs(orientation);
         return loopDuration > 0;
     }
 }

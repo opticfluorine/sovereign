@@ -86,7 +86,7 @@ public class TestActiveAnimationPhase
         // First scan resolves and pins the loop duration of 400.
         Scan(startTime);
         activePhases.ApplyComponentUpdates();
-        Assert.Equal(400UL, activePhases[EntityId].LoopDurationTicks);
+        Assert.Equal(400UL, activePhases[EntityId].LoopDurationUs);
 
         // Still present immediately before the expiry time.
         Scan(startTime + 800 - 1);
@@ -145,7 +145,7 @@ public class TestActiveAnimationPhase
         // First scan pins the loop duration from the initial orientation (4 frames x 100 = 400).
         Scan(startTime);
         activePhases.ApplyComponentUpdates();
-        Assert.Equal(400UL, activePhases[EntityId].LoopDurationTicks);
+        Assert.Equal(400UL, activePhases[EntityId].LoopDurationUs);
 
         // Turn to an orientation whose frame count differs; the pinned duration must not change.
         orientations.AddOrUpdateComponent(EntityId, Orientation.North);
@@ -200,7 +200,7 @@ public class TestActiveAnimationPhase
 
         Scan(startTime);
         activePhases.ApplyComponentUpdates();
-        Assert.Equal(300UL, activePhases[EntityId].LoopDurationTicks);
+        Assert.Equal(300UL, activePhases[EntityId].LoopDurationUs);
 
         Scan(startTime + 300 - 1);
         activePhases.ApplyComponentUpdates();

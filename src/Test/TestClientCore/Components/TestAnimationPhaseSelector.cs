@@ -69,8 +69,8 @@ public class TestAnimationPhaseSelector
         {
             Phase = AnimationPhase.Moving,
             Loops = 1,
-            StartTimeTicks = 1000,
-            LoopDurationTicks = 0
+            StartTimeUs = 1000,
+            LoopDurationUs = 0
         });
 
         selector.Select(EntityId, 1500, out var phase, out var effectiveTime);
@@ -87,8 +87,8 @@ public class TestAnimationPhaseSelector
         {
             Phase = AnimationPhase.Moving,
             Loops = 1,
-            StartTimeTicks = 1000,
-            LoopDurationTicks = 0
+            StartTimeUs = 1000,
+            LoopDurationUs = 0
         });
 
         selector.Select(EntityId, 1000, out var phase, out var effectiveTime);

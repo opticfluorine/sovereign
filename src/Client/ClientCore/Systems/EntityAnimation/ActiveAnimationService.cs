@@ -61,8 +61,8 @@ public sealed class ActiveAnimationService
         {
             Phase = phase,
             Loops = loops,
-            StartTimeTicks = systemTimer.GetTime(),
-            LoopDurationTicks = 0
+            StartTimeUs = systemTimer.GetTime(),
+            LoopDurationUs = 0
         });
     }
 }

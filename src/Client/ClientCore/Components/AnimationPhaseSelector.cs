@@ -53,7 +53,7 @@ public sealed class AnimationPhaseSelector
         if (activePhases.TryGetValue(entityId, out var active))
         {
             phase = active.Phase;
-            effectiveTime = systemTime - active.StartTimeTicks;
+            effectiveTime = systemTime - active.StartTimeUs;
             return;
         }
 

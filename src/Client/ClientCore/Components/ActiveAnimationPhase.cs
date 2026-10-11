@@ -37,11 +37,11 @@ public struct ActiveAnimationPhase
     /// <summary>
     ///     System time in microseconds at which the override was created.
     /// </summary>
-    public ulong StartTimeTicks;
+    public ulong StartTimeUs;
 
     /// <summary>
     ///     Loop duration of the rendered override phase in microseconds, resolved on the first
     ///     countdown scan. Zero means not yet resolved.
     /// </summary>
-    public ulong LoopDurationTicks;
+    public ulong LoopDurationUs;
 }

@@ -137,8 +137,8 @@ public sealed class AnimatedSprite
         ///     Gets the duration of a single animation loop for the given orientation.
         /// </summary>
         /// <param name="orientation">Orientation.</param>
-        /// <returns>Loop duration in system time units.</returns>
-        public ulong GetLoopDurationTicks(Orientation orientation)
+        /// <returns>Loop duration in microseconds.</returns>
+        public ulong GetLoopDurationUs(Orientation orientation)
         {
             var sprites = GetSpritesForOrientation(orientation);
             return FrameTime * (ulong)sprites.Count;
