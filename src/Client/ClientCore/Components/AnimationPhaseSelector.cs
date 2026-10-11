@@ -45,9 +45,12 @@ public sealed class AnimationPhaseSelector
     ///     first frame from the moment it was set.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
-    /// <param name="systemTime">System time of the current frame.</param>
+    /// <param name="systemTime">System time of the current frame, in microseconds.</param>
     /// <param name="phase">Selected animation phase.</param>
-    /// <param name="effectiveTime">Effective animation time for frame selection.</param>
+    /// <param name="effectiveTime">
+    ///     Effective animation time for frame selection, in microseconds. Shifted so that active
+    ///     overrides start from their first frame.
+    /// </param>
     public void Select(ulong entityId, ulong systemTime, out AnimationPhase phase, out ulong effectiveTime)
     {
         if (activePhases.TryGetValue(entityId, out var active))
