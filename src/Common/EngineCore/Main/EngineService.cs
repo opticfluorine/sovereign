@@ -22,7 +22,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Configuration;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Timing;
 
 namespace Sovereign.EngineCore.Main;
@@ -39,11 +41,15 @@ public class EngineService : BackgroundService
     /// </summary>
     private readonly IEventLoop eventLoop;
 
+    private readonly EntityManager entityManager;
+
     private readonly ILogger<EngineService> logger;
 
     private readonly List<IMainLoopAction> mainLoopActions;
 
     private readonly PerformanceOptions performanceOptions;
+
+    private readonly List<ISystem> systems;
 
     /// <summary>
     ///     Time manager.
@@ -56,13 +62,16 @@ public class EngineService : BackgroundService
     private ulong cycleCount;
 
     public EngineService(IEventLoop eventLoop, TimeManager timeManager, IEnumerable<IMainLoopAction> mainLoopActions,
-        ILogger<EngineService> logger, IOptions<PerformanceOptions> performanceOptions)
+        ILogger<EngineService> logger, IOptions<PerformanceOptions> performanceOptions, IEnumerable<ISystem> systems,
+        EntityManager entityManager)
     {
         this.eventLoop = eventLoop;
         this.timeManager = timeManager;
         this.logger = logger;
         this.mainLoopActions = new List<IMainLoopAction>(mainLoopActions);
         this.performanceOptions = performanceOptions.Value;
+        this.systems = new List<ISystem>(systems);
+        this.entityManager = entityManager;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -106,6 +115,18 @@ public class EngineService : BackgroundService
     /// </summary>
     private void Startup()
     {
+        if (performanceOptions.SystemExecutorCount <= 0)
+        {
+            logger.LogInformation("Single-threaded execution enabled; initializing systems on the main thread.");
+
+            /* Apply any entity/component updates queued before the main loop starts (for example,
+             * templates loaded during dependency injection). In threaded mode the main loop is
+             * already applying updates while the system executors initialize, so this keeps the
+             * observable state at system initialization consistent between the two modes. */
+            entityManager.ApplyUpdates();
+
+            foreach (var system in systems) system.Initialize();
+        }
     }
 
     /// <summary>
@@ -136,6 +157,11 @@ public class EngineService : BackgroundService
     /// </summary>
     private void Shutdown()
     {
+        if (performanceOptions.SystemExecutorCount <= 0)
+        {
+            logger.LogInformation("Single-threaded execution enabled; cleaning up systems on the main thread.");
+            foreach (var system in systems) system.Cleanup();
+        }
     }
 
     /// <summary>
