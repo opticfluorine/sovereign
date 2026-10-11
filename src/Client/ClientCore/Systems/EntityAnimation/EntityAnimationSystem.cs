@@ -128,9 +128,13 @@ public class EntityAnimationSystem : ISystem
     /// </summary>
     private void ExpireActiveAnimationPhases()
     {
-        // Forget scheduled removals once the component collection has applied them.
+        // Forget scheduled removals once they are no longer buffered in the component
+        // collection, i.e. once they have been applied or cancelled by a restart. Entries
+        // are kept while the removal remains pending so it is not enqueued twice between
+        // component update ticks; once forgotten, the entity is re-examined by later scans
+        // and expires naturally based on its current override.
         if (pendingRemovals.Count > 0)
-            pendingRemovals.RemoveWhere(entityId => !activePhases.HasComponentForEntity(entityId));
+            pendingRemovals.RemoveWhere(entityId => !activePhases.HasPendingRemoveForEntity(entityId));
 
         if (activePhases.ComponentCount == 0) return;
 

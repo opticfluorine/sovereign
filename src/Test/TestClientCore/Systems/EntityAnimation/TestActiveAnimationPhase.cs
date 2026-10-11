@@ -249,6 +249,43 @@ public class TestActiveAnimationPhase
         Assert.False(activePhases.HasComponentForEntity(EntityId));
     }
 
+    [Fact]
+    public void PlayAnimation_RestartBeforePendingRemoveApplies_SurvivesStaleRemoval()
+    {
+        AddSprite(CreateSprite(
+            (AnimationPhase.Default, Orientation.South, 4),
+            (AnimationPhase.Moving, Orientation.South, 4)));
+
+        const ulong startTime = 1000;
+        const ulong loopDuration = 400;
+        systemTimer.Time = startTime;
+        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        activePhases.ApplyComponentUpdates();
+
+        // Expire the override, but do NOT apply the component updates afterwards:
+        // the removal is enqueued but still pending in the collection.
+        Scan(startTime + loopDuration);
+
+        // Re-trigger the override before the pending removal is applied. The restart
+        // must cancel the stale removal rather than let it eat the restarted override.
+        const ulong restartTime = startTime + loopDuration;
+        systemTimer.Time = restartTime;
+        service.PlayAnimation(EntityId, AnimationPhase.Moving, 1);
+        activePhases.ApplyComponentUpdates();
+        Assert.True(activePhases.HasComponentForEntity(EntityId));
+
+        // The stale removal must not arrive late: another full update cycle must
+        // leave the restarted override in place.
+        Scan(restartTime + 1);
+        activePhases.ApplyComponentUpdates();
+        Assert.True(activePhases.HasComponentForEntity(EntityId));
+
+        // The restarted override must still expire naturally, one loop after its restart.
+        Scan(restartTime + loopDuration);
+        activePhases.ApplyComponentUpdates();
+        Assert.False(activePhases.HasComponentForEntity(EntityId));
+    }
+
     /// <summary>
     ///     Runs the countdown scan at the given system time.
     /// </summary>

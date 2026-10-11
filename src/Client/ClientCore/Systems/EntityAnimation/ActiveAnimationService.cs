@@ -53,6 +53,10 @@ public sealed class ActiveAnimationService
         if (loops < 1)
             throw new ArgumentOutOfRangeException(nameof(loops), loops, "Loop count must be at least one.");
 
+        /* Cancel any pending expiry removal so that the re-triggered override cannot be
+           silently deleted by the stale removal when component updates are next applied. */
+        activePhases.CancelPendingRemove(entityId);
+
         activePhases.AddOrUpdateComponent(entityId, new ActiveAnimationPhase
         {
             Phase = phase,

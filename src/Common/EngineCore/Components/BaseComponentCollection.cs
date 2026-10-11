@@ -294,6 +294,25 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     }
 
     /// <summary>
+    ///     Cancels any pending removal of the component associated with the given entity.
+    /// </summary>
+    /// This method is intended for the case in which a component removal has been enqueued
+    /// but not yet applied, and the component has since been re-triggered; cancelling the
+    /// stale removal prevents it from silently deleting the component when the pending
+    /// operations are next applied. If the entity has no pending removal, this method is a
+    /// cheap no-op.
+    /// <param name="entityId">Entity ID whose pending removal is to be cancelled.</param>
+    public void CancelPendingRemove(ulong entityId)
+    {
+        /* Fast path when there is nothing pending. */
+        if (!hasRemoves) return;
+
+        /* Drop all pending removals for the entity. */
+        pendingRemoves.RemoveAll(pendingRemove => pendingRemove.EntityId == entityId);
+        hasRemoves = pendingRemoves.Count > 0;
+    }
+
+    /// <summary>
     ///     Applies pending component updates.
     /// </summary>
     public void ApplyComponentUpdates()
@@ -447,6 +466,24 @@ public class BaseComponentCollection<T> : IComponentUpdater, IComponentEventSour
     public bool HasPendingComponentForEntity(ulong entityId)
     {
         return pendingAddEntityIds.Contains(entityId);
+    }
+
+    /// <summary>
+    ///     Determines whether a removal of the component associated with the given
+    ///     entity is enqueued but not yet applied.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <returns>true if there is a pending remove, false otherwise.</returns>
+    public bool HasPendingRemoveForEntity(ulong entityId)
+    {
+        if (!hasRemoves) return false;
+
+        foreach (var pendingRemove in pendingRemoves)
+        {
+            if (pendingRemove.EntityId == entityId) return true;
+        }
+
+        return false;
     }
 
     /// <summary>
