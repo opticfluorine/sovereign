@@ -364,3 +364,51 @@ synchronization, at which point a subsequent `/gcworld` will unload them. REST
 requests for block data of an unloaded world segment return empty data until the
 segment is reloaded.
 :::
+
+## World Segment Flags
+
+World segment flags are bitwise properties attached to a world segment (a 32x32x32
+block region) that alter gameplay within it. Flags are used by the engine's
+gameplay systems at their point of use; the currently available flag is:
+
+* `Pvp`: allows player-initiated damage between players within the segment. The
+  flag must be present on **both** the attacker's segment and the target's segment;
+  if either segment lacks the flag, player-versus-player damage is refused. NPC
+  attacks, environmental damage, and scripted damage are unaffected.
+
+### /segflag
+
+**Usage:** `/segflag add|remove <range> <flag>` or `/segflag list [range]`
+
+**Parameters:**
+* `add|remove`: Whether to set or clear the flag over the range.
+* `range`: The affected world segment box, given in one of the following forms:
+  * `x1 y1 [z1] x2 y2 [z2]`: a box of world segment coordinates. The four-argument
+    form defines an x/y box that applies to all z; the six-argument form defines a
+    full 3D box. Corners are normalized, so the two corners may be given in any order.
+  * `here`: the sender's current world segment.
+* `flag`: Name of the flag to add or remove (case insensitive). The `/segflag list`
+  subcommand takes no flag.
+
+Adds or removes a flag over the given box of world segments, or lists the flags
+currently set within the box. Flags take effect immediately and are written to the
+database at the next server synchronization.
+
+Boxes affecting more than 65,536 segments are rejected to guard against mistyped
+coordinates spanning the entire z range.
+
+**Examples:**
+
+`/segflag add here Pvp` enables PvP in the segment you are standing in.
+
+`/segflag add 4 10 9 12 Pvp` enables PvP in the x/y box from segment (4, 10) to
+(9, 12) across all z.
+
+`/segflag add 4 10 2 9 12 5 Pvp` enables PvP in the 3D box from segment (4, 10, 2)
+to (9, 12, 5).
+
+`/segflag remove 4 10 9 12 Pvp` disables PvP in that same x/y box.
+
+`/segflag list here` lists the flags set in your current segment.
+
+`/segflag list 4 10 2 9 12 5` lists the flagged segments within the given 3D box.

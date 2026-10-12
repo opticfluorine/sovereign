@@ -48,13 +48,13 @@ public sealed class StateManager : IDisposable
         ILogger<StateBuffer> stateBufferLogger, FatalErrorHandler fatalErrorHandler,
         EntityNotifier entityNotifier, ExistingEntitySet existingEntitySet,
         IEventSender eventSender, PersistenceInternalController internalController,
-        WorldSegmentPersister worldSegmentPersister, IDataServices dataServices,
-        EntityTable entityTable)
+        WorldSegmentPersister worldSegmentPersister, SegmentFlagPersister segmentFlagPersister,
+        IDataServices dataServices, EntityTable entityTable)
     {
         FrontBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger, dataServices, existingEntitySet);
+            segmentFlagPersister, stateBufferLogger, dataServices, existingEntitySet);
         backBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            stateBufferLogger, dataServices, existingEntitySet);
+            segmentFlagPersister, stateBufferLogger, dataServices, existingEntitySet);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;

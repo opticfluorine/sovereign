@@ -60,4 +60,27 @@ public sealed class PersistenceController
         var ev = new Event(EventId.Server_Persistence_Synchronize);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Requests that the persistence engine set or clear a world segment flag over a box of
+    ///     world segments.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    /// <param name="minSegment">Minimum (inclusive) corner of the affected segment box.</param>
+    /// <param name="maxSegment">Maximum (inclusive) corner of the affected segment box.</param>
+    /// <param name="flag">Flag to apply.</param>
+    /// <param name="set">Whether to set the flag (true) or clear it (false).</param>
+    public void UpdateSegmentFlags(IEventSender eventSender, GridPosition minSegment, GridPosition maxSegment,
+        WorldSegmentFlag flag, bool set)
+    {
+        var details = new SegmentFlagUpdateEventDetails
+        {
+            MinSegment = minSegment,
+            MaxSegment = maxSegment,
+            Flag = flag,
+            Set = set
+        };
+        var ev = new Event(EventId.Server_Persistence_UpdateSegmentFlags, details);
+        eventSender.SendEvent(ev);
+    }
 }

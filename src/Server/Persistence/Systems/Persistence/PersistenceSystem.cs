@@ -83,6 +83,7 @@ public sealed class PersistenceSystem : ISystem
     {
         EventId.Server_Persistence_RetrieveEntity,
         EventId.Server_Persistence_RetrieveWorldSegment,
+        EventId.Server_Persistence_UpdateSegmentFlags,
         EventId.Server_Persistence_Synchronize,
         EventId.Server_Accounts_SelectPlayer,
         EventId.Core_Data_GlobalSet,

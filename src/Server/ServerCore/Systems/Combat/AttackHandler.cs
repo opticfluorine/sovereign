@@ -58,6 +58,7 @@ internal sealed class AttackHandler
     private readonly ISystemTimer timer;
     private readonly VitalsController vitalsController;
     private readonly WorldSegmentResolver segmentResolver;
+    private readonly PvpGate pvpGate;
     private readonly CombatOptions options;
 
     public AttackHandler(AttackDetailsComponentCollection attackDetails,
@@ -68,6 +69,7 @@ internal sealed class AttackHandler
         OrientationComponentCollection orientations,
         NonBlockWorldSegmentIndexer nonBlockIndexer,
         WorldSegmentResolver segmentResolver,
+        PvpGate pvpGate,
         EntityTable entityTable,
         ISystemTimer timer,
         VitalsController vitalsController,
@@ -86,6 +88,7 @@ internal sealed class AttackHandler
         this.orientations = orientations;
         this.nonBlockIndexer = nonBlockIndexer;
         this.segmentResolver = segmentResolver;
+        this.pvpGate = pvpGate;
         this.entityTable = entityTable;
         this.timer = timer;
         this.vitalsController = vitalsController;
@@ -163,6 +166,8 @@ internal sealed class AttackHandler
     {
         var targets = new List<ulong>();
         var rangeSquared = range * range;
+        var actorIsPlayer = entityTypes.TryGetValue(actorId, out var actorType)
+                            && actorType == EntityType.Player;
 
         foreach (var candidateId in EnumerateCandidates(actorPosition, range))
         {
@@ -171,6 +176,15 @@ internal sealed class AttackHandler
             if (entityType != EntityType.Player && entityType != EntityType.Npc) continue;
             if (parents.HasComponentForEntity(candidateId)) continue;
             if (!kinematics.TryGetValue(candidateId, out var candidateKinematics)) continue;
+
+            // Player-versus-player damage requires the Pvp flag on both segments.
+            if (entityType == EntityType.Player && actorIsPlayer
+                && !pvpGate.IsPvpDamageAllowed(actorPosition, candidateKinematics.Position))
+            {
+                logger.LogDebug("Pvp damage from {Actor} to {Target} was blocked by segment flags.",
+                    loggingUtil.FormatEntity(actorId), loggingUtil.FormatEntity(candidateId));
+                continue;
+            }
 
             var delta = candidateKinematics.Position - actorPosition;
             if (Vector2.Dot(new Vector2(delta.X, delta.Y), new Vector2(facing.X, facing.Y)) <= 0f) continue;
