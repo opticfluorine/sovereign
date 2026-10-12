@@ -117,7 +117,7 @@ public class SegmentFlagsChatProcessor : IChatProcessor
             Command = SegFlag,
             HelpSummary =
                 "Manage world segment flags: /segflag add|remove <range> <flag>, /segflag list [range].",
-            IncludeInHelp = true
+            IncludeInHelp = false
         }
     };
 
