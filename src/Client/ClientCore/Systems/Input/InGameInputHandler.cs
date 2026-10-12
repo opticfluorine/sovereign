@@ -92,6 +92,12 @@ public class InGameInputHandler(
             return;
         }
 
+        if (details.Key == keybindings.Attack)
+        {
+            HandleAttackKeyEvent(oldState, newState);
+            return;
+        }
+
         if (hotbarKeys.TryGetValue(details.Key, out var slotIndex))
             HandleNumberKeyEvent(slotIndex, oldState, newState);
 
@@ -222,6 +228,16 @@ public class InGameInputHandler(
     private void HandlePickUpItemKeyEvent(bool oldState, bool newState)
     {
         if (!oldState && newState) playerController.PickUpItemUnder(eventSender);
+    }
+
+    /// <summary>
+    ///     Handles attack key events.
+    /// </summary>
+    /// <param name="oldState">Old state of the key (true = key down).</param>
+    /// <param name="newState">New state of the key (true = key down).</param>
+    private void HandleAttackKeyEvent(bool oldState, bool newState)
+    {
+        if (!oldState && newState) playerController.Attack(eventSender);
     }
 
     /// <summary>

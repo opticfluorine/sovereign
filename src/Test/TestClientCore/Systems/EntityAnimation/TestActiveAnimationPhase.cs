@@ -64,7 +64,7 @@ public class TestActiveAnimationPhase
         system = new EntityAnimationSystem(new EventCommunicator(), new FakeEventLoop(),
             new AnimationPhaseStateMachine(basePhases), new ActiveAnimationManager(activePhases,
                 animatedSprites, orientations, animatedSpriteManager, systemTimer),
-            NullLogger<EntityAnimationSystem>.Instance);
+            systemTimer, NullLogger<EntityAnimationSystem>.Instance);
         eventSender = new ForwardingEventSender(system);
         controller = new EntityAnimationController();
     }

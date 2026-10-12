@@ -416,9 +416,12 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<OverheadTransparency>();
         services.TryAddSingleton<OverheadBlockGraphManager>();
 
-        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PlayerSystem>());
+        services.TryAddSingleton<PlayerSystem>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PlayerSystem>(
+            s => s.GetRequiredService<PlayerSystem>()));
         services.TryAddSingleton<PlayerInventoryActions>();
         services.TryAddSingleton<PlayerInteractionHandler>();
+        services.TryAddSingleton<PlayerAttackHandler>();
         services.TryAddSingleton<PlayerController>();
     }
 

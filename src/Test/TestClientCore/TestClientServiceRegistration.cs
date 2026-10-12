@@ -18,6 +18,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Sovereign.ClientCore;
 using Sovereign.ClientCore.Components;
 using Sovereign.ClientCore.Systems.EntityAnimation;
+using Sovereign.ClientCore.Systems.Input;
+using Sovereign.ClientCore.Systems.Player;
 using Sovereign.EngineCore;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Timing;
@@ -51,5 +53,24 @@ public class TestClientServiceRegistration
         Assert.NotNull(provider.GetRequiredService<AnimationPhaseSelector>());
         Assert.NotNull(provider.GetRequiredService<EntityAnimationSystem>());
         Assert.NotNull(provider.GetRequiredService<ISystemTimer>());
+    }
+
+    [Fact]
+    public void AddSovereignClient_ResolvesPlayerAttackServices()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddOptions();
+        services.AddSingleton<IEventLoop>(new FakeEventLoop());
+        services.AddSingleton<ISystemTimer>(new FakeSystemTimer());
+        services.AddSovereignCore();
+        services.AddSovereignClient();
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<PlayerAttackHandler>());
+        Assert.NotNull(provider.GetRequiredService<PlayerSystem>());
+        Assert.NotNull(provider.GetRequiredService<Keybindings>());
+        Assert.NotNull(provider.GetRequiredService<EntityAnimationSystem>());
     }
 }

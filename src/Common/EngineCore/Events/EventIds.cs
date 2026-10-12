@@ -632,6 +632,12 @@ public enum EventId
     /// Associated details: None
     Client_Player_Interact = 10701,
 
+    /// <summary>
+    ///     Event sent to make the player attack the entity in front of them.
+    /// </summary>
+    /// Associated details: None
+    Client_Player_Attack = 10702,
+
     #endregion Client_Player
 
     #region Client_EntityAnimation

@@ -99,6 +99,7 @@ In-game player actions. Unless noted otherwise, each option is a single key name
 - **Jump**: Jumps.
 - **Interact**: Interacts with the targeted entity.
 - **PickUpItem**: Picks up the item under the player.
+- **Attack**: Attacks the entity in front of the player.
 - **HotbarSlots**: Ordered list of keys selecting hotbar slots; the entry at index 0
   selects the first hotbar slot, and so on. The list is expected to have one entry per
   hotbar slot.

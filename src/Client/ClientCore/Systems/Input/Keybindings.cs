@@ -131,6 +131,11 @@ public class Keybindings
     public SDL.SDL_Keycode PickUpItem { get; }
 
     /// <summary>
+    ///     Key bound to attacking the entity in front of the player.
+    /// </summary>
+    public SDL.SDL_Keycode Attack { get; }
+
+    /// <summary>
     ///     Keys bound to upward movement; any key in the list activates the action.
     /// </summary>
     public IReadOnlyList<SDL.SDL_Keycode> MoveUp { get; }
@@ -219,6 +224,7 @@ public class Keybindings
         Interact = BindSingle(OptionPath("InGameActions", nameof(inGameActions.Interact)), inGameActions.Interact);
         PickUpItem = BindSingle(OptionPath("InGameActions", nameof(inGameActions.PickUpItem)),
             inGameActions.PickUpItem);
+        Attack = BindSingle(OptionPath("InGameActions", nameof(inGameActions.Attack)), inGameActions.Attack);
         DropItemModifier = BindList(OptionPath("InGameActions", nameof(inGameActions.DropItemModifier)),
             inGameActions.DropItemModifier);
         ScrollZOffsetModifier = BindList(OptionPath("InGameActions", nameof(inGameActions.ScrollZOffsetModifier)),
