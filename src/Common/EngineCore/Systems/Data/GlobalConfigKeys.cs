@@ -27,4 +27,9 @@ public static class GlobalConfigKeys
     ///     Minimum Z coordinate allowed for entities; lower entities will be destroyed or respawned.
     /// </summary>
     public const string MinimumZ = $"{ConfigPrefix}.MinimumZ";
+
+    /// <summary>
+    ///     Maximum Z coordinate allowed for entities.
+    /// </summary>
+    public const string MaximumZ = $"{ConfigPrefix}.MaximumZ";
 }
