@@ -572,6 +572,11 @@ public sealed class InGameActionsOptions
     public string PickUpItem { get; set; } = ",";
 
     /// <summary>
+    ///     Key to attack the entity in front of the player.
+    /// </summary>
+    public string Attack { get; set; } = "F";
+
+    /// <summary>
     ///     Hotbar slot keys in slot order; the entry at index i selects hotbar slot i.
     /// </summary>
     public List<string> HotbarSlots { get; set; } = new() { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };

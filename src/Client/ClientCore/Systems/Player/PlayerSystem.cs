@@ -29,15 +29,17 @@ public class PlayerSystem : ISystem
 {
     private readonly PlayerInteractionHandler interactionHandler;
     private readonly PlayerInventoryActions inventoryActions;
+    private readonly PlayerAttackHandler attackHandler;
     private readonly ILogger<PlayerSystem> logger;
 
     public PlayerSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
         ILogger<PlayerSystem> logger, PlayerInventoryActions inventoryActions,
-        PlayerInteractionHandler interactionHandler)
+        PlayerInteractionHandler interactionHandler, PlayerAttackHandler attackHandler)
     {
         this.logger = logger;
         this.inventoryActions = inventoryActions;
         this.interactionHandler = interactionHandler;
+        this.attackHandler = attackHandler;
         EventCommunicator = eventCommunicator;
 
         eventLoop.RegisterSystem(this);
@@ -48,10 +50,11 @@ public class PlayerSystem : ISystem
     public ISet<EventId> EventIdsOfInterest { get; } = new HashSet<EventId>
     {
         EventId.Client_Player_PickUpItemUnder,
-        EventId.Client_Player_Interact
+        EventId.Client_Player_Interact,
+        EventId.Client_Player_Attack
     };
 
-    public int WorkloadEstimate => 10;
+    public int WorkloadEstimate => 15;
 
     public void Initialize()
     {
@@ -74,6 +77,10 @@ public class PlayerSystem : ISystem
 
                 case EventId.Client_Player_Interact:
                     interactionHandler.Interact();
+                    break;
+
+                case EventId.Client_Player_Attack:
+                    attackHandler.Attack();
                     break;
 
                 default:

@@ -21,15 +21,37 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Timing;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ClientCore.Systems.EntityAnimation;
 
 public class EntityAnimationSystem : ISystem
 {
+    /// <summary>
+    ///     Window in microseconds within which a server attack echo is treated as a duplicate of a
+    ///     locally predicted attack and suppressed. Exceeds typical round-trip time so echoes land
+    ///     inside it, while staying below the server's minimum re-attack delay (250 ms default) so
+    ///     genuine rapid swings are not swallowed.
+    /// </summary>
+    private const ulong DedupeWindowUs = 150_000;
+
     private readonly ActiveAnimationManager animationManager;
     private readonly AnimationPhaseStateMachine animationPhaseStateMachine;
     private readonly ILogger<EntityAnimationSystem> logger;
+
+    /// <summary>
+    ///     System time in microseconds of the most recent predicted attack override per entity,
+    ///     used to suppress the duplicate override from the server's rebroadcast of the attack.
+    /// </summary>
+    private readonly Dictionary<ulong, ulong> lastPredictedAttackUs = new();
+
+    /// <summary>
+    ///     Scratch buffer of predicted-attack entries to prune, reused to avoid per-scan allocation.
+    /// </summary>
+    private readonly List<ulong> stalePredictedAttacks = new();
+
+    private readonly ISystemTimer systemTimer;
 
     /// <summary>
     ///     Creates a new entity animation system.
@@ -38,14 +60,17 @@ public class EntityAnimationSystem : ISystem
     /// <param name="eventLoop">Event loop.</param>
     /// <param name="animationPhaseStateMachine">Animation phase state machine.</param>
     /// <param name="animationManager">Active animation manager.</param>
+    /// <param name="systemTimer">System timer.</param>
     /// <param name="logger">Logger.</param>
     public EntityAnimationSystem(EventCommunicator eventCommunicator, IEventLoop eventLoop,
         AnimationPhaseStateMachine animationPhaseStateMachine,
         ActiveAnimationManager animationManager,
+        ISystemTimer systemTimer,
         ILogger<EntityAnimationSystem> logger)
     {
         this.animationPhaseStateMachine = animationPhaseStateMachine;
         this.animationManager = animationManager;
+        this.systemTimer = systemTimer;
         this.logger = logger;
         EventCommunicator = eventCommunicator;
 
@@ -100,6 +125,9 @@ public class EntityAnimationSystem : ISystem
                         break;
                     }
 
+                    if (details.Phase == AnimationPhase.Attack)
+                        lastPredictedAttackUs[details.EntityId] = systemTimer.GetTime();
+
                     animationManager.OnPlayOverride(details);
                 }
                     break;
@@ -111,6 +139,15 @@ public class EntityAnimationSystem : ISystem
                         logger.LogError("Received Attack event without details.");
                         break;
                     }
+
+                    var nowUs = systemTimer.GetTime();
+                    PrunePredictedAttacks(nowUs);
+
+                    // If the local client already predicted this attack, the override is already
+                    // playing; restarting it here would show as a stutter one RTT after the swing.
+                    if (lastPredictedAttackUs.TryGetValue(details.ActorId, out var predictedUs) &&
+                        nowUs - predictedUs < DedupeWindowUs)
+                        break;
 
                     animationManager.OnPlayOverride(new ActiveAnimationPhaseEventDetails
                     {
@@ -126,5 +163,23 @@ public class EntityAnimationSystem : ISystem
         animationManager.ExpireCompletedOverrides();
 
         return processed;
+    }
+
+    /// <summary>
+    ///     Removes predicted-attack entries older than the dedupe window so the map stays bounded
+    ///     by the set of actors attacked within the window.
+    /// </summary>
+    /// <param name="nowUs">Current system time in microseconds.</param>
+    private void PrunePredictedAttacks(ulong nowUs)
+    {
+        if (lastPredictedAttackUs.Count == 0) return;
+
+        stalePredictedAttacks.Clear();
+        foreach (var (entityId, predictedUs) in lastPredictedAttackUs)
+            if (nowUs - predictedUs >= DedupeWindowUs)
+                stalePredictedAttacks.Add(entityId);
+
+        foreach (var entityId in stalePredictedAttacks)
+            lastPredictedAttackUs.Remove(entityId);
     }
 }

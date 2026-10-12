@@ -42,4 +42,14 @@ public sealed class PlayerController
         var ev = new Event(EventId.Client_Player_Interact);
         eventSender.SendEvent(ev);
     }
+
+    /// <summary>
+    ///     Requests that the player attack the entity in front of them.
+    /// </summary>
+    /// <param name="eventSender">Event sender.</param>
+    public void Attack(IEventSender eventSender)
+    {
+        var ev = new Event(EventId.Client_Player_Attack);
+        eventSender.SendEvent(ev);
+    }
 }

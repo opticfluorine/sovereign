@@ -4,6 +4,10 @@
 
 ### October
 
+#### 12 October 2026
+
+* Add a client attack input. A new `Attack` in-game key binding (default `F`, configurable under `Sovereign:KeybindingsOptions:InGameActions`) sends a new client-only `Client_Player_Attack` event that `PlayerSystem` routes to a new `PlayerAttackHandler`. The handler applies a local cooldown keyed to the player's effective attack delay (their `AttackDetails` component if present, otherwise `CombatOptions.DefaultAttackDelayUs`), sends the existing `Server_Combat_Attack`, and predicts the one-loop `Attack` animation override on the keypress frame. `EntityAnimationSystem` suppresses the duplicate override from the server's rebroadcast when it arrives within a 150 ms window of a local prediction (pruning stale per-entity prediction timestamps so the map stays bounded), so the echoed animation no longer restarts mid-swing.
+
 #### 11 October 2026
 
 * Add support for single-threaded execution in the engine core. Setting `Sovereign:PerformanceOptions:SystemExecutorCount` to `0` now runs all systems serially on the main loop thread (interleaved with component updates, the event pump, network polling, and rendering) instead of spawning system executor threads, and systems are initialized and cleaned up on that same thread so shutdown is race-free. Values greater than `0` keep the existing multi-threaded behavior, and the default remains unchanged.
