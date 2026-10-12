@@ -26,6 +26,7 @@ using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Main;
 using Sovereign.Persistence.Database.Queries;
 using Sovereign.Persistence.Database.Sqlite.Queries;
+using Sovereign.Persistence.Systems.Persistence;
 using Sovereign.ServerCore.Configuration;
 
 namespace Sovereign.Persistence.Database.Sqlite;
@@ -558,7 +559,21 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
             throw new FatalErrorException();
         }
 
+        ApplyMigrations();
+
         logger.LogInformation("SQLite database opened.");
+    }
+
+    /// <summary>
+    ///     Applies any pending incremental migrations to the database.
+    /// </summary>
+    private void ApplyMigrations()
+    {
+        var migrationQuery = new SqliteMigrationQuery(Connection);
+        var locator = new MigrationScriptLocator();
+        var runner = new MigrationRunner(Connection, migrationQuery, locator, logger);
+
+        runner.ApplyMigrations(DatabaseValidator.LatestMigration);
     }
 
     /// <summary>

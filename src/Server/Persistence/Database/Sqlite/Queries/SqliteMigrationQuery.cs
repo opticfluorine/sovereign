@@ -53,4 +53,17 @@ public sealed class SqliteMigrationQuery : IMigrationQuery
             }
         }
     }
+
+    public int GetLatestMigrationLevel()
+    {
+        using (var cmd = new SqliteCommand(query, dbConnection))
+        {
+            using (var reader = cmd.ExecuteReader())
+            {
+                // MAX over an empty table yields a single NULL row.
+                reader.Read();
+                return reader.IsDBNull(0) ? 0 : reader.GetInt32(0);
+            }
+        }
+    }
 }

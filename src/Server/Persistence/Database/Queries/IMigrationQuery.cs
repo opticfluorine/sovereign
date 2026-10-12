@@ -28,4 +28,10 @@ public interface IMigrationQuery
     /// <param name="migrationLevel">Migration level to check.</param>
     /// <returns>true if the migration level and all prior levels are applied.</returns>
     bool IsMigrationLevelApplied(int migrationLevel);
+
+    /// <summary>
+    ///     Gets the latest migration level applied to the database.
+    /// </summary>
+    /// <returns>Latest applied migration level, or 0 if no migrations are recorded.</returns>
+    int GetLatestMigrationLevel();
 }

@@ -164,6 +164,20 @@ CREATE TABLE WorldSegmentBlockData
 );
 
 
+-------------------------
+-- World Segment Flags --
+-------------------------
+
+CREATE TABLE WorldSegmentFlag
+(
+    x     INTEGER NOT NULL,
+    y     INTEGER NOT NULL,
+    z     INTEGER NOT NULL,
+    flags INTEGER NOT NULL,
+    PRIMARY KEY (x, y, z)
+);
+
+
 ----------------------------
 -- Global Key-Value Store --
 ----------------------------
@@ -348,9 +362,15 @@ VALUES (0, -1, 0,
 INSERT INTO GlobalKeyValue (key, value)
 VALUES ('__Sovereign.Config.MinimumZ', '-1024');
 
+INSERT INTO GlobalKeyValue (key, value)
+VALUES ('__Sovereign.Config.MaximumZ', '1024');
+
 -- Log the migration.
 INSERT INTO MigrationLog
 VALUES (1, 'Baseline');
+
+INSERT INTO MigrationLog
+VALUES (2, 'SegmentFlags');
 
 -- Enable WAL.
 PRAGMA
