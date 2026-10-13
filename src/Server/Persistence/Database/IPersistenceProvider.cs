@@ -595,6 +595,21 @@ public interface IPersistenceProvider : IDisposable
     IDeleteWorldSegmentBlockDataInRangeQuery DeleteWorldSegmentBlockDataInRangeQuery { get; }
 
     /// <summary>
+    ///     IGetSegmentFlagsQuery for this persistence provider.
+    /// </summary>
+    IGetSegmentFlagsQuery GetSegmentFlagsQuery { get; }
+
+    /// <summary>
+    ///     IGetSegmentFlagsInRangeQuery for this persistence provider.
+    /// </summary>
+    IGetSegmentFlagsInRangeQuery GetSegmentFlagsInRangeQuery { get; }
+
+    /// <summary>
+    ///     ISetSegmentFlagsQuery for this persistence provider.
+    /// </summary>
+    ISetSegmentFlagsQuery SetSegmentFlagsQuery { get; }
+
+    /// <summary>
     ///     IBulkAddEntitiesQuery for this persistence provider.
     /// </summary>
     IBulkAddEntitiesQuery BulkAddEntitiesQuery { get; }

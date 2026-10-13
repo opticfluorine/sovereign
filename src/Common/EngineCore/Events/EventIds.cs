@@ -680,6 +680,14 @@ public enum EventId
     Server_Persistence_PlayerEnteredWorld = 200002,
 
     /// <summary>
+    ///     Requests that the persistence system set or clear a world segment flag over a
+    ///     box of world segments.
+    ///     Server-internal; never crosses the network.
+    /// </summary>
+    /// Associated details: SegmentFlagUpdateEventDetails
+    Server_Persistence_UpdateSegmentFlags = 200003,
+
+    /// <summary>
     ///     Event sent to synchronize the server with the database.
     /// </summary>
     /// Associated details: None

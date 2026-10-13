@@ -139,6 +139,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<AttackHandler>();
         services.TryAddSingleton<CombatDamageCalculator>();
         services.TryAddSingleton<CombatScripting>();
+        services.TryAddSingleton<PvpGate>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, CombatSystem>());
     }
 
@@ -173,6 +174,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, GlobalChatProcessor>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, RescueChatProcessor>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, ModerationChatProcessor>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, SegmentFlagsChatProcessor>());
     }
 
     private static void AddServerManagementSystem(IServiceCollection services)
@@ -236,6 +238,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<EntitySynchronizer>();
         services.TryAddSingleton<WorldManagementServices>();
         services.TryAddSingleton<WorldSegmentChangeMonitor>();
+        services.TryAddSingleton<SegmentFlagManager>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldManagementSystem>());
     }

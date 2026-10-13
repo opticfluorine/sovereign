@@ -240,6 +240,11 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         DeleteWorldGenDecorationsInRangeQuery =
             new SqliteDeleteWorldGenDecorationsInRangeQuery(conn);
 
+        // World segment flags.
+        GetSegmentFlagsQuery = new SqliteGetSegmentFlagsQuery(conn);
+        GetSegmentFlagsInRangeQuery = new SqliteGetSegmentFlagsInRangeQuery(conn);
+        SetSegmentFlagsQuery = new SqliteSetSegmentFlagsQuery(conn);
+
         // CastBlockShadows component.
         AddCastBlockShadowsComponentQuery = new SimpleSqliteAddComponentQuery<bool>(
             CastBlockShadowsParamName, CastBlockShadowsParamType, conn);
@@ -508,6 +513,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IDeleteWorldSegmentBlockDataInRangeQuery DeleteWorldSegmentBlockDataInRangeQuery { get; }
     public IBulkAddEntitiesQuery BulkAddEntitiesQuery { get; }
     public IDeleteWorldGenDecorationsInRangeQuery DeleteWorldGenDecorationsInRangeQuery { get; }
+    public IGetSegmentFlagsQuery GetSegmentFlagsQuery { get; }
+    public IGetSegmentFlagsInRangeQuery GetSegmentFlagsInRangeQuery { get; }
+    public ISetSegmentFlagsQuery SetSegmentFlagsQuery { get; }
     public IAddComponentQuery<PointLight> AddPointLightSourceComponentQuery { get; }
     public IModifyComponentQuery<PointLight> ModifyPointLightSourceComponentQuery { get; }
     public IRemoveComponentQuery RemovePointLightSourceComponentQuery { get; }

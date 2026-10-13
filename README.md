@@ -132,6 +132,7 @@ prompt to download the latest game data files.
 | /listscripts      |                       | Admin only. Lists all currently loaded scripts.       |
 | /reloadentity     | entityId              | Admin only. Reloads the script hooks of the given entity. |
 | /reloadtemplate   | templateRelId         | Admin only. Reloads all loaded entities of the given template. |
+| /segflag          | subcommand, range, flag | Admin only. Adds, removes, or lists world segment flags (e.g. PvP). |
 
 ## Reporting Issues
 

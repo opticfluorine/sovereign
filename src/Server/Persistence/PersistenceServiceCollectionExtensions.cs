@@ -142,6 +142,9 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<PersistenceRangeRetriever>();
         services.TryAddSingleton<PersistenceInternalController>();
         services.TryAddSingleton<WorldSegmentPersister>();
+        services.TryAddSingleton<PendingSegmentFlagUpdates>();
+        services.TryAddSingleton<SegmentFlagPersister>();
+        services.TryAddSingleton<SegmentFlagRetriever>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PersistenceSystem>());
     }
