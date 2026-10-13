@@ -208,14 +208,13 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     }
 
     [Fact]
-    public void Validation_NonIntegerCoordinate_LogsErrorAndSendsNoEvent()
+    public void SetSegmentFlag_TruncatesFractionalCoordinates()
     {
-        Assert.Equal(0, RunLuaInteger("Data.GetSegmentFlags({ X = 1.5, Y = 2, Z = 3 })"));
+        host.LoadAndExecuteString("Data.SetSegmentFlag({ X = 1.5, Y = 2.9, Z = 3.0 }, WorldSegmentFlag.Pvp)");
 
-        host.LoadAndExecuteString("Data.SetSegmentFlag({ X = 1.5, Y = 2, Z = 3 }, WorldSegmentFlag.Pvp)");
-
-        Assert.Empty(eventSender.SentEvents);
-        Assert.Contains(logger.Messages, message => message.Contains("must be an integer"));
+        var details = AssertSingleEvent();
+        Assert.Equal(new GridPosition(1, 2, 3), details.MinSegment);
+        Assert.Equal(new GridPosition(1, 2, 3), details.MaxSegment);
     }
 
     [Fact]

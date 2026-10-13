@@ -24,6 +24,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.World;
 using Sovereign.Scripting.Lua;
+using Sovereign.ServerCore.Lua;
 using Sovereign.ServerCore.Systems.Persistence;
 using Sovereign.ServerCore.Systems.Scripting;
 using Sovereign.ServerCore.Systems.WorldManagement;
@@ -718,7 +719,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         segment = default;
 
-        if (!TryGetVector3Argument(luaState, index, mainState, functionName, argumentName, true, out var vector))
+        if (!TryGetVector3Argument(luaState, index, mainState, functionName, argumentName, out var vector))
             return false;
 
         segment = new GridPosition((int)vector.X, (int)vector.Y, (int)vector.Z);
@@ -737,7 +738,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         segment = default;
 
-        if (!TryGetVector3Argument(luaState, 1, mainState, functionName, "position", false, out var vector))
+        if (!TryGetVector3Argument(luaState, 1, mainState, functionName, "position", out var vector))
             return false;
 
         segment = segmentResolver.GetWorldSegmentForPosition(vector);
@@ -752,84 +753,29 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     /// <param name="mainState">Main Lua state.</param>
     /// <param name="functionName">Function name for error messages.</param>
     /// <param name="argumentName">Argument name for error messages.</param>
-    /// <param name="requireIntegerComponents">Whether every component must be an integer.</param>
     /// <param name="value">Parsed vector. Only valid if the method returns true.</param>
     /// <returns>true if the argument was a valid Vector3, false otherwise.</returns>
     private bool TryGetVector3Argument(IntPtr luaState, int index, IntPtr mainState, string functionName,
-        string argumentName, bool requireIntegerComponents, out Vector3 value)
+        string argumentName, out Vector3 value)
     {
         value = default;
 
-        if (!lua_istable(luaState, index))
+        var top = lua_gettop(luaState);
+        try
         {
+            // Copy the argument to the top of the stack for the marshaller, which pops it.
+            lua_pushvalue(luaState, index);
+            LuaMarshaller.Unmarshal(luaState, out value);
+            return true;
+        }
+        catch (LuaException)
+        {
+            // Restore the stack in case the marshaller threw mid-unmarshal.
+            lua_settop(luaState, top);
             scriptingServices.GetScriptLogger(mainState, logger)
                 .LogError("{Function}: {Argument} must be a Vector3.", functionName, argumentName);
             return false;
         }
-
-        luaL_checkstack(luaState, 1, null);
-
-        var vector = new Vector3();
-        if (!TryGetVector3Component(luaState, index, "X", mainState, functionName, argumentName,
-                requireIntegerComponents, out vector.X)
-            || !TryGetVector3Component(luaState, index, "Y", mainState, functionName, argumentName,
-                requireIntegerComponents, out vector.Y)
-            || !TryGetVector3Component(luaState, index, "Z", mainState, functionName, argumentName,
-                requireIntegerComponents, out vector.Z))
-            return false;
-
-        value = vector;
-        return true;
-    }
-
-    /// <summary>
-    ///     Reads and validates a single numeric component of a Vector3 argument.
-    /// </summary>
-    /// <param name="luaState">Lua state.</param>
-    /// <param name="index">Stack index of the Vector3 table.</param>
-    /// <param name="component">Component field name.</param>
-    /// <param name="mainState">Main Lua state.</param>
-    /// <param name="functionName">Function name for error messages.</param>
-    /// <param name="argumentName">Argument name for error messages.</param>
-    /// <param name="requireInteger">Whether the component must be an integer.</param>
-    /// <param name="value">Parsed component. Only valid if the method returns true.</param>
-    /// <returns>true if the component was valid, false otherwise.</returns>
-    private bool TryGetVector3Component(IntPtr luaState, int index, string component, IntPtr mainState,
-        string functionName, string argumentName, bool requireInteger, out float value)
-    {
-        value = 0.0f;
-
-        if (lua_getfield(luaState, index, component) != LuaType.Number)
-        {
-            lua_pop(luaState, 1);
-            scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("{Function}: {Argument}.{Component} must be a number.", functionName, argumentName,
-                    component);
-            return false;
-        }
-
-        if (requireInteger && !lua_isinteger(luaState, -1))
-        {
-            lua_pop(luaState, 1);
-            scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("{Function}: {Argument}.{Component} must be an integer.", functionName, argumentName,
-                    component);
-            return false;
-        }
-
-        var raw = lua_tonumber(luaState, -1);
-        lua_pop(luaState, 1);
-
-        if (requireInteger && (raw < int.MinValue || raw > int.MaxValue))
-        {
-            scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("{Function}: {Argument}.{Component} is out of range.", functionName, argumentName,
-                    component);
-            return false;
-        }
-
-        value = (float)raw;
-        return true;
     }
 
     /// <summary>
