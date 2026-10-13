@@ -76,7 +76,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void GetSegmentFlags_UnflaggedSegment_ReturnsZero()
     {
-        Assert.Equal(0, RunLuaInteger("Data.GetSegmentFlags(1, 2, 3)"));
+        Assert.Equal(0, RunLuaInteger("Data.GetSegmentFlags({ X = 1, Y = 2, Z = 3 })"));
     }
 
     [Fact]
@@ -84,7 +84,8 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     {
         segmentFlagManager.SetFlagsInCache(new GridPosition(1, 2, 3), WorldSegmentFlag.Pvp);
 
-        Assert.Equal((long)WorldSegmentFlag.Pvp, RunLuaInteger("Data.GetSegmentFlags(1, 2, 3)"));
+        Assert.Equal((long)WorldSegmentFlag.Pvp,
+            RunLuaInteger("Data.GetSegmentFlags({ X = 1, Y = 2, Z = 3 })"));
     }
 
     [Fact]
@@ -93,10 +94,10 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
         var segment = new GridPosition(2, 3, 4);
         segmentFlagManager.SetFlagsInCache(segment, WorldSegmentFlag.Pvp);
 
-        var position = $"({segment.X * SegmentLength + 5}, {segment.Y * SegmentLength + 5}, " +
-                       $"{segment.Z * SegmentLength + 5})";
+        var position = $"{{ X = {segment.X * SegmentLength + 5}, Y = {segment.Y * SegmentLength + 5}, " +
+                       $"Z = {segment.Z * SegmentLength + 5} }}";
         Assert.Equal((long)WorldSegmentFlag.Pvp,
-            RunLuaInteger($"Data.GetSegmentFlagsForPosition{position}"));
+            RunLuaInteger($"Data.GetSegmentFlagsForPosition({position})"));
     }
 
     [Fact]
@@ -106,7 +107,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
         segmentFlagManager.SetFlagsInCache(segment, WorldSegmentFlag.Pvp);
 
         Assert.Equal((long)WorldSegmentFlag.Pvp,
-            RunLuaInteger($"Data.GetSegmentFlagsForPosition({-SegmentLength * 2 + 5}, 0.0, 0.0)"));
+            RunLuaInteger($"Data.GetSegmentFlagsForPosition({{ X = {-SegmentLength * 2 + 5}, Y = 0.0, Z = 0.0 }})"));
     }
 
     [Fact]
@@ -116,14 +117,15 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
         segmentFlagManager.SetFlagsInCache(segment, WorldSegmentFlag.Pvp);
 
         Assert.Equal((long)WorldSegmentFlag.Pvp,
-            RunLuaInteger($"Data.GetSegmentFlagsForPosition({SegmentLength}.0, 0.0, 0.0)"));
-        Assert.Equal(0, RunLuaInteger($"Data.GetSegmentFlagsForPosition({SegmentLength - 0.001}, 0.0, 0.0)"));
+            RunLuaInteger($"Data.GetSegmentFlagsForPosition({{ X = {SegmentLength}.0, Y = 0.0, Z = 0.0 }})"));
+        Assert.Equal(0,
+            RunLuaInteger($"Data.GetSegmentFlagsForPosition({{ X = {SegmentLength - 0.001}, Y = 0.0, Z = 0.0 }})"));
     }
 
     [Fact]
     public void SetSegmentFlag_SendsSingleSegmentEvent()
     {
-        host.LoadAndExecuteString("Data.SetSegmentFlag(5, 6, 7, WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString("Data.SetSegmentFlag({ X = 5, Y = 6, Z = 7 }, WorldSegmentFlag.Pvp)");
 
         var details = AssertSingleEvent();
         Assert.Equal(new GridPosition(5, 6, 7), details.MinSegment);
@@ -135,7 +137,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void ClearSegmentFlag_SendsSingleSegmentEvent()
     {
-        host.LoadAndExecuteString("Data.ClearSegmentFlag(5, 6, 7, WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString("Data.ClearSegmentFlag({ X = 5, Y = 6, Z = 7 }, WorldSegmentFlag.Pvp)");
 
         var details = AssertSingleEvent();
         Assert.Equal(new GridPosition(5, 6, 7), details.MinSegment);
@@ -147,8 +149,9 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void SetSegmentFlagForPosition_SendsEventForContainingSegment()
     {
-        host.LoadAndExecuteString($"Data.SetSegmentFlagForPosition({SegmentLength * 2 + 1}.0, 0.5, -0.5, " +
-                                  "WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString(
+            $"Data.SetSegmentFlagForPosition({{ X = {SegmentLength * 2 + 1}.0, Y = 0.5, Z = -0.5 }}, " +
+            "WorldSegmentFlag.Pvp)");
 
         var details = AssertSingleEvent();
         Assert.Equal(new GridPosition(2, 0, -1), details.MinSegment);
@@ -159,8 +162,9 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void ClearSegmentFlagForPosition_SendsEventForContainingSegment()
     {
-        host.LoadAndExecuteString($"Data.ClearSegmentFlagForPosition({SegmentLength * 2 + 1}.0, 0.5, -0.5, " +
-                                  "WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString(
+            $"Data.ClearSegmentFlagForPosition({{ X = {SegmentLength * 2 + 1}.0, Y = 0.5, Z = -0.5 }}, " +
+            "WorldSegmentFlag.Pvp)");
 
         var details = AssertSingleEvent();
         Assert.Equal(new GridPosition(2, 0, -1), details.MinSegment);
@@ -170,7 +174,8 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void SetSegmentFlagInBox_SendsNormalizedInclusiveBox()
     {
-        host.LoadAndExecuteString("Data.SetSegmentFlagInBox(3, 2, 1, 1, 4, 2, WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString(
+            "Data.SetSegmentFlagInBox({ X = 3, Y = 2, Z = 1 }, { X = 1, Y = 4, Z = 2 }, WorldSegmentFlag.Pvp)");
 
         var details = AssertSingleEvent();
         Assert.Equal(new GridPosition(1, 2, 1), details.MinSegment);
@@ -182,7 +187,8 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void ClearSegmentFlagInBox_SendsNormalizedInclusiveBox()
     {
-        host.LoadAndExecuteString("Data.ClearSegmentFlagInBox(1, 4, 2, 3, 2, 1, WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString(
+            "Data.ClearSegmentFlagInBox({ X = 1, Y = 4, Z = 2 }, { X = 3, Y = 2, Z = 1 }, WorldSegmentFlag.Pvp)");
 
         var details = AssertSingleEvent();
         Assert.Equal(new GridPosition(1, 2, 1), details.MinSegment);
@@ -191,11 +197,22 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     }
 
     [Fact]
+    public void Validation_NonTableArgument_LogsErrorAndSendsNoEvent()
+    {
+        Assert.Equal(0, RunLuaInteger("Data.GetSegmentFlags(5)"));
+
+        host.LoadAndExecuteString("Data.SetSegmentFlag(5, WorldSegmentFlag.Pvp)");
+
+        Assert.Empty(eventSender.SentEvents);
+        Assert.Contains(logger.Messages, message => message.Contains("must be a Vector3"));
+    }
+
+    [Fact]
     public void Validation_NonIntegerCoordinate_LogsErrorAndSendsNoEvent()
     {
-        Assert.Equal(0, RunLuaInteger("Data.GetSegmentFlags(1.5, 2, 3)"));
+        Assert.Equal(0, RunLuaInteger("Data.GetSegmentFlags({ X = 1.5, Y = 2, Z = 3 })"));
 
-        host.LoadAndExecuteString("Data.SetSegmentFlag(1.5, 2, 3, WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString("Data.SetSegmentFlag({ X = 1.5, Y = 2, Z = 3 }, WorldSegmentFlag.Pvp)");
 
         Assert.Empty(eventSender.SentEvents);
         Assert.Contains(logger.Messages, message => message.Contains("must be an integer"));
@@ -204,7 +221,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void Validation_ZeroFlagBits_LogsErrorAndSendsNoEvent()
     {
-        host.LoadAndExecuteString("Data.SetSegmentFlag(1, 2, 3, 0)");
+        host.LoadAndExecuteString("Data.SetSegmentFlag({ X = 1, Y = 2, Z = 3 }, 0)");
 
         Assert.Empty(eventSender.SentEvents);
         Assert.Contains(logger.Messages, message => message.Contains("non-zero combination"));
@@ -213,7 +230,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void Validation_OutOfMaskFlagBits_LogsErrorAndSendsNoEvent()
     {
-        host.LoadAndExecuteString("Data.SetSegmentFlag(1, 2, 3, 0x40)");
+        host.LoadAndExecuteString("Data.SetSegmentFlag({ X = 1, Y = 2, Z = 3 }, 0x40)");
 
         Assert.Empty(eventSender.SentEvents);
         Assert.Contains(logger.Messages, message => message.Contains("non-zero combination"));
@@ -222,7 +239,8 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
     [Fact]
     public void Validation_OversizedBox_LogsErrorAndSendsNoEvent()
     {
-        host.LoadAndExecuteString("Data.SetSegmentFlagInBox(0, 0, 0, 65536, 0, 0, WorldSegmentFlag.Pvp)");
+        host.LoadAndExecuteString(
+            "Data.SetSegmentFlagInBox({ X = 0, Y = 0, Z = 0 }, { X = 65536, Y = 0, Z = 0 }, WorldSegmentFlag.Pvp)");
 
         Assert.Empty(eventSender.SentEvents);
         Assert.Contains(logger.Messages, message => message.Contains("exceeds"));

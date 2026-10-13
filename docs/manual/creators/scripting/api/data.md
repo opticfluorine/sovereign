@@ -118,124 +118,86 @@ player-versus-player combat is allowed. The flag constants are provided in the
 
 The `Data` module provides functions to read and write the flags for the world segment
 containing a given world position, or for a specific segment index or inclusive box of
-segment indices.
+segment indices. Segment indices and world positions are both passed as `Vector3` values
+(see {ref}`script-types-vector3`); segment indices must have integer components, while
+positions may be fractional.
 
 ```{eval-rst}
-.. lua:function:: Data.GetSegmentFlags(x, y, z)
+.. lua:function:: Data.GetSegmentFlags(segment)
 
    Gets the flags for the world segment at the given segment index.
 
-   :param x: Segment X index.
-   :type x: integer
-   :param y: Segment Y index.
-   :type y: integer
-   :param z: Segment Z index.
-   :type z: integer
+   :param segment: Segment index.
+   :type segment: Vector3
 
    :return: Bitwise OR of the segment's flags, or 0 if the segment has no flags.
    :rtype: integer
 
-.. lua:function:: Data.GetSegmentFlagsForPosition(px, py, pz)
+.. lua:function:: Data.GetSegmentFlagsForPosition(position)
 
    Gets the flags for the world segment containing the given world position.
 
-   :param px: World X position.
-   :type px: number
-   :param py: World Y position.
-   :type py: number
-   :param pz: World Z position.
-   :type pz: number
+   :param position: World position.
+   :type position: Vector3
 
    :return: Bitwise OR of the segment's flags, or 0 if the segment has no flags.
    :rtype: integer
 
-.. lua:function:: Data.SetSegmentFlag(x, y, z, flag)
+.. lua:function:: Data.SetSegmentFlag(segment, flag)
 
    Sets the given flag on the world segment at the given segment index.
 
-   :param x: Segment X index.
-   :type x: integer
-   :param y: Segment Y index.
-   :type y: integer
-   :param z: Segment Z index.
-   :type z: integer
+   :param segment: Segment index.
+   :type segment: Vector3
    :param flag: Flag to set. Must be a non-zero combination of ``WorldSegmentFlag`` values.
    :type flag: integer
 
-.. lua:function:: Data.ClearSegmentFlag(x, y, z, flag)
+.. lua:function:: Data.ClearSegmentFlag(segment, flag)
 
    Clears the given flag on the world segment at the given segment index.
 
-   :param x: Segment X index.
-   :type x: integer
-   :param y: Segment Y index.
-   :type y: integer
-   :param z: Segment Z index.
-   :type z: integer
+   :param segment: Segment index.
+   :type segment: Vector3
    :param flag: Flag to clear. Must be a non-zero combination of ``WorldSegmentFlag`` values.
    :type flag: integer
 
-.. lua:function:: Data.SetSegmentFlagForPosition(px, py, pz, flag)
+.. lua:function:: Data.SetSegmentFlagForPosition(position, flag)
 
    Sets the given flag on the world segment containing the given world position.
 
-   :param px: World X position.
-   :type px: number
-   :param py: World Y position.
-   :type py: number
-   :param pz: World Z position.
-   :type pz: number
+   :param position: World position.
+   :type position: Vector3
    :param flag: Flag to set. Must be a non-zero combination of ``WorldSegmentFlag`` values.
    :type flag: integer
 
-.. lua:function:: Data.ClearSegmentFlagForPosition(px, py, pz, flag)
+.. lua:function:: Data.ClearSegmentFlagForPosition(position, flag)
 
    Clears the given flag on the world segment containing the given world position.
 
-   :param px: World X position.
-   :type px: number
-   :param py: World Y position.
-   :type py: number
-   :param pz: World Z position.
-   :type pz: number
+   :param position: World position.
+   :type position: Vector3
    :param flag: Flag to clear. Must be a non-zero combination of ``WorldSegmentFlag`` values.
    :type flag: integer
 
-.. lua:function:: Data.SetSegmentFlagInBox(x1, y1, z1, x2, y2, z2, flag)
+.. lua:function:: Data.SetSegmentFlagInBox(corner1, corner2, flag)
 
    Sets the given flag on every world segment in the inclusive box bounded by the two corners.
 
-   :param x1: Segment X index of the first corner.
-   :type x1: integer
-   :param y1: Segment Y index of the first corner.
-   :type y1: integer
-   :param z1: Segment Z index of the first corner.
-   :type z1: integer
-   :param x2: Segment X index of the second corner.
-   :type x2: integer
-   :param y2: Segment Y index of the second corner.
-   :type y2: integer
-   :param z2: Segment Z index of the second corner.
-   :type z2: integer
+   :param corner1: Segment index of the first corner.
+   :type corner1: Vector3
+   :param corner2: Segment index of the second corner.
+   :type corner2: Vector3
    :param flag: Flag to set. Must be a non-zero combination of ``WorldSegmentFlag`` values.
    :type flag: integer
 
-.. lua:function:: Data.ClearSegmentFlagInBox(x1, y1, z1, x2, y2, z2, flag)
+.. lua:function:: Data.ClearSegmentFlagInBox(corner1, corner2, flag)
 
    Clears the given flag on every world segment in the inclusive box bounded by the two corners.
 
-   :param x1: Segment X index of the first corner.
-   :type x1: integer
-   :param y1: Segment Y index of the first corner.
-   :type y1: integer
-   :param z1: Segment Z index of the first corner.
-   :type z1: integer
-   :param x2: Segment X index of the second corner.
-   :type x2: integer
-   :param y2: Segment Y index of the second corner.
-   :type y2: integer
-   :param z2: Segment Z index of the second corner.
-   :type z2: integer
+   :param corner1: Segment index of the first corner.
+   :type corner1: Vector3
+   :param corner2: Segment index of the second corner.
+   :type corner2: Vector3
    :param flag: Flag to clear. Must be a non-zero combination of ``WorldSegmentFlag`` values.
    :type flag: integer
 ```
@@ -256,11 +218,19 @@ read-modify-write OR / AND-NOT operations, so repeated calls are idempotent.
 ```{code-block} lua
 :caption: Reading and writing segment flags.
 -- Read the flags for the segment containing a world position.
-local flags = Data.GetSegmentFlagsForPosition(position.X, position.Y, position.Z)
-if flags & WorldSegmentFlag.Pvp == 0 then                     -- PVP is not enabled here
-    Data.SetSegmentFlagForPosition(position.X, position.Y, position.Z, WorldSegmentFlag.Pvp)
+local flags = Data.GetSegmentFlagsForPosition(position)
+if bit.band(flags, WorldSegmentFlag.Pvp) == 0 then               -- PVP is not enabled here
+    Data.SetSegmentFlagForPosition(position, WorldSegmentFlag.Pvp)
 end
 
 -- Clear PVP over an inclusive box of segment indices.
-Data.ClearSegmentFlagInBox(0, 0, 0, 3, 3, 3, WorldSegmentFlag.Pvp)
+local corner1 = { X = 0, Y = 0, Z = 0 }
+local corner2 = { X = 3, Y = 3, Z = 3 }
+Data.ClearSegmentFlagInBox(corner1, corner2, WorldSegmentFlag.Pvp)
 ```
+
+:::{note}
+The scripting engine runs on LuaJIT, so the Lua 5.4 bitwise operators (``&``, ``|``, ``~``)
+are not available. Use the built-in `bit` module (``bit.band``, ``bit.bor``, ``bit.bnot``)
+instead, as shown above.
+:::

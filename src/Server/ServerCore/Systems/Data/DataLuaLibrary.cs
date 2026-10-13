@@ -474,7 +474,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.GetSegmentFlags(x, y, z).
+    ///     Implementation of Data.GetSegmentFlags(segment).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned.</returns>
@@ -482,15 +482,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         var mainState = LuaUtil.GetMainThread(luaState);
 
-        if (lua_gettop(luaState) != 3)
+        if (lua_gettop(luaState) != 1)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("Data.GetSegmentFlags(x, y, z) requires exactly three integer arguments.");
+                .LogError("Data.GetSegmentFlags(segment) requires exactly one Vector3 argument.");
             lua_pushinteger(luaState, 0);
             return 1;
         }
 
-        if (!TryGetSegmentCoordinates(luaState, mainState, nameof(GetSegmentFlags), out var segment))
+        if (!TryGetSegmentVector(luaState, mainState, nameof(GetSegmentFlags), "segment", out var segment))
         {
             lua_pushinteger(luaState, 0);
             return 1;
@@ -501,7 +501,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.GetSegmentFlagsForPosition(px, py, pz).
+    ///     Implementation of Data.GetSegmentFlagsForPosition(position).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned.</returns>
@@ -509,15 +509,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         var mainState = LuaUtil.GetMainThread(luaState);
 
-        if (lua_gettop(luaState) != 3)
+        if (lua_gettop(luaState) != 1)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("Data.GetSegmentFlagsForPosition(px, py, pz) requires exactly three numeric arguments.");
+                .LogError("Data.GetSegmentFlagsForPosition(position) requires exactly one Vector3 argument.");
             lua_pushinteger(luaState, 0);
             return 1;
         }
 
-        if (!TryGetPosition(luaState, mainState, nameof(GetSegmentFlagsForPosition), out var segment))
+        if (!TryGetPositionVector(luaState, mainState, nameof(GetSegmentFlagsForPosition), out var segment))
         {
             lua_pushinteger(luaState, 0);
             return 1;
@@ -528,7 +528,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.SetSegmentFlag(x, y, z, flag).
+    ///     Implementation of Data.SetSegmentFlag(segment, flag).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned (always 0).</returns>
@@ -538,7 +538,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.ClearSegmentFlag(x, y, z, flag).
+    ///     Implementation of Data.ClearSegmentFlag(segment, flag).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned (always 0).</returns>
@@ -548,7 +548,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.SetSegmentFlagForPosition(px, py, pz, flag).
+    ///     Implementation of Data.SetSegmentFlagForPosition(position, flag).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned (always 0).</returns>
@@ -558,7 +558,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.ClearSegmentFlagForPosition(px, py, pz, flag).
+    ///     Implementation of Data.ClearSegmentFlagForPosition(position, flag).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned (always 0).</returns>
@@ -568,7 +568,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.SetSegmentFlagInBox(x1, y1, z1, x2, y2, z2, flag).
+    ///     Implementation of Data.SetSegmentFlagInBox(corner1, corner2, flag).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned (always 0).</returns>
@@ -578,7 +578,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Implementation of Data.ClearSegmentFlagInBox(x1, y1, z1, x2, y2, z2, flag).
+    ///     Implementation of Data.ClearSegmentFlagInBox(corner1, corner2, flag).
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <returns>Number of values returned (always 0).</returns>
@@ -597,15 +597,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         var mainState = LuaUtil.GetMainThread(luaState);
 
-        if (lua_gettop(luaState) != 4)
+        if (lua_gettop(luaState) != 2)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("Segment flag write requires exactly four arguments: x, y, z, and a flag.");
+                .LogError("Segment flag write requires exactly two arguments: a Vector3 segment and a flag.");
             return 0;
         }
 
-        if (!TryGetSegmentCoordinates(luaState, mainState, "Segment flag write", out var segment)) return 0;
-        if (!TryGetFlagArgument(luaState, 4, mainState, "Segment flag write", out var flag)) return 0;
+        if (!TryGetSegmentVector(luaState, mainState, "Segment flag write", "segment", out var segment)) return 0;
+        if (!TryGetFlagArgument(luaState, 2, mainState, "Segment flag write", out var flag)) return 0;
 
         ApplySegmentFlag(segment, segment, flag, set);
         return 0;
@@ -621,15 +621,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         var mainState = LuaUtil.GetMainThread(luaState);
 
-        if (lua_gettop(luaState) != 4)
+        if (lua_gettop(luaState) != 2)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("Position segment flag write requires exactly four arguments: px, py, pz, and a flag.");
+                .LogError("Position segment flag write requires exactly two arguments: a Vector3 position and a flag.");
             return 0;
         }
 
-        if (!TryGetPosition(luaState, mainState, "Position segment flag write", out var segment)) return 0;
-        if (!TryGetFlagArgument(luaState, 4, mainState, "Position segment flag write", out var flag)) return 0;
+        if (!TryGetPositionVector(luaState, mainState, "Position segment flag write", out var segment)) return 0;
+        if (!TryGetFlagArgument(luaState, 2, mainState, "Position segment flag write", out var flag)) return 0;
 
         ApplySegmentFlag(segment, segment, flag, set);
         return 0;
@@ -645,25 +645,22 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         var mainState = LuaUtil.GetMainThread(luaState);
 
-        if (lua_gettop(luaState) != 7)
+        if (lua_gettop(luaState) != 3)
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError(
-                    "Box segment flag write requires exactly seven arguments: x1, y1, z1, x2, y2, z2, and a flag.");
+                .LogError("Box segment flag write requires exactly three arguments: two Vector3 corners and a flag.");
             return 0;
         }
 
-        if (!TryGetIntegerArgument(luaState, 1, mainState, "Box segment flag write", "x1", out var x1)
-            || !TryGetIntegerArgument(luaState, 2, mainState, "Box segment flag write", "y1", out var y1)
-            || !TryGetIntegerArgument(luaState, 3, mainState, "Box segment flag write", "z1", out var z1)
-            || !TryGetIntegerArgument(luaState, 4, mainState, "Box segment flag write", "x2", out var x2)
-            || !TryGetIntegerArgument(luaState, 5, mainState, "Box segment flag write", "y2", out var y2)
-            || !TryGetIntegerArgument(luaState, 6, mainState, "Box segment flag write", "z2", out var z2)
-            || !TryGetFlagArgument(luaState, 7, mainState, "Box segment flag write", out var flag))
+        if (!TryGetSegmentVector(luaState, mainState, "Box segment flag write", "corner1", 1, out var corner1)
+            || !TryGetSegmentVector(luaState, mainState, "Box segment flag write", "corner2", 2, out var corner2)
+            || !TryGetFlagArgument(luaState, 3, mainState, "Box segment flag write", out var flag))
             return 0;
 
-        var min = new GridPosition(Math.Min(x1, x2), Math.Min(y1, y2), Math.Min(z1, z2));
-        var max = new GridPosition(Math.Max(x1, x2), Math.Max(y1, y2), Math.Max(z1, z2));
+        var min = new GridPosition(Math.Min(corner1.X, corner2.X), Math.Min(corner1.Y, corner2.Y),
+            Math.Min(corner1.Z, corner2.Z));
+        var max = new GridPosition(Math.Max(corner1.X, corner2.X), Math.Max(corner1.Y, corner2.Y),
+            Math.Max(corner1.Z, corner2.Z));
 
         if (!IsBoxSizeOk(min, max))
         {
@@ -692,103 +689,146 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Reads three segment coordinate arguments and converts them to a GridPosition.
+    ///     Reads a Vector3 argument of segment indices and converts it to a GridPosition.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <param name="mainState">Main Lua state.</param>
     /// <param name="functionName">Function name for error messages.</param>
+    /// <param name="argumentName">Argument name for error messages.</param>
     /// <param name="segment">Parsed segment. Only valid if the method returns true.</param>
-    /// <returns>true if the coordinates were valid, false otherwise.</returns>
-    private bool TryGetSegmentCoordinates(IntPtr luaState, IntPtr mainState, string functionName,
+    /// <returns>true if the argument was a valid segment vector, false otherwise.</returns>
+    private bool TryGetSegmentVector(IntPtr luaState, IntPtr mainState, string functionName, string argumentName,
         out GridPosition segment)
     {
+        return TryGetSegmentVector(luaState, mainState, functionName, argumentName, 1, out segment);
+    }
+
+    /// <summary>
+    ///     Reads a Vector3 argument at the given stack index as segment indices.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="mainState">Main Lua state.</param>
+    /// <param name="functionName">Function name for error messages.</param>
+    /// <param name="argumentName">Argument name for error messages.</param>
+    /// <param name="index">Stack index of the argument.</param>
+    /// <param name="segment">Parsed segment. Only valid if the method returns true.</param>
+    /// <returns>true if the argument was a valid segment vector, false otherwise.</returns>
+    private bool TryGetSegmentVector(IntPtr luaState, IntPtr mainState, string functionName, string argumentName,
+        int index, out GridPosition segment)
+    {
         segment = default;
-        if (!TryGetIntegerArgument(luaState, 1, mainState, functionName, "x", out var x)
-            || !TryGetIntegerArgument(luaState, 2, mainState, functionName, "y", out var y)
-            || !TryGetIntegerArgument(luaState, 3, mainState, functionName, "z", out var z))
+
+        if (!TryGetVector3Argument(luaState, index, mainState, functionName, argumentName, true, out var vector))
             return false;
 
-        segment = new GridPosition(x, y, z);
+        segment = new GridPosition((int)vector.X, (int)vector.Y, (int)vector.Z);
         return true;
     }
 
     /// <summary>
-    ///     Reads three world position arguments and resolves the containing world segment.
+    ///     Reads a Vector3 position argument and resolves the containing world segment.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <param name="mainState">Main Lua state.</param>
     /// <param name="functionName">Function name for error messages.</param>
     /// <param name="segment">Resolved segment. Only valid if the method returns true.</param>
     /// <returns>true if the position was valid, false otherwise.</returns>
-    private bool TryGetPosition(IntPtr luaState, IntPtr mainState, string functionName, out GridPosition segment)
+    private bool TryGetPositionVector(IntPtr luaState, IntPtr mainState, string functionName, out GridPosition segment)
     {
         segment = default;
-        if (!TryGetNumberArgument(luaState, 1, mainState, functionName, "px", out var px)
-            || !TryGetNumberArgument(luaState, 2, mainState, functionName, "py", out var py)
-            || !TryGetNumberArgument(luaState, 3, mainState, functionName, "pz", out var pz))
+
+        if (!TryGetVector3Argument(luaState, 1, mainState, functionName, "position", false, out var vector))
             return false;
 
-        segment = segmentResolver.GetWorldSegmentForPosition(new Vector3(px, py, pz));
+        segment = segmentResolver.GetWorldSegmentForPosition(vector);
         return true;
     }
 
     /// <summary>
-    ///     Reads and validates an integer argument.
+    ///     Reads and validates a Vector3 argument.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
     /// <param name="index">Stack index of the argument.</param>
     /// <param name="mainState">Main Lua state.</param>
     /// <param name="functionName">Function name for error messages.</param>
     /// <param name="argumentName">Argument name for error messages.</param>
-    /// <param name="value">Parsed value. Only valid if the method returns true.</param>
-    /// <returns>true if the argument was a valid integer, false otherwise.</returns>
-    private bool TryGetIntegerArgument(IntPtr luaState, int index, IntPtr mainState, string functionName,
-        string argumentName, out int value)
+    /// <param name="requireIntegerComponents">Whether every component must be an integer.</param>
+    /// <param name="value">Parsed vector. Only valid if the method returns true.</param>
+    /// <returns>true if the argument was a valid Vector3, false otherwise.</returns>
+    private bool TryGetVector3Argument(IntPtr luaState, int index, IntPtr mainState, string functionName,
+        string argumentName, bool requireIntegerComponents, out Vector3 value)
     {
-        value = 0;
+        value = default;
 
-        if (!lua_isinteger(luaState, index))
+        if (!lua_istable(luaState, index))
         {
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("{Function}: {Argument} must be an integer.", functionName, argumentName);
+                .LogError("{Function}: {Argument} must be a Vector3.", functionName, argumentName);
             return false;
         }
 
-        var raw = lua_tointeger(luaState, index);
-        if (raw < int.MinValue || raw > int.MaxValue)
-        {
-            scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("{Function}: {Argument} is out of range.", functionName, argumentName);
-            return false;
-        }
+        luaL_checkstack(luaState, 1, null);
 
-        value = (int)raw;
+        var vector = new Vector3();
+        if (!TryGetVector3Component(luaState, index, "X", mainState, functionName, argumentName,
+                requireIntegerComponents, out vector.X)
+            || !TryGetVector3Component(luaState, index, "Y", mainState, functionName, argumentName,
+                requireIntegerComponents, out vector.Y)
+            || !TryGetVector3Component(luaState, index, "Z", mainState, functionName, argumentName,
+                requireIntegerComponents, out vector.Z))
+            return false;
+
+        value = vector;
         return true;
     }
 
     /// <summary>
-    ///     Reads and validates a floating-point argument.
+    ///     Reads and validates a single numeric component of a Vector3 argument.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
-    /// <param name="index">Stack index of the argument.</param>
+    /// <param name="index">Stack index of the Vector3 table.</param>
+    /// <param name="component">Component field name.</param>
     /// <param name="mainState">Main Lua state.</param>
     /// <param name="functionName">Function name for error messages.</param>
     /// <param name="argumentName">Argument name for error messages.</param>
-    /// <param name="value">Parsed value. Only valid if the method returns true.</param>
-    /// <returns>true if the argument was a valid number, false otherwise.</returns>
-    private bool TryGetNumberArgument(IntPtr luaState, int index, IntPtr mainState, string functionName,
-        string argumentName, out float value)
+    /// <param name="requireInteger">Whether the component must be an integer.</param>
+    /// <param name="value">Parsed component. Only valid if the method returns true.</param>
+    /// <returns>true if the component was valid, false otherwise.</returns>
+    private bool TryGetVector3Component(IntPtr luaState, int index, string component, IntPtr mainState,
+        string functionName, string argumentName, bool requireInteger, out float value)
     {
         value = 0.0f;
 
-        if (!lua_isnumber(luaState, index))
+        if (lua_getfield(luaState, index, component) != LuaType.Number)
         {
+            lua_pop(luaState, 1);
             scriptingServices.GetScriptLogger(mainState, logger)
-                .LogError("{Function}: {Argument} must be a number.", functionName, argumentName);
+                .LogError("{Function}: {Argument}.{Component} must be a number.", functionName, argumentName,
+                    component);
             return false;
         }
 
-        value = (float)lua_tonumber(luaState, index);
+        if (requireInteger && !lua_isinteger(luaState, -1))
+        {
+            lua_pop(luaState, 1);
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("{Function}: {Argument}.{Component} must be an integer.", functionName, argumentName,
+                    component);
+            return false;
+        }
+
+        var raw = lua_tonumber(luaState, -1);
+        lua_pop(luaState, 1);
+
+        if (requireInteger && (raw < int.MinValue || raw > int.MaxValue))
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("{Function}: {Argument}.{Component} is out of range.", functionName, argumentName,
+                    component);
+            return false;
+        }
+
+        value = (float)raw;
         return true;
     }
 

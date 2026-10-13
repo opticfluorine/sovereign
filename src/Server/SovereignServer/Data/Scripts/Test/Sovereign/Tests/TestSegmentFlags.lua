@@ -18,13 +18,13 @@ Test.Case("FlagConstants", function()
 end)
 
 Test.Case("UnflaggedSegmentReadsZero", function()
-    local flags = Data.GetSegmentFlags(FarSegment, FarSegment, FarSegment)
+    local flags = Data.GetSegmentFlags({ X = FarSegment, Y = FarSegment, Z = FarSegment })
     Test.AssertEqual(0, flags, "unflagged segment should read back a zero bitmask")
 end)
 
 Test.Case("UnflaggedPositionReadsZero", function()
     local offset = FarSegment * SegmentLength + 16
-    local flags = Data.GetSegmentFlagsForPosition(offset, offset, offset)
+    local flags = Data.GetSegmentFlagsForPosition({ X = offset, Y = offset, Z = offset })
     Test.AssertEqual(0, flags, "position in an unflagged segment should read back a zero bitmask")
 end)
 
