@@ -28,6 +28,8 @@ jobs:
           dotnet-version: 10.0.x
       - name: Setup glslc
         run: curl https://storage.googleapis.com/shaderc/artifacts/prod/graphics_shader_compiler/shaderc/linux/continuous_clang_release/515/20260126-070936/install.tgz -o install.tgz && tar -xzf install.tgz && sudo cp -r install/bin/* /usr/local/bin && sudo cp -r install/include/* /usr/local/include && sudo cp -r install/lib/* /usr/local/lib && sudo ldconfig
+      - name: Install server runtime dependencies
+        run: sudo apt-get install -y libluajit-5.1-dev
       - name: Restore dependencies
         run: dotnet restore
         working-directory: src
@@ -37,8 +39,6 @@ jobs:
       - name: Test
         run: dotnet test --no-restore
         working-directory: src
-      - name: Install server runtime dependencies
-        run: sudo apt-get install -y libluajit-5.1-dev
       - name: Run script tests
         run: util/test-scripts.sh
       - name: Upload script test results
