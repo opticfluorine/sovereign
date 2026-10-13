@@ -130,3 +130,20 @@ This section describes constants and enumerations provided by the scripting engi
 
         Mana vital.
 ```
+
+(script-constants-worldsegmentflag)=
+## WorldSegmentFlag
+
+```{eval-rst}
+.. lua:class:: WorldSegmentFlag
+
+    Bitwise flags that apply to a world segment.
+
+    .. lua:attribute:: None: integer
+
+        No flags.
+
+    .. lua:attribute:: Pvp: integer
+
+        Player-initiated damage between players is allowed in the segment.
+```
