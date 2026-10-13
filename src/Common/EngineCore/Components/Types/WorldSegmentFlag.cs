@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Sovereign.EngineUtil.Attributes;
 
 namespace Sovereign.EngineCore.Components.Types;
 
@@ -26,6 +27,8 @@ namespace Sovereign.EngineCore.Components.Types;
 ///     point of use (combat enforces Pvp, and so on).
 /// </remarks>
 [Flags]
+[Scriptable]
+[ScriptableEnum]
 public enum WorldSegmentFlag
 {
     /// <summary>

@@ -107,3 +107,130 @@ Data.Global["MyKey"] = nil         -- removes "MyKey" from the global key-value 
 local MyEntityData = Data.GetEntityData(entityId)
 MyEntityData["MyEntityKey"] = nil  -- removes "MyEntityKey" from the entity key-value store
 ```
+
+(script-data-segmentflags)=
+## Segment Flags
+
+World segment flags are bitwise flags that apply to an entire world segment, such as whether
+player-versus-player combat is allowed. The flag constants are provided in the
+`WorldSegmentFlag` table (see {ref}`script-constants-worldsegmentflag`); for example,
+`WorldSegmentFlag.Pvp` is the player-versus-player flag.
+
+The `Data` module provides functions to read and write the flags for the world segment
+containing a given world position, or for a specific segment index or inclusive box of
+segment indices. Segment indices and world positions are both passed as `Vector3` values
+(see {ref}`script-types-vector3`); segment indices must have integer components, while
+positions may be fractional.
+
+```{eval-rst}
+.. lua:function:: Data.GetSegmentFlags(segment)
+
+   Gets the flags for the world segment at the given segment index.
+
+   :param segment: Segment index.
+   :type segment: Vector3
+
+   :return: Bitwise OR of the segment's flags, or 0 if the segment has no flags.
+   :rtype: integer
+
+.. lua:function:: Data.GetSegmentFlagsForPosition(position)
+
+   Gets the flags for the world segment containing the given world position.
+
+   :param position: World position.
+   :type position: Vector3
+
+   :return: Bitwise OR of the segment's flags, or 0 if the segment has no flags.
+   :rtype: integer
+
+.. lua:function:: Data.SetSegmentFlag(segment, flag)
+
+   Sets the given flag on the world segment at the given segment index.
+
+   :param segment: Segment index.
+   :type segment: Vector3
+   :param flag: Flag to set. Must be a non-zero combination of ``WorldSegmentFlag`` values.
+   :type flag: integer
+
+.. lua:function:: Data.ClearSegmentFlag(segment, flag)
+
+   Clears the given flag on the world segment at the given segment index.
+
+   :param segment: Segment index.
+   :type segment: Vector3
+   :param flag: Flag to clear. Must be a non-zero combination of ``WorldSegmentFlag`` values.
+   :type flag: integer
+
+.. lua:function:: Data.SetSegmentFlagForPosition(position, flag)
+
+   Sets the given flag on the world segment containing the given world position.
+
+   :param position: World position.
+   :type position: Vector3
+   :param flag: Flag to set. Must be a non-zero combination of ``WorldSegmentFlag`` values.
+   :type flag: integer
+
+.. lua:function:: Data.ClearSegmentFlagForPosition(position, flag)
+
+   Clears the given flag on the world segment containing the given world position.
+
+   :param position: World position.
+   :type position: Vector3
+   :param flag: Flag to clear. Must be a non-zero combination of ``WorldSegmentFlag`` values.
+   :type flag: integer
+
+.. lua:function:: Data.SetSegmentFlagInBox(corner1, corner2, flag)
+
+   Sets the given flag on every world segment in the inclusive box bounded by the two corners.
+
+   :param corner1: Segment index of the first corner.
+   :type corner1: Vector3
+   :param corner2: Segment index of the second corner.
+   :type corner2: Vector3
+   :param flag: Flag to set. Must be a non-zero combination of ``WorldSegmentFlag`` values.
+   :type flag: integer
+
+.. lua:function:: Data.ClearSegmentFlagInBox(corner1, corner2, flag)
+
+   Clears the given flag on every world segment in the inclusive box bounded by the two corners.
+
+   :param corner1: Segment index of the first corner.
+   :type corner1: Vector3
+   :param corner2: Segment index of the second corner.
+   :type corner2: Vector3
+   :param flag: Flag to clear. Must be a non-zero combination of ``WorldSegmentFlag`` values.
+   :type flag: integer
+```
+
+The box corners are normalized per axis, so either corner may be given first. A box may
+affect at most 65,536 segments; larger boxes are rejected.
+
+:::{note}
+Segment flag writes are asynchronous. Calling a `Set` or `Clear` function enqueues the
+change and returns immediately; the write is applied when the persistence system processes
+it. Reads reflect the live in-memory cache, so a script's own write is not visible to a
+read until after the persistence system has processed it. Set and clear are applied as
+read-modify-write OR / AND-NOT operations, so repeated calls are idempotent.
+:::
+
+#### Example
+
+```{code-block} lua
+:caption: Reading and writing segment flags.
+-- Read the flags for the segment containing a world position.
+local flags = Data.GetSegmentFlagsForPosition(position)
+if bit.band(flags, WorldSegmentFlag.Pvp) == 0 then               -- PVP is not enabled here
+    Data.SetSegmentFlagForPosition(position, WorldSegmentFlag.Pvp)
+end
+
+-- Clear PVP over an inclusive box of segment indices.
+local corner1 = { X = 0, Y = 0, Z = 0 }
+local corner2 = { X = 3, Y = 3, Z = 3 }
+Data.ClearSegmentFlagInBox(corner1, corner2, WorldSegmentFlag.Pvp)
+```
+
+:::{note}
+The scripting engine runs on LuaJIT, so the Lua 5.4 bitwise operators (``&``, ``|``, ``~``)
+are not available. Use the built-in `bit` module (``bit.band``, ``bit.bor``, ``bit.bnot``)
+instead, as shown above.
+:::
