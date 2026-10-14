@@ -850,8 +850,8 @@ public class AdminChatProcessor : IChatProcessor
             return;
         }
 
-        if (dataServices.TryGetGlobal(key, out var value))
-            internalController.SendSystemMessage(value, senderEntityId);
+        if (dataServices.TryGetGlobal(key, out DataValue value))
+            internalController.SendSystemMessage($"{value.Type} {value}", senderEntityId);
         else
             internalController.SendSystemMessage("Key not found.", senderEntityId);
     }
@@ -907,16 +907,17 @@ public class AdminChatProcessor : IChatProcessor
         if (!ValidateEntityForDataCommand(args[0], senderEntityId, out var entityId)) return;
 
         var key = args[1];
-        if (dataServices.TryGetEntityKeyValueLocal(entityId, key, out var value))
+        if (dataServices.TryGetEntityKeyValueLocal(entityId, key, out DataValue value))
         {
-            internalController.SendSystemMessage(value, senderEntityId);
+            internalController.SendSystemMessage($"{value.Type} {value}", senderEntityId);
             return;
         }
 
         if (entityTable.TryGetTemplate(entityId, out var templateId) &&
             dataServices.TryGetEntityKeyValueLocal(templateId, key, out value))
         {
-            internalController.SendSystemMessage($"{value} (inherited from template {templateId:X16})",
+            internalController.SendSystemMessage(
+                $"{value.Type} {value} (inherited from template {templateId:X16})",
                 senderEntityId);
             return;
         }

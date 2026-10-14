@@ -90,7 +90,7 @@ public sealed class SqliteRetrieveRangeQuery : IRetrieveRangeQuery
 	        		WHERE ec.parent_id = et.id 
                       AND ec.player_char IS NULL
 	        )
-            SELECT id, kv.key, kv.value, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
+            SELECT id, kv.key, kv.value, kv.type, template_id, x, y, z, frontTileId, topTileId, playerCharacter, name, account, parent,
                 drawableX, drawableY, animatedSprite, orientation, admin, castBlockShadows, plsRadius, plsIntensity, plsColor,
                 plsPosX, plsPosY, plsPosZ, physics, bbPosX, bbPosY, bbPosZ, bbSizeX, bbSizeY, bbSizeZ, shadowRadius,
                 entityType, serverOnly, stackable, quantity, itemUse, npcFlags, useRange,

@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Systems.Data;
+
 namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
-///     Event details containing a string-based key-value pair.
+///     Event details containing a typed key-value pair.
 /// </summary>
 public class KeyValueEventDetails : IEventDetails
 {
@@ -29,5 +31,5 @@ public class KeyValueEventDetails : IEventDetails
     /// <summary>
     ///     Value.
     /// </summary>
-    public string Value { get; set; } = string.Empty;
+    public DataValue Value { get; set; }
 }

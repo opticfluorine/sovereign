@@ -24,7 +24,7 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 /// </summary>
 public class SqliteGetGlobalKeyValuePairsQuery : IGetGlobalKeyValuePairsQuery
 {
-    private const string Sql = "SELECT key, value FROM GlobalKeyValue";
+    private const string Sql = "SELECT key, value, type FROM GlobalKeyValue";
     private readonly SqliteConnection connection;
 
     public SqliteGetGlobalKeyValuePairsQuery(SqliteConnection connection)

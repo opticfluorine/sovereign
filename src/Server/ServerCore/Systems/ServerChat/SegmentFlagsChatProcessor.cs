@@ -353,8 +353,8 @@ public class SegmentFlagsChatProcessor : IChatProcessor
     /// <returns>Minimum segment Z index.</returns>
     private int GetMinimumSegmentZ()
     {
-        var minZ = dataServices.TryGetGlobalInt(GlobalConfigKeys.MinimumZ, out var value)
-            ? value
+        var minZ = dataServices.TryGetGlobalFloat(GlobalConfigKeys.MinimumZ, out var value)
+            ? (int)value
             : DefaultMinimumZ;
         return minZ >> SegmentShift;
     }
@@ -365,8 +365,8 @@ public class SegmentFlagsChatProcessor : IChatProcessor
     /// <returns>Maximum segment Z index.</returns>
     private int GetMaximumSegmentZ()
     {
-        var maxZ = dataServices.TryGetGlobalInt(GlobalConfigKeys.MaximumZ, out var value)
-            ? value
+        var maxZ = dataServices.TryGetGlobalFloat(GlobalConfigKeys.MaximumZ, out var value)
+            ? (int)value
             : DefaultMaximumZ;
         return maxZ >> SegmentShift;
     }

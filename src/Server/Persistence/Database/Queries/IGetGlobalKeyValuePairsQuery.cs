@@ -24,6 +24,6 @@ public interface IGetGlobalKeyValuePairsQuery
     /// <summary>
     ///     Gets all global key-value pairs.
     /// </summary>
-    /// <returns>DataReader with keys in the first column, values in the second column.</returns>
+    /// <returns>DataReader with keys in the first column, values in the second, and types in the third.</returns>
     QueryReader GetGlobalKeyValuePairs();
 }

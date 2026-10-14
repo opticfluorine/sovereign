@@ -36,7 +36,7 @@ internal class DataInternalController
     /// </summary>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
-    public void GlobalSet(string key, string value)
+    public void GlobalSet(string key, DataValue value)
     {
         var details = new KeyValueEventDetails
         {
@@ -68,7 +68,7 @@ internal class DataInternalController
     /// <param name="entityId">Entity ID.</param>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
-    public void EntityKeyValueSet(IEventSender localEventSender, ulong entityId, string key, string value)
+    public void EntityKeyValueSet(IEventSender localEventSender, ulong entityId, string key, DataValue value)
     {
         var details = new EntityKeyValueEventDetails
         {

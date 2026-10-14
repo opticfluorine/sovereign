@@ -73,8 +73,9 @@ internal class GameClock(
     {
         if (!initialized)
         {
-            // Synchronize from a cached value if available.
-            if (dataServices.TryGetGlobalUlong(TimeConstants.ClockGlobalKey, out var time))
+            // Synchronize from a cached value if available. Clock time is stored as a non-negative
+            // Int; it is cast to uint here because the game clock counts seconds since the epoch.
+            if (dataServices.TryGetGlobalInt(TimeConstants.ClockGlobalKey, out var time))
             {
                 logger.LogDebug("Loaded clock time: {Time}", time);
                 Time = (uint)time;

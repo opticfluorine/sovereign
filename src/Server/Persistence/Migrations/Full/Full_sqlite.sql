@@ -185,7 +185,8 @@ CREATE TABLE WorldSegmentFlag
 CREATE TABLE GlobalKeyValue
 (
     key   TEXT PRIMARY KEY NOT NULL,
-    value TEXT             NOT NULL
+    value TEXT             NOT NULL,
+    type  INTEGER          NOT NULL DEFAULT 0
 );
 
 
@@ -198,6 +199,7 @@ CREATE TABLE EntityKeyValue
     entity_id INTEGER NOT NULL,
     key       TEXT    NOT NULL,
     value     TEXT    NOT NULL,
+    type      INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (entity_id, key),
     FOREIGN KEY (entity_id) REFERENCES Entity (id) ON DELETE CASCADE
 );
@@ -358,12 +360,12 @@ INSERT INTO WorldSegmentBlockData
 VALUES (0, -1, 0,
         X'92dc002092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010092010091920091921f9292009200009201920000');
 
--- Default config constants.
-INSERT INTO GlobalKeyValue (key, value)
-VALUES ('__Sovereign.Config.MinimumZ', '-1024');
+-- Default config constants (type 3 = Float).
+INSERT INTO GlobalKeyValue (key, value, type)
+VALUES ('__Sovereign.Config.MinimumZ', '-1024', 3);
 
-INSERT INTO GlobalKeyValue (key, value)
-VALUES ('__Sovereign.Config.MaximumZ', '1024');
+INSERT INTO GlobalKeyValue (key, value, type)
+VALUES ('__Sovereign.Config.MaximumZ', '1024', 3);
 
 -- Log the migration.
 INSERT INTO MigrationLog
@@ -371,6 +373,9 @@ VALUES (1, 'Baseline');
 
 INSERT INTO MigrationLog
 VALUES (2, 'SegmentFlags');
+
+INSERT INTO MigrationLog
+VALUES (3, 'TypedKeyValue');
 
 -- Enable WAL.
 PRAGMA

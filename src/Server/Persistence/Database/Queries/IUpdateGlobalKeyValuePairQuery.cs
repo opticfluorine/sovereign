@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Data;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.Persistence.Database.Queries;
 
@@ -27,7 +28,7 @@ public interface IUpdateGlobalKeyValuePairQuery
     ///     Updates the given global key-value pair.
     /// </summary>
     /// <param name="key">Key.</param>
-    /// <param name="value">Value in string representation.</param>
+    /// <param name="value">Typed value.</param>
     /// <param name="transaction">Transaction.</param>
-    void UpdateGlobalKeyValuePair(string key, string value, IDbTransaction transaction);
+    void UpdateGlobalKeyValuePair(string key, DataValue value, IDbTransaction transaction);
 }
