@@ -26,6 +26,7 @@ namespace Sovereign.ServerCore.TestSupport;
 /// </summary>
 public class FakeDataServices : IDataServices
 {
+    private readonly Dictionary<(ulong EntityId, string Key), DataValue> entityValues = new();
     private readonly Dictionary<string, DataValue> globals = new();
 
     /// <summary>
@@ -36,6 +37,17 @@ public class FakeDataServices : IDataServices
     public void SetGlobal(string key, DataValue value)
     {
         globals[key] = value;
+    }
+
+    /// <summary>
+    ///     Sets an entity key-value pair.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Value.</param>
+    public void SetEntityKeyValue(ulong entityId, string key, DataValue value)
+    {
+        entityValues[(entityId, key)] = value;
     }
 
     public bool HasGlobal(string key)
@@ -113,67 +125,88 @@ public class FakeDataServices : IDataServices
 
     public bool TryGetEntityKeyValue(ulong entityId, string key, [NotNullWhen(true)] out string? value)
     {
+        if (entityValues.TryGetValue((entityId, key), out var dataValue))
+        {
+            value = dataValue.ToString();
+            return true;
+        }
+
         value = null;
         return false;
     }
 
     public bool TryGetEntityKeyValueLocal(ulong entityId, string key, [NotNullWhen(true)] out string? value)
     {
-        value = null;
-        return false;
+        return TryGetEntityKeyValue(entityId, key, out value);
     }
 
     public bool TryGetEntityKeyValue(ulong entityId, string key, out DataValue value)
     {
-        value = default;
-        return false;
+        return entityValues.TryGetValue((entityId, key), out value);
     }
 
     public bool TryGetEntityKeyValueLocal(ulong entityId, string key, out DataValue value)
     {
-        value = default;
-        return false;
+        return entityValues.TryGetValue((entityId, key), out value);
     }
 
     public bool TryGetEntityKeyValue(ulong entityId, string key, DataValueType type, out DataValue value)
     {
-        value = default;
-        return false;
+        if (!entityValues.TryGetValue((entityId, key), out value) || value.Type != type)
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryGetEntityKeyValueInt(ulong entityId, string key, out int value)
     {
         value = 0;
-        return false;
+        if (!TryGetEntityKeyValue(entityId, key, DataValueType.Int, out var dataValue)) return false;
+        value = (int)dataValue.AsInt();
+        return true;
     }
 
     public bool TryGetEntityKeyValueBool(ulong entityId, string key, out bool value)
     {
         value = false;
-        return false;
+        if (!TryGetEntityKeyValue(entityId, key, DataValueType.Bool, out var dataValue)) return false;
+        value = dataValue.AsBool();
+        return true;
     }
 
     public bool TryGetEntityKeyValueFloat(ulong entityId, string key, out float value)
     {
         value = 0.0f;
-        return false;
+        if (!TryGetEntityKeyValue(entityId, key, DataValueType.Float, out var dataValue)) return false;
+        value = (float)dataValue.AsFloat();
+        return true;
     }
 
     public bool TryGetEntityKeyValueVector3(ulong entityId, string key, out Vector3 value)
     {
         value = Vector3.Zero;
-        return false;
+        if (!TryGetEntityKeyValue(entityId, key, DataValueType.Vector3, out var dataValue)) return false;
+        value = dataValue.AsVector3();
+        return true;
     }
 
     public bool TryGetEntityKeyValueEntityId(ulong entityId, string key, out ulong value)
     {
         value = 0;
-        return false;
+        if (!TryGetEntityKeyValue(entityId, key, DataValueType.EntityId, out var dataValue)) return false;
+        value = dataValue.AsEntityId();
+        return true;
     }
 
     public void GetEntityData(ulong entityId, Dictionary<string, DataValue> data)
     {
         data.Clear();
+        foreach (var ((id, key), value) in entityValues)
+            if (id == entityId)
+                data[key] = value;
     }
 
     public bool IsKeyReadOnly(string key)

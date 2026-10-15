@@ -25,6 +25,7 @@ using Microsoft.Extensions.Logging;
 using Sovereign.ClientCore.Network.Rest;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.NetworkCore.Network.Rest.Data;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;
@@ -35,7 +36,7 @@ namespace Sovereign.ClientCore.Network.Infrastructure;
 public class EntityDataClient(RestClient restClient, ILogger<EntityDataClient> logger)
 {
     private const int MaxContentLength = 65536; // 64 KB
-    private readonly ConcurrentDictionary<ulong, Dictionary<string, string>> entityDataCache = new();
+    private readonly ConcurrentDictionary<ulong, Dictionary<string, DataValueDto>> entityDataCache = new();
 
     /// <summary>
     ///     Asynchronously refreshes the entity key-value data for the given entity.
@@ -88,7 +89,8 @@ public class EntityDataClient(RestClient restClient, ILogger<EntityDataClient> l
     /// <param name="entityId">Entity ID.</param>
     /// <param name="entityData">Entity key-value data. Only valid if method returns true.</param>
     /// <returns>true if a current cached copy is available, false otherwise.</returns>
-    public bool TryGetCachedEntityData(ulong entityId, [NotNullWhen(true)] out Dictionary<string, string>? entityData)
+    public bool TryGetCachedEntityData(ulong entityId,
+        [NotNullWhen(true)] out Dictionary<string, DataValueDto>? entityData)
     {
         return entityDataCache.TryGetValue(entityId, out entityData);
     }

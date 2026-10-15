@@ -18,12 +18,21 @@ to the database and back. Sovereign provides a global key-value store as well
 as entity-scoped key-value stores. Entity-scoped key-value stores are only
 available for non-block entities.
 
-All keys and values are stored internally as strings. When writing
-to the key-value store, the conversion of values to string format is handled
-automatically. When reading from the global store, the calling script is
-responsible for converting the string to the appropriate type. Many
-conversions (including conversion from string to number) can be done
-implicitly; others (such as booleans) require explicit conversion.
+Keys are always strings. Each value is stored with a type tag, and the supported
+types and their Lua representations are:
+
+| Type       | Lua type on read | Accepted on write                            |
+| ---------- | ---------------- | -------------------------------------------- |
+| `String`   | string           | string                                       |
+| `Int`      | integer          | integral number                              |
+| `Float`    | number           | non-integral number                          |
+| `Bool`     | boolean          | boolean                                      |
+| `Vector3`  | table            | table with numeric `x`, `y`, and `z` fields  |
+| `EntityId` | lightuserdata    | lightuserdata entity handle                  |
+
+Values are never converted between types: a value read back has the same type tag
+it was written with. A number assigned to the store is stored as `Int` if it has no
+fractional part, and as `Float` otherwise.
 
 ### Accessing Key-Value Stores
 
@@ -43,12 +52,13 @@ Entity-scoped key-value stores may be retrieved using the `Data.GetEntityData(en
    :rtype: table
 ```
 
-### Reading Global Key-Value Pairs
+### Reading Key-Value Pairs
 
 A key-value pair may be read from the key-value store by indexing into the
-appropriate table with the key. This returns the string representation of
-the value if the key-value pair is present, or `nil` if the key-value pair
-is not present. 
+appropriate table with the key. This returns the value as the native Lua type
+matching its tag (see the table above) if the key-value pair is present, or `nil`
+if the key-value pair is not present. A typed read of a key that holds a different
+type logs an error and returns `nil` rather than converting the value.
 
 For entity key-value stores, if the key is not found, the key
 for the template entity (if any) is also checked; this allows entities to inherit
@@ -59,18 +69,19 @@ key-value pairs held by their template entities.
 ```{code-block} lua
 :caption: Reading key-value pairs.
 :emphasize-lines: 1,4
-local MyValue = Data.Global["MyKey"]              -- MyValue is string if key exists, nil otherwise.
+local MyValue = Data.Global["MyKey"]              -- native Lua value if key exists, nil otherwise.
 -- ...
 local MyEntityData = Data.GetEntityData(entityId)
-local MyEntityValue = MyEntityData["MyEntityKey"] -- MyEntityValue is string if key exists for entity or its template, nil otherwise.
+local MyEntityValue = MyEntityData["MyEntityKey"] -- value if key exists for entity or its template, nil otherwise.
 ```
 
 ### Writing Key-Value Pairs
 
 A key-value pair may be created or updated in the key-value store by assigning
-a value to the appropriate table. Fields in the key-value store may be assigned
-strings, integers, numbers, or booleans; all input values will be converted
-to strings.
+a value to the appropriate table. The type tag is inferred from the Lua value
+being assigned (see the table above); an integer number is stored as `Int`, any
+other number as `Float`, and a table with numeric `x`, `y`, and `z` fields as
+`Vector3`. Assigning any other value logs a script error and does not write.
 
 For entity key-value stores, this will only ever modify the key-value pair for the
 entity itself. Unlike with reading values, writing values will not affect the
@@ -86,11 +97,13 @@ values from a script will fail with an error.
 
 ```{code-block} lua
 :caption: Writing key-value pairs.
-:emphasize-lines: 1,4
-Data.Global["MyValue"] = 12345
+local MyPosition = { x = 0.5, y = 0.5, z = 1.0 }
+Data.Global["MyValue"] = 12345        -- stored as an Int
+Data.Global["MyPosition"] = MyPosition -- stored as a Vector3
 -- ...
 local MyEntityData = Data.GetEntityData(entityId)
-MyEntityData["MyEntityKey"] = 3.14159
+MyEntityData["MyEntityKey"] = 3.14159  -- stored as a Float
+MyEntityData["MyTarget"] = targetEntity -- stored as an EntityId
 ```
 
 ### Deleting Key-Value Pairs
@@ -107,6 +120,14 @@ Data.Global["MyKey"] = nil         -- removes "MyKey" from the global key-value 
 local MyEntityData = Data.GetEntityData(entityId)
 MyEntityData["MyEntityKey"] = nil  -- removes "MyEntityKey" from the entity key-value store
 ```
+
+:::{note}
+Key-value writes update the live in-memory store when the assignment runs, so a
+later read in the same script sees the new value. Persistence to the database
+happens asynchronously, so a write is not durable until the persistence system
+has processed it.
+:::
+
 
 (script-data-segmentflags)=
 ## Segment Flags

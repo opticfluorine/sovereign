@@ -30,6 +30,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
 
@@ -398,7 +399,7 @@ public class NpcTemplateEditorTab
             EntityId = entityTable.TakeNextTemplateEntityId(),
             EntityType = EntityType.Npc
         };
-        Save(emptyDef, new Dictionary<string, string>());
+        Save(emptyDef, new Dictionary<string, DataValueDto>());
     }
 
     /// <summary>
@@ -426,7 +427,7 @@ public class NpcTemplateEditorTab
     /// </summary>
     /// <param name="definition">Entity definition.</param>
     /// <param name="entityData">Entity key-value data.</param>
-    private void Save(EntityDefinition definition, Dictionary<string, string> entityData)
+    private void Save(EntityDefinition definition, Dictionary<string, DataValueDto> entityData)
     {
         templateEntityDataClient.SetTemplateEntity(definition, entityData);
     }

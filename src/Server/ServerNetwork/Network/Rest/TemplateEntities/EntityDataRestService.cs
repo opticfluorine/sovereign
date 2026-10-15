@@ -56,7 +56,7 @@ public sealed class EntityDataRestService(
                 dataServices.GetEntityData(entityId, data);
                 var response = new EntityDataResponse
                 {
-                    EntityData = data.ToDictionary(kv => kv.Key, kv => kv.Value.ToString())
+                    EntityData = data.ToDictionary(kv => kv.Key, kv => DataValueDto.FromDataValue(kv.Value))
                 };
                 responseJson = JsonSerializer.Serialize(response, MessageConfig.JsonOptions);
             }

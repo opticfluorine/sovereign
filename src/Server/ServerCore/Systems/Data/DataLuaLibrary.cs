@@ -84,7 +84,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         entityGetCallback = EntityKvGet;
         entityGetGcHandle = GCHandle.Alloc(entityGetCallback);
         entitySetCallback = EntityKvSet;
-        entitySetGcHandle = GCHandle.Alloc(entityGetCallback);
+        entitySetGcHandle = GCHandle.Alloc(entitySetCallback);
     }
 
     public void Dispose()
@@ -159,8 +159,8 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             }
 
             var key = lua_tostring(luaState, -1);
-            if (dataServices.TryGetGlobal(key, out string? value))
-                lua_pushstring(luaState, value);
+            if (dataServices.TryGetGlobal(key, out DataValue value))
+                PushDataValue(luaState, value);
             else
                 lua_pushnil(luaState);
         }
@@ -205,34 +205,16 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 return 0;
             }
 
-            var valueType = lua_type(luaState, -1);
-            switch (valueType)
+            // Special case - nil assignment deletes the key-value pair.
+            if (lua_type(luaState, -1) == LuaType.Nil)
             {
-                case LuaType.String:
-                    dataController.SetGlobalSync(key, lua_tostring(luaState, -1));
-                    break;
-
-                case LuaType.Number:
-                    if (lua_isinteger(luaState, -1))
-                        dataController.SetGlobalSync(key, lua_tointeger(luaState, -1));
-                    else
-                        dataController.SetGlobalSync(key, lua_tonumber(luaState, -1));
-                    break;
-
-                case LuaType.Boolean:
-                    dataController.SetGlobalSync(key, lua_toboolean(luaState, -1));
-                    break;
-
-                case LuaType.Nil:
-                    // Special case - nil assignment deletes the key-value pair.
-                    dataController.RemoveGlobalSync(key);
-                    break;
-
-                default:
-                    scriptingServices.GetScriptLogger(mainState, logger)
-                        .LogError("Unsupported value type for data.global[key].");
-                    return 0;
+                dataController.RemoveGlobalSync(key);
+                return 0;
             }
+
+            if (!TryReadDataValue(luaState, -1, mainState, "data.global[key]", out var value)) return 0;
+
+            dataController.SetGlobalSync(key, value);
         }
         catch (Exception e)
         {
@@ -343,10 +325,13 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             // Fetch value for key if it exists.
             var key = lua_tostring(luaState, -1);
-            if (dataServices.TryGetEntityKeyValue(entityId, key, out string? value))
-                lua_pushstring(luaState, value);
-            else
-                return 0;
+            if (dataServices.TryGetEntityKeyValue(entityId, key, out DataValue value))
+            {
+                PushDataValue(luaState, value);
+                return 1;
+            }
+
+            return 0;
         }
         catch (Exception e)
         {
@@ -354,8 +339,6 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 .LogError(e, "Error in entity KV getter.");
             return 0;
         }
-
-        return 1;
     }
 
     /// <summary>
@@ -374,6 +357,13 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         try
         {
             luaL_checkstack(luaState, 1, null);
+
+            if (!lua_isstring(luaState, -2))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Entity KV set requires a string key.");
+                return 0;
+            }
 
             var key = lua_tostring(luaState, -2);
 
@@ -400,34 +390,16 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             lua_pop(luaState, 1);
 
             // Handle the set or delete if the type is supported.
-            var valueType = lua_type(luaState, -1);
-            switch (valueType)
+            if (lua_type(luaState, -1) == LuaType.Nil)
             {
-                case LuaType.String:
-                    dataController.SetEntityKeyValueSync(entityId, key, lua_tostring(luaState, -1));
-                    break;
-
-                case LuaType.Number:
-                    if (lua_isinteger(luaState, -1))
-                        dataController.SetEntityKeyValueSync(entityId, key, lua_tointeger(luaState, -1));
-                    else
-                        dataController.SetEntityKeyValueSync(entityId, key, lua_tonumber(luaState, -1));
-                    break;
-
-                case LuaType.Boolean:
-                    dataController.SetEntityKeyValueSync(entityId, key, lua_toboolean(luaState, -1));
-                    break;
-
-                case LuaType.Nil:
-                    // Special case - nil assignment is idiomatic for deleting a key-value pair.
-                    dataController.RemoveEntityKeyValueSync(entityId, key);
-                    break;
-
-                default:
-                    scriptingServices.GetScriptLogger(mainState, logger)
-                        .LogError("Unsupported value type for entity key-value pair.");
-                    return 0;
+                // Special case - nil assignment is idiomatic for deleting a key-value pair.
+                dataController.RemoveEntityKeyValueSync(entityId, key);
+                return 0;
             }
+
+            if (!TryReadDataValue(luaState, -1, mainState, "entity key-value pair", out var value)) return 0;
+
+            dataController.SetEntityKeyValueSync(entityId, key, value);
         }
         catch (Exception e)
         {
@@ -436,6 +408,182 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         }
 
         return 0;
+    }
+
+    /// <summary>
+    ///     Pushes a tagged data value onto the Lua stack as the closest native Lua type.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="value">Tagged value to push.</param>
+    private static void PushDataValue(IntPtr luaState, DataValue value)
+    {
+        switch (value.Type)
+        {
+            case DataValueType.String:
+                lua_pushstring(luaState, value.AsString());
+                break;
+
+            case DataValueType.Int:
+                lua_pushinteger(luaState, value.AsInt());
+                break;
+
+            case DataValueType.Float:
+                lua_pushnumber(luaState, value.AsFloat());
+                break;
+
+            case DataValueType.Bool:
+                lua_pushboolean(luaState, value.AsBool());
+                break;
+
+            case DataValueType.Vector3:
+                PushVector3(luaState, value.AsVector3());
+                break;
+
+            case DataValueType.EntityId:
+                lua_pushlightuserdata(luaState, (IntPtr)value.AsEntityId());
+                break;
+
+            default:
+                lua_pushnil(luaState);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Pushes a Vector3 as a plain Lua table with x, y, and z fields.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="value">Vector value.</param>
+    private static void PushVector3(IntPtr luaState, Vector3 value)
+    {
+        luaL_checkstack(luaState, 4, null);
+        lua_createtable(luaState, 0, 3);
+
+        lua_pushnumber(luaState, value.X);
+        lua_setfield(luaState, -2, "x");
+        lua_pushnumber(luaState, value.Y);
+        lua_setfield(luaState, -2, "y");
+        lua_pushnumber(luaState, value.Z);
+        lua_setfield(luaState, -2, "z");
+    }
+
+    /// <summary>
+    ///     Reads a tagged data value from the Lua stack, inferring the tag from the Lua type.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="index">Stack index of the value.</param>
+    /// <param name="mainState">Main Lua state.</param>
+    /// <param name="context">Context for error messages.</param>
+    /// <param name="value">Parsed value. Only valid if the method returns true.</param>
+    /// <returns>true if the value was a supported type, false otherwise.</returns>
+    private bool TryReadDataValue(IntPtr luaState, int index, IntPtr mainState, string context, out DataValue value)
+    {
+        value = default;
+
+        switch (lua_type(luaState, index))
+        {
+            case LuaType.String:
+                value = DataValue.FromString(lua_tostring(luaState, index));
+                return true;
+
+            case LuaType.Number:
+                value = lua_isinteger(luaState, index)
+                    ? DataValue.FromInt(lua_tointeger(luaState, index))
+                    : DataValue.FromFloat(lua_tonumber(luaState, index));
+                return true;
+
+            case LuaType.Boolean:
+                value = DataValue.FromBool(lua_toboolean(luaState, index));
+                return true;
+
+            case LuaType.LightUserData:
+                value = DataValue.FromEntityId((ulong)lua_touserdata(luaState, index));
+                return true;
+
+            case LuaType.Table:
+                if (TryReadVector3(luaState, index, out var vector))
+                {
+                    value = DataValue.FromVector3(vector);
+                    return true;
+                }
+
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("{Context}: table value requires numeric x, y, and z fields.", context);
+                return false;
+
+            default:
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Unsupported value type for {Context}.", context);
+                return false;
+        }
+    }
+
+    /// <summary>
+    ///     Reads an x/y/z table as a Vector3, accepting either lowercase or uppercase field names.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="index">Stack index of the table.</param>
+    /// <param name="value">Parsed vector. Only valid if the method returns true.</param>
+    /// <returns>true if the table has numeric x, y, and z fields, false otherwise.</returns>
+    private static bool TryReadVector3(IntPtr luaState, int index, out Vector3 value)
+    {
+        value = default;
+
+        var absIndex = lua_absindex(luaState, index);
+        var top = lua_gettop(luaState);
+        try
+        {
+            if (!TryGetVectorComponent(luaState, absIndex, "x", "X", out var x)) return false;
+            if (!TryGetVectorComponent(luaState, absIndex, "y", "Y", out var y)) return false;
+            if (!TryGetVectorComponent(luaState, absIndex, "z", "Z", out var z)) return false;
+
+            value = new Vector3((float)x, (float)y, (float)z);
+            return true;
+        }
+        finally
+        {
+            lua_settop(luaState, top);
+        }
+    }
+
+    /// <summary>
+    ///     Reads a numeric vector component field, trying the lowercase name before the uppercase name.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="absIndex">Absolute stack index of the table.</param>
+    /// <param name="lowerName">Lowercase field name.</param>
+    /// <param name="upperName">Uppercase field name.</param>
+    /// <param name="component">Parsed component. Only valid if the method returns true.</param>
+    /// <returns>true if a numeric field was found, false otherwise.</returns>
+    private static bool TryGetVectorComponent(IntPtr luaState, int absIndex, string lowerName, string upperName,
+        out double component)
+    {
+        if (TryGetNumericField(luaState, absIndex, lowerName, out component)) return true;
+        return TryGetNumericField(luaState, absIndex, upperName, out component);
+    }
+
+    /// <summary>
+    ///     Reads a numeric field from a table, restoring the stack afterwards.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="absIndex">Absolute stack index of the table.</param>
+    /// <param name="name">Field name.</param>
+    /// <param name="component">Parsed component. Only valid if the method returns true.</param>
+    /// <returns>true if a numeric field was found, false otherwise.</returns>
+    private static bool TryGetNumericField(IntPtr luaState, int absIndex, string name, out double component)
+    {
+        var top = lua_gettop(luaState);
+        luaL_checkstack(luaState, 1, null);
+        if (lua_getfield(luaState, absIndex, name) == LuaType.Number)
+        {
+            component = lua_tonumber(luaState, -1);
+            lua_settop(luaState, top);
+            return true;
+        }
+
+        lua_settop(luaState, top);
+        component = 0.0;
+        return false;
     }
 
     /// <summary>

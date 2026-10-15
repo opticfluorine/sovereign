@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
 
@@ -33,7 +34,7 @@ public sealed class TemplateEntityController
     /// <param name="definition">Entity definition.</param>
     /// <param name="keyValuePairs">Entity key-value pairs.</param>
     public void UpdateTemplateEntity(IEventSender eventSender, EntityDefinition definition,
-        Dictionary<string, string> keyValuePairs)
+        Dictionary<string, DataValueDto> keyValuePairs)
     {
         var details = new KeyedEntityDefinitionEventDetails
         {

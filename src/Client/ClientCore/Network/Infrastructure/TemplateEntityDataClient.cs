@@ -28,6 +28,7 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Network;
 using Sovereign.EngineCore.Network.Rest;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.ClientCore.Network.Infrastructure;
 
@@ -74,7 +75,7 @@ public class TemplateEntityDataClient
     /// </summary>
     /// <param name="definition">Entity definition.</param>
     /// <param name="keyValuePairs">Entity key-value pairs.</param>
-    public void SetTemplateEntity(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
+    public void SetTemplateEntity(EntityDefinition definition, Dictionary<string, DataValueDto> keyValuePairs)
     {
         Task.Run(async () =>
         {

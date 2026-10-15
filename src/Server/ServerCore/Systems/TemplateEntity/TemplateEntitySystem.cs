@@ -22,6 +22,7 @@ using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Logging;
 using Sovereign.EngineCore.Player;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.Data;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace Sovereign.ServerCore.Systems.TemplateEntity;
@@ -146,8 +147,20 @@ public class TemplateEntitySystem : ISystem
     /// </summary>
     /// <param name="definition">Entity definition.</param>
     /// <param name="keyValuePairs">Complete entity key-value dzta.</param>
-    private void OnUpdateKeyed(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
+    private void OnUpdateKeyed(EntityDefinition definition, Dictionary<string, DataValueDto> keyValuePairs)
     {
-        manager.UpdateKeyed(definition, keyValuePairs);
+        var values = new Dictionary<string, DataValue>(keyValuePairs.Count);
+        foreach (var (key, dto) in keyValuePairs)
+        {
+            if (!dto.TryToDataValue(out var value))
+            {
+                logger.LogError("Rejecting malformed entity data value for key {Key}; skipping.", key);
+                continue;
+            }
+
+            values[key] = value;
+        }
+
+        manager.UpdateKeyed(definition, values);
     }
 }

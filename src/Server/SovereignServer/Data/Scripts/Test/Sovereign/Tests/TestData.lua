@@ -17,8 +17,8 @@ end
 
 stepGlobalVerify = function()
     Test.Step("GlobalWriteReadDelete", function()
-        Test.AssertEqual("12345", Data.Global[globalKey],
-            "global key-value should round-trip as a string")
+        Test.AssertEqual(12345, Data.Global[globalKey],
+            "global key-value should round-trip as an integer")
     end)
 end
 
@@ -41,8 +41,8 @@ end
 
 step2EntityDataVerify = function()
     Test.Step("EntityDataStore", function()
-        Test.AssertEqual("3.14159", Data.GetEntityData(fixtureEntityId)["TestHarnessEntityKey"],
-            "entity key-value should round-trip as a string")
+        Test.AssertEqual(3.14159, Data.GetEntityData(fixtureEntityId)["TestHarnessEntityKey"],
+            "entity key-value should round-trip as a float")
     end)
 end
 

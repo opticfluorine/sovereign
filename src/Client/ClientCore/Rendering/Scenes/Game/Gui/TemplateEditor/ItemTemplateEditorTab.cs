@@ -30,6 +30,7 @@ using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Components.Validators;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
@@ -389,7 +390,7 @@ public class ItemTemplateEditorTab
             EntityId = entityTable.TakeNextTemplateEntityId(),
             EntityType = EntityType.Item
         };
-        Save(emptyDef, new Dictionary<string, string>());
+        Save(emptyDef, new Dictionary<string, DataValueDto>());
     }
 
     /// <summary>
@@ -417,7 +418,7 @@ public class ItemTemplateEditorTab
     /// </summary>
     /// <param name="definition">Entity definition.</param>
     /// <param name="entityData">Entity key-value data.</param>
-    private void Save(EntityDefinition definition, Dictionary<string, string> entityData)
+    private void Save(EntityDefinition definition, Dictionary<string, DataValueDto> entityData)
     {
         selectedDefinition.UseRange = inputUseRangeEnabled ? inputUseRange : null;
         selectedDefinition.EquipmentType = inputEquippableEnabled ? inputEquipmentType : null;
