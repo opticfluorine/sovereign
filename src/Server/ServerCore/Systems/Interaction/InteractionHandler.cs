@@ -39,9 +39,10 @@ internal sealed class InteractionHandler(
         if (!validator.IsInteractionAllowed(sourceEntityId, targetEntityId, toolEntityId)) return;
 
         // Call any interaction script attached to the target entity.
-        if (!dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractScriptKey, out var scriptName) ||
+        if (!dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractScriptKey,
+                out string? scriptName) ||
             !dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractFunctionKey,
-                out var funcName)) return;
+                out string? funcName)) return;
 
         scriptingController.CallFunctionAsync(scriptName, funcName, sourceEntityId, targetEntityId, toolEntityId);
     }

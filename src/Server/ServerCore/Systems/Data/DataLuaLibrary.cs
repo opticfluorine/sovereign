@@ -159,7 +159,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             }
 
             var key = lua_tostring(luaState, -1);
-            if (dataServices.TryGetGlobal(key, out var value))
+            if (dataServices.TryGetGlobal(key, out string? value))
                 lua_pushstring(luaState, value);
             else
                 lua_pushnil(luaState);
@@ -343,7 +343,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             // Fetch value for key if it exists.
             var key = lua_tostring(luaState, -1);
-            if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
+            if (dataServices.TryGetEntityKeyValue(entityId, key, out string? value))
                 lua_pushstring(luaState, value);
             else
                 return 0;

@@ -32,7 +32,7 @@ public class TemplateEntityManager
     private readonly IDataServices dataServices;
     private readonly EntityDefinitionProcessor definitionProcessor;
 
-    private readonly ObjectPool<Dictionary<string, string>> dictPool = new(4);
+    private readonly ObjectPool<Dictionary<string, DataValue>> dictPool = new(4);
     private readonly IEventSender eventSender;
     private readonly TemplateEntityInternalController internalController;
     private readonly ILogger<TemplateEntityManager> logger;

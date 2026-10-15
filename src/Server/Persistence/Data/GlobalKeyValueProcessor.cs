@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence.Database;
 
@@ -26,6 +28,7 @@ public class GlobalKeyValueProcessor
 {
     private const int IndexKey = 0;
     private const int IndexValue = 1;
+    private const int IndexType = 2;
     private readonly IDataController dataController;
 
     public GlobalKeyValueProcessor(IDataController dataController)
@@ -37,10 +40,11 @@ public class GlobalKeyValueProcessor
     ///     Processes global key-value pairs from the database.
     /// </summary>
     /// <param name="reader">
-    ///     Data reader. First column must be keys (string), second column must be
-    ///     values (string).
+    ///     Data reader. First column must be keys (string), second column values (string),
+    ///     and third column type tags (integer).
     /// </param>
     /// <returns>Number of key-value pairs loaded.</returns>
+    /// <exception cref="FatalErrorException">Thrown if a stored value cannot be decoded.</exception>
     public int Process(QueryReader reader)
     {
         var count = 0;
@@ -52,7 +56,18 @@ public class GlobalKeyValueProcessor
             var key = reader.Reader.GetString(IndexKey);
             var value = reader.Reader.GetString(IndexValue);
 
-            dataController.SetGlobalSync(key, value);
+            DataValue dataValue;
+            try
+            {
+                var type = reader.Reader.GetInt32(IndexType);
+                dataValue = DataValueCodec.Decode((DataValueType)type, value);
+            }
+            catch (Exception e)
+            {
+                throw new FatalErrorException($"Failed to decode global value for key '{key}'.", e);
+            }
+
+            dataController.SetGlobalSync(key, dataValue);
         }
 
         return count;

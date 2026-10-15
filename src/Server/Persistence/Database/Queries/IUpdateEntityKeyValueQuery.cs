@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Data;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.Persistence.Database.Queries;
 
@@ -28,7 +29,7 @@ public interface IUpdateEntityKeyValueQuery
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="key">Key.</param>
-    /// <param name="value">Value.</param>
+    /// <param name="value">Typed value.</param>
     /// <param name="transaction">Current transaction.</param>
-    void UpdateEntityKeyValue(ulong entityId, string key, string value, IDbTransaction transaction);
+    void UpdateEntityKeyValue(ulong entityId, string key, DataValue value, IDbTransaction transaction);
 }

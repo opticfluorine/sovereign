@@ -119,9 +119,9 @@ public sealed class EntityScriptCallbacks
     public void InvokeInteractCallback(ulong usingEntityId, ulong toolEntityId, ulong targetEntityId)
     {
         if (!dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractScriptKey,
-                out var scriptName) ||
+                out string? scriptName) ||
             !dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractFunctionKey,
-                out var functionName)) return;
+                out string? functionName)) return;
 
         InvokeCallback(targetEntityId, EntityConstants.InteractCallbackName, scriptName, functionName,
             usingEntityId, toolEntityId, targetEntityId);
@@ -140,15 +140,15 @@ public sealed class EntityScriptCallbacks
             // Fire the unload hook first, then the load hook. InvokeCallback chains tasks per entity ID,
             // so the load hook will not run until the unload hook completes.
             if (dataServices.TryGetEntityKeyValue(entityId, EntityConstants.UnloadCallbackScriptKey,
-                    out var unloadScript) &&
+                    out string? unloadScript) &&
                 dataServices.TryGetEntityKeyValue(entityId, EntityConstants.UnloadCallbackFunctionKey,
-                    out var unloadFunction))
+                    out string? unloadFunction))
                 InvokeCallback(entityId, EntityConstants.UnloadCallbackName, unloadScript, unloadFunction, entityId);
 
             if (dataServices.TryGetEntityKeyValue(entityId, EntityConstants.LoadCallbackScriptKey,
-                    out var loadScript) &&
+                    out string? loadScript) &&
                 dataServices.TryGetEntityKeyValue(entityId, EntityConstants.LoadCallbackFunctionKey,
-                    out var loadFunction))
+                    out string? loadFunction))
                 InvokeCallback(entityId, EntityConstants.LoadCallbackName, loadScript, loadFunction, entityId);
         }
     }
@@ -164,8 +164,8 @@ public sealed class EntityScriptCallbacks
     {
         while (queue.TryDequeue(out var entityId))
         {
-            if (!dataServices.TryGetEntityKeyValue(entityId, scriptKey, out var scriptName)) continue;
-            if (!dataServices.TryGetEntityKeyValue(entityId, functionKey, out var functionName)) continue;
+            if (!dataServices.TryGetEntityKeyValue(entityId, scriptKey, out string? scriptName)) continue;
+            if (!dataServices.TryGetEntityKeyValue(entityId, functionKey, out string? functionName)) continue;
 
             InvokeCallback(entityId, callbackName, scriptName, functionName, entityId);
         }
@@ -183,9 +183,9 @@ public sealed class EntityScriptCallbacks
             // Look up the unload callback for the previous template entity directly since the entity
             // now points to its new template.
             if (!dataServices.TryGetEntityKeyValue(templateId, EntityConstants.UnloadCallbackScriptKey,
-                    out var scriptName)) continue;
+                    out string? scriptName)) continue;
             if (!dataServices.TryGetEntityKeyValue(templateId, EntityConstants.UnloadCallbackFunctionKey,
-                    out var functionName)) continue;
+                    out string? functionName)) continue;
 
             InvokeCallback(entityId, EntityConstants.UnloadCallbackName, scriptName, functionName, entityId);
         }

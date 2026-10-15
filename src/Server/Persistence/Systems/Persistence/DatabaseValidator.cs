@@ -26,7 +26,7 @@ namespace Sovereign.Persistence.Systems.Persistence;
 /// </summary>
 public sealed class DatabaseValidator
 {
-    public const int LatestMigration = 2;
+    public const int LatestMigration = 3;
     private readonly ILogger<DatabaseValidator> logger;
 
     public DatabaseValidator(ILogger<DatabaseValidator> logger)

@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Sovereign.EngineCore;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Configuration;
@@ -59,5 +60,28 @@ public class TestWorldGenServiceRegistration
         Assert.NotNull(provider.GetRequiredService<ProfileValidator>());
         Assert.NotNull(provider.GetRequiredService<IWorldGenCommitWriter>());
         Assert.NotNull(provider.GetRequiredService<IWorldGenWorldRegistryStore>());
+    }
+
+    [Fact]
+    public void AddSovereignServer_BuildsProvider_AndResolvesDataServices()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IEventLoop>(new FakeEventLoop());
+        services.AddSingleton<IEventSender>(new FakeEventSender());
+        services.AddLogging();
+        services.AddOptions();
+        services.Configure<WorldGenOptions>(_ => { });
+        services.AddSovereignCore();
+        services.AddSovereignServer();
+        services.AddSovereignPersistence();
+
+        using var provider = services.BuildServiceProvider();
+
+        var dataServices = provider.GetRequiredService<IDataServices>();
+        var dataController = provider.GetRequiredService<IDataController>();
+
+        dataController.SetGlobalSync("service.probe", DataValue.FromInt(5));
+        Assert.True(dataServices.TryGetGlobalInt("service.probe", out var value));
+        Assert.Equal(5, value);
     }
 }

@@ -22,6 +22,7 @@ using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.Persistence.Entities;
@@ -34,7 +35,8 @@ public sealed class EntityProcessor
     private const int IndexId = 0;
     private const int IndexKvKey = IndexId + 1;
     private const int IndexKvValue = IndexKvKey + 1;
-    private const int IndexTemplateId = IndexKvValue + 1;
+    private const int IndexKvType = IndexKvValue + 1;
+    private const int IndexTemplateId = IndexKvType + 1;
     private const int IndexPosX = IndexTemplateId + 1;
     private const int IndexPosY = IndexPosX + 1;
     private const int IndexPosZ = IndexPosY + 1;
@@ -199,11 +201,27 @@ public sealed class EntityProcessor
     /// </summary>
     /// <param name="reader">Reader.</param>
     /// <param name="entityId">Entity ID.</param>
+    /// <exception cref="FatalErrorException">Thrown if a stored value cannot be decoded.</exception>
     private void ProcessKeyValue(IDataReader reader, ulong entityId)
     {
         if (reader.IsDBNull(IndexKvKey) || reader.IsDBNull(IndexKvValue)) return;
 
-        dataController.SetEntityKeyValueSync(entityId, reader.GetString(IndexKvKey), reader.GetString(IndexKvValue));
+        var key = reader.GetString(IndexKvKey);
+        var value = reader.GetString(IndexKvValue);
+
+        DataValue dataValue;
+        try
+        {
+            var type = reader.IsDBNull(IndexKvType) ? (int)DataValueType.String : reader.GetInt32(IndexKvType);
+            dataValue = DataValueCodec.Decode((DataValueType)type, value);
+        }
+        catch (Exception e)
+        {
+            throw new FatalErrorException(
+                $"Failed to decode value for entity {entityId:X16} key '{key}'.", e);
+        }
+
+        dataController.SetEntityKeyValueSync(entityId, key, dataValue);
     }
 
     /// <summary>

@@ -16,6 +16,7 @@
 
 using System.Data;
 using Microsoft.Data.Sqlite;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
@@ -26,9 +27,9 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 public class SqliteUpdateEntityKeyValueQuery : IUpdateEntityKeyValueQuery
 {
     private const string Sql =
-        @"INSERT INTO EntityKeyValue (entity_id, key, value)
-    	    VALUES (@Id, @Key, @Value)
-	        ON CONFLICT DO UPDATE SET entity_id=excluded.entity_id, key=excluded.key, value=excluded.value;";
+        @"INSERT INTO EntityKeyValue (entity_id, key, value, type)
+    	    VALUES (@Id, @Key, @Value, @Type)
+	        ON CONFLICT DO UPDATE SET entity_id=excluded.entity_id, key=excluded.key, value=excluded.value, type=excluded.type;";
 
     private readonly SqliteConnection connection;
 
@@ -37,7 +38,7 @@ public class SqliteUpdateEntityKeyValueQuery : IUpdateEntityKeyValueQuery
         this.connection = connection;
     }
 
-    public void UpdateEntityKeyValue(ulong entityId, string key, string value, IDbTransaction transaction)
+    public void UpdateEntityKeyValue(ulong entityId, string key, DataValue value, IDbTransaction transaction)
     {
         using var cmd = new SqliteCommand(Sql, connection, (SqliteTransaction)transaction);
 
@@ -50,8 +51,12 @@ public class SqliteUpdateEntityKeyValueQuery : IUpdateEntityKeyValueQuery
         cmd.Parameters.Add(pKey);
 
         var pValue = new SqliteParameter("Value", SqliteType.Text);
-        pValue.Value = value;
+        pValue.Value = DataValueCodec.Encode(value);
         cmd.Parameters.Add(pValue);
+
+        var pType = new SqliteParameter("Type", SqliteType.Integer);
+        pType.Value = (int)value.Type;
+        cmd.Parameters.Add(pType);
 
         cmd.ExecuteNonQuery();
     }

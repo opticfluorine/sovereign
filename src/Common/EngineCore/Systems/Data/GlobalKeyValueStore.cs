@@ -37,14 +37,14 @@ internal class GlobalKeyValueStore
     /// <summary>
     ///     Key-value store.
     /// </summary>
-    public ConcurrentDictionary<string, string> KeyValueStore { get; } = new();
+    public ConcurrentDictionary<string, DataValue> KeyValueStore { get; } = new();
 
     /// <summary>
     ///     Adds or updates a global key-value pair.
     /// </summary>
     /// <param name="key">Global key.</param>
     /// <param name="value">Global value.</param>
-    public void SetGlobal(string key, string value)
+    public void SetGlobal(string key, DataValue value)
     {
         logger.LogTrace("Global: Set {Key} = {Value}.", key, value);
 

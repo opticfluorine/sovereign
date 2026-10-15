@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 
@@ -30,7 +30,7 @@ internal class EntityKeyValueStore
     private readonly EntityTable entityTable;
     private readonly IEventSender eventSender;
     private readonly DataInternalController internalController;
-    private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, string>> keyValueStores = new();
+    private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, DataValue>> keyValueStores = new();
 
     /// <summary>
     ///     Entities removed since the last database synchronization.
@@ -64,9 +64,9 @@ internal class EntityKeyValueStore
     /// <param name="key">Key.</param>
     /// <param name="value">Value. Only meaningful if method returns true.</param>
     /// <returns>true if the key-value pair exists for the entity, false otherwise.</returns>
-    public bool TryGetValue(ulong entityId, string key, [NotNullWhen(true)] out string? value)
+    public bool TryGetValue(ulong entityId, string key, out DataValue value)
     {
-        value = null;
+        value = default;
 
         // First try to get the key-value pair for the entity directly.
         if (keyValueStores.TryGetValue(entityId, out var store))
@@ -87,12 +87,12 @@ internal class EntityKeyValueStore
     /// <param name="key">Key.</param>
     /// <param name="value">Value. Only meaningful if method returns true.</param>
     /// <returns>true if the key-value pair exists for the entity, false otherwise.</returns>
-    public bool TryGetValueLocal(ulong entityId, string key, [NotNullWhen(true)] out string? value)
+    public bool TryGetValueLocal(ulong entityId, string key, out DataValue value)
     {
         if (keyValueStores.TryGetValue(entityId, out var store) && store.TryGetValue(key, out value))
             return true;
 
-        value = null;
+        value = default;
         return false;
     }
 
@@ -102,22 +102,32 @@ internal class EntityKeyValueStore
     /// <param name="entityId">Entity ID.</param>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
-    /// <typeparam name="T">Value type.</typeparam>
-    public void SetValue<T>(ulong entityId, string key, T value) where T : notnull
+    public void SetValue(ulong entityId, string key, DataValue value)
     {
         if (!keyValueStores.TryGetValue(entityId, out var store))
         {
-            store = new ConcurrentDictionary<string, string>();
+            store = new ConcurrentDictionary<string, DataValue>();
             keyValueStores[entityId] = store;
         }
 
-        var stringValue = value.ToString() ?? string.Empty;
-        store[key] = stringValue;
+        store[key] = value;
 
         lock (eventSender)
         {
-            internalController.EntityKeyValueSet(eventSender, entityId, key, stringValue);
+            internalController.EntityKeyValueSet(eventSender, entityId, key, value);
         }
+    }
+
+    /// <summary>
+    ///     Sets an enum-typed value for the given entity ID and key. Enums are stored as Int values.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">Enum value.</param>
+    /// <typeparam name="T">Enum type.</typeparam>
+    public void SetValue<T>(ulong entityId, string key, T value) where T : struct, Enum
+    {
+        SetValue(entityId, key, DataValue.FromInt(Convert.ToInt64(value)));
     }
 
     /// <summary>
@@ -157,7 +167,7 @@ internal class EntityKeyValueStore
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
     /// <param name="data">Dictionary to append with entity key-value pairs, if any.</param>
-    public void GetAllKeyValuePairs(ulong entityId, Dictionary<string, string> data)
+    public void GetAllKeyValuePairs(ulong entityId, Dictionary<string, DataValue> data)
     {
         if (!keyValueStores.TryGetValue(entityId, out var store)) return;
         foreach (var kv in store)

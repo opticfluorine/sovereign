@@ -50,14 +50,13 @@ public class TestEntityKeyValueStore
         store.SetValue(EntityId, "MyKey", "MyValue");
 
         Assert.True(store.TryGetValueLocal(EntityId, "MyKey", out var value));
-        Assert.Equal("MyValue", value);
+        Assert.Equal(DataValue.FromString("MyValue"), value);
     }
 
     [Fact]
     public void TryGetValueLocal_ReturnsFalseForMissingKey()
     {
-        Assert.False(store.TryGetValueLocal(EntityId, "MyKey", out var value));
-        Assert.Null(value);
+        Assert.False(store.TryGetValueLocal(EntityId, "MyKey", out _));
     }
 
     [Fact]
@@ -69,6 +68,22 @@ public class TestEntityKeyValueStore
 
         // The inheriting lookup still falls back to the template.
         Assert.True(store.TryGetValue(EntityId, "MyKey", out var value));
-        Assert.Equal("TemplateValue", value);
+        Assert.Equal(DataValue.FromString("TemplateValue"), value);
+    }
+
+    [Fact]
+    public void SetValue_EnumStoredAsInt()
+    {
+        store.SetValue(EntityId, "MyKey", SampleEnum.Second);
+
+        Assert.True(store.TryGetValue(EntityId, "MyKey", out var value));
+        Assert.Equal(DataValueType.Int, value.Type);
+        Assert.Equal((long)SampleEnum.Second, value.AsInt());
+    }
+
+    private enum SampleEnum
+    {
+        First = 1,
+        Second = 2
     }
 }

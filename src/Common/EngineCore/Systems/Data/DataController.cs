@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Numerics;
 
 namespace Sovereign.EngineCore.Systems.Data;
 
@@ -29,7 +30,7 @@ public interface IDataController
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
     /// <typeparam name="T">Value type.</typeparam>
-    /// <exception cref="InvalidCastException">Thrown if the value cannot be converted to string.</exception>
+    /// <exception cref="InvalidCastException">Thrown if the value type is not supported.</exception>
     void SetGlobalSync<T>(string key, T value) where T : notnull;
 
     /// <summary>
@@ -45,6 +46,7 @@ public interface IDataController
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
     /// <typeparam name="T">Value type.</typeparam>
+    /// <exception cref="InvalidCastException">Thrown if the value type is not supported.</exception>
     void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull;
 
     /// <summary>
@@ -69,7 +71,7 @@ internal class DataController(GlobalKeyValueStore globalStore, EntityKeyValueSto
 {
     public void SetEntityKeyValueSync<T>(ulong entityId, string key, T value) where T : notnull
     {
-        entityKeyValueStore.SetValue(entityId, key, value);
+        entityKeyValueStore.SetValue(entityId, key, ToDataValue(value));
     }
 
     public void RemoveEntityKeyValueSync(ulong entityId, string key)
@@ -84,12 +86,53 @@ internal class DataController(GlobalKeyValueStore globalStore, EntityKeyValueSto
 
     public void SetGlobalSync<T>(string key, T value) where T : notnull
     {
-        var stringValue = value.ToString() ?? throw new InvalidCastException();
-        globalStore.SetGlobal(key, stringValue);
+        globalStore.SetGlobal(key, ToDataValue(value));
     }
 
     public void RemoveGlobalSync(string key)
     {
         globalStore.RemoveGlobal(key);
+    }
+
+    /// <summary>
+    ///     Converts a supported CLR value into a tagged <see cref="DataValue" />.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <typeparam name="T">Value type.</typeparam>
+    /// <returns>Tagged value.</returns>
+    /// <exception cref="InvalidCastException">Thrown if the value type is not supported.</exception>
+    private static DataValue ToDataValue<T>(T value) where T : notnull
+    {
+        switch (value)
+        {
+            case DataValue dataValue:
+                return dataValue;
+            case string stringValue:
+                return DataValue.FromString(stringValue);
+            case bool boolValue:
+                return DataValue.FromBool(boolValue);
+            case int intValue:
+                return DataValue.FromInt(intValue);
+            case long longValue:
+                return DataValue.FromInt(longValue);
+            case short shortValue:
+                return DataValue.FromInt(shortValue);
+            case byte byteValue:
+                return DataValue.FromInt(byteValue);
+            case uint uintValue:
+                return DataValue.FromInt(uintValue);
+            case ulong ulongValue:
+                return DataValue.FromEntityId(ulongValue);
+            case float floatValue:
+                return DataValue.FromFloat(floatValue);
+            case double doubleValue:
+                return DataValue.FromFloat(doubleValue);
+            case Vector3 vectorValue:
+                return DataValue.FromVector3(vectorValue);
+            case Enum enumValue:
+                return DataValue.FromInt(Convert.ToInt64(enumValue));
+            default:
+                throw new InvalidCastException($"Unsupported data value type {typeof(T)}.");
+        }
     }
 }

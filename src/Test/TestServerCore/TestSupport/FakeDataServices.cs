@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.ServerCore.TestSupport;
@@ -25,14 +26,14 @@ namespace Sovereign.ServerCore.TestSupport;
 /// </summary>
 public class FakeDataServices : IDataServices
 {
-    private readonly Dictionary<string, string> globals = new();
+    private readonly Dictionary<string, DataValue> globals = new();
 
     /// <summary>
     ///     Sets a global key-value pair.
     /// </summary>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
-    public void SetGlobal(string key, string value)
+    public void SetGlobal(string key, DataValue value)
     {
         globals[key] = value;
     }
@@ -44,31 +45,70 @@ public class FakeDataServices : IDataServices
 
     public bool TryGetGlobal(string key, [NotNullWhen(true)] out string? value)
     {
+        if (globals.TryGetValue(key, out var dataValue))
+        {
+            value = dataValue.ToString();
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    public bool TryGetGlobal(string key, out DataValue value)
+    {
         return globals.TryGetValue(key, out value);
+    }
+
+    public bool TryGetGlobal(string key, DataValueType type, out DataValue value)
+    {
+        if (!globals.TryGetValue(key, out value) || value.Type != type)
+        {
+            value = default;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryGetGlobalInt(string key, out int value)
     {
         value = 0;
-        return TryGetGlobal(key, out var raw) && int.TryParse(raw, out value);
-    }
-
-    public bool TryGetGlobalUlong(string key, out ulong value)
-    {
-        value = 0;
-        return TryGetGlobal(key, out var raw) && ulong.TryParse(raw, out value);
-    }
-
-    public bool TryGetGlobalFloat(string key, out float value)
-    {
-        value = 0.0f;
-        return TryGetGlobal(key, out var raw) && float.TryParse(raw, out value);
+        if (!TryGetGlobal(key, DataValueType.Int, out var dataValue)) return false;
+        value = (int)dataValue.AsInt();
+        return true;
     }
 
     public bool TryGetGlobalBool(string key, out bool value)
     {
         value = false;
-        return TryGetGlobal(key, out var raw) && bool.TryParse(raw, out value);
+        if (!TryGetGlobal(key, DataValueType.Bool, out var dataValue)) return false;
+        value = dataValue.AsBool();
+        return true;
+    }
+
+    public bool TryGetGlobalFloat(string key, out float value)
+    {
+        value = 0.0f;
+        if (!TryGetGlobal(key, DataValueType.Float, out var dataValue)) return false;
+        value = (float)dataValue.AsFloat();
+        return true;
+    }
+
+    public bool TryGetGlobalVector3(string key, out Vector3 value)
+    {
+        value = Vector3.Zero;
+        if (!TryGetGlobal(key, DataValueType.Vector3, out var dataValue)) return false;
+        value = dataValue.AsVector3();
+        return true;
+    }
+
+    public bool TryGetGlobalEntityId(string key, out ulong value)
+    {
+        value = 0;
+        if (!TryGetGlobal(key, DataValueType.EntityId, out var dataValue)) return false;
+        value = dataValue.AsEntityId();
+        return true;
     }
 
     public bool TryGetEntityKeyValue(ulong entityId, string key, [NotNullWhen(true)] out string? value)
@@ -83,7 +123,55 @@ public class FakeDataServices : IDataServices
         return false;
     }
 
-    public void GetEntityData(ulong entityId, Dictionary<string, string> data)
+    public bool TryGetEntityKeyValue(ulong entityId, string key, out DataValue value)
+    {
+        value = default;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValueLocal(ulong entityId, string key, out DataValue value)
+    {
+        value = default;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValue(ulong entityId, string key, DataValueType type, out DataValue value)
+    {
+        value = default;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValueInt(ulong entityId, string key, out int value)
+    {
+        value = 0;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValueBool(ulong entityId, string key, out bool value)
+    {
+        value = false;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValueFloat(ulong entityId, string key, out float value)
+    {
+        value = 0.0f;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValueVector3(ulong entityId, string key, out Vector3 value)
+    {
+        value = Vector3.Zero;
+        return false;
+    }
+
+    public bool TryGetEntityKeyValueEntityId(ulong entityId, string key, out ulong value)
+    {
+        value = 0;
+        return false;
+    }
+
+    public void GetEntityData(ulong entityId, Dictionary<string, DataValue> data)
     {
         data.Clear();
     }

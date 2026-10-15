@@ -83,7 +83,7 @@ public sealed class SqliteRetrieveEntityQuery : IRetrieveEntityQuery
 		        FROM Entity ec, EntityTree et
         			WHERE ec.parent_id = et.id
 	        )
-            SELECT et.id, kv.key, kv.value, et.template_id, et.x, et.y, et.z, et.frontTileId, et.topTileId, et.playerCharacter, et.name, 
+            SELECT et.id, kv.key, kv.value, kv.type, et.template_id, et.x, et.y, et.z, et.frontTileId, et.topTileId, et.playerCharacter, et.name, 
                 et.account, et.parent, et.drawableX, et.drawableY, et.animatedSprite, et.orientation, et.admin, et.castBlockShadows, et.plsRadius, 
                 et.plsIntensity, et.plsColor, et.plsPosX, et.plsPosY, et.plsPosZ, et.physics, et.bbPosX, et.bbPosY, et.bbPosZ, 
                 et.bbSizeX, et.bbSizeY, et.bbSizeZ, et.shadowRadius, et.entityType, et.serverOnly, et.stackable,

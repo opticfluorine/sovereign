@@ -59,8 +59,8 @@ public class TestSegmentFlagsChatProcessor
         kinematics = new KinematicsComponentCollection(entityTable, componentManager);
         var names = new NameComponentCollection(entityTable, componentManager);
 
-        dataServices.SetGlobal(GlobalConfigKeys.MinimumZ, "-1024");
-        dataServices.SetGlobal(GlobalConfigKeys.MaximumZ, "1024");
+        dataServices.SetGlobal(GlobalConfigKeys.MinimumZ, -1024.0f);
+        dataServices.SetGlobal(GlobalConfigKeys.MaximumZ, 1024.0f);
 
         // The admin is positioned in segment (0, 0, 0).
         admins.TagEntity(AdminId);

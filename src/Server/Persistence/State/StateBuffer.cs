@@ -954,7 +954,7 @@ public sealed class StateBuffer
         var removeQuery = provider.RemoveGlobalKeyValuePairQuery;
 
         foreach (var key in globalKeyValuePairs)
-            if (dataServices.TryGetGlobal(key, out var value))
+            if (dataServices.TryGetGlobal(key, out DataValue value))
                 updateQuery.UpdateGlobalKeyValuePair(key, value, transaction);
             else
                 removeQuery.RemoveGlobalKeyValuePair(key, transaction);
@@ -972,7 +972,7 @@ public sealed class StateBuffer
 
         foreach (var (entityId, key) in entityKeyValuePairs)
         {
-            if (dataServices.TryGetEntityKeyValue(entityId, key, out var value))
+            if (dataServices.TryGetEntityKeyValue(entityId, key, out DataValue value))
                 updateQuery.UpdateEntityKeyValue(entityId, key, value, transaction);
             else
                 removeQuery.RemoveEntityKeyValue(entityId, key, transaction);

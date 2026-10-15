@@ -4,6 +4,10 @@
 
 ### October
 
+#### 14 October 2026
+
+* Add per-value type tags to global and per-entity key-value data. A new tag-only `DataValue` type (`String`, `Int`, `Bool`, `Float`, `Vector3`, `EntityId`) with a culture-invariant text codec is now stored by `GlobalKeyValueStore` and `EntityKeyValueStore`; writes no longer flatten values with `ToString()`, and typed reads require an exact tag match (a mismatch logs an error and returns false rather than silently coercing). The key-value tables gain a `type` column via migration 0003, which retypes `__Sovereign.Clock` to `Int` and the `MinimumZ`/`MaximumZ` config keys to `Float` while defaulting existing rows to `String`; the server fails to start if a stored value cannot be decoded under its stored tag. The game clock and movement Z bounds read through the new typed accessors, and the admin `/getvalue` and `/getentityvalue` commands display the tag alongside the canonical text.
+
 #### 12 October 2026
 
 * Add world segment flags and PvP gating. A new `WorldSegmentFlag` bitmask enum (first member `Pvp`) is stored per segment in the `WorldSegmentFlag` table, cached in a new `SegmentFlagManager` for gameplay reads, and loaded by `PersistenceRangeRetriever` when a segment activates (folding any still-pending update so a segment never caches a stale value). A new admin-only `/segflag add|remove|list` chat command manages flags over a segment box (`here`, a four-integer x/y box spanning all z, or a six-integer 3D box; boxes over 65,536 segments are rejected), publishing `Server_Persistence_UpdateSegmentFlags` through the event loop so the cache updates immediately and the single persistence writer applies the change at the next synchronization. Player-versus-player damage from `AttackHandler.FindTargets` is now refused unless the new `PvpGate` finds the `Pvp` flag on both the attacker's and the target's segment; NPC, environmental, and scripted damage are unaffected.

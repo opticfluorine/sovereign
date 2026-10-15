@@ -16,6 +16,7 @@
 
 using System.Data;
 using Microsoft.Data.Sqlite;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence.Database.Queries;
 
 namespace Sovereign.Persistence.Database.Sqlite.Queries;
@@ -27,11 +28,11 @@ namespace Sovereign.Persistence.Database.Sqlite.Queries;
 public class SqliteUpdateGlobalKeyValuePairQuery(SqliteConnection connection) : IUpdateGlobalKeyValuePairQuery
 {
     private const string Sql =
-        @"INSERT INTO GlobalKeyValue (key, value)
-    	    VALUES (@Key, @Value)
-	        ON CONFLICT DO UPDATE SET key=excluded.key, value=excluded.value;";
+        @"INSERT INTO GlobalKeyValue (key, value, type)
+    	    VALUES (@Key, @Value, @Type)
+	        ON CONFLICT DO UPDATE SET key=excluded.key, value=excluded.value, type=excluded.type;";
 
-    public void UpdateGlobalKeyValuePair(string key, string value, IDbTransaction transaction)
+    public void UpdateGlobalKeyValuePair(string key, DataValue value, IDbTransaction transaction)
     {
         using var cmd = new SqliteCommand(Sql, connection, (SqliteTransaction)transaction);
 
@@ -40,8 +41,12 @@ public class SqliteUpdateGlobalKeyValuePairQuery(SqliteConnection connection) : 
         cmd.Parameters.Add(pKey);
 
         var pValue = new SqliteParameter("Value", SqliteType.Text);
-        pValue.Value = value;
+        pValue.Value = DataValueCodec.Encode(value);
         cmd.Parameters.Add(pValue);
+
+        var pType = new SqliteParameter("Type", SqliteType.Integer);
+        pType.Value = (int)value.Type;
+        cmd.Parameters.Add(pType);
 
         cmd.ExecuteNonQuery();
     }

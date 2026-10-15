@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ public sealed class EntityDataRestService(
     ILogger<EntityDataRestService> logger,
     IDataServices dataServices)
 {
-    private readonly ObjectPool<Dictionary<string, string>> dataPool = new();
+    private readonly ObjectPool<Dictionary<string, DataValue>> dataPool = new();
 
     /// <summary>
     ///     GET endpoint for retrieving entity data.
@@ -55,7 +56,7 @@ public sealed class EntityDataRestService(
                 dataServices.GetEntityData(entityId, data);
                 var response = new EntityDataResponse
                 {
-                    EntityData = data
+                    EntityData = data.ToDictionary(kv => kv.Key, kv => kv.Value.ToString())
                 };
                 responseJson = JsonSerializer.Serialize(response, MessageConfig.JsonOptions);
             }
