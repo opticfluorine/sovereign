@@ -27,7 +27,7 @@ types and their Lua representations are:
 | `Int`      | integer          | integral number                              |
 | `Float`    | number           | non-integral number                          |
 | `Bool`     | boolean          | boolean                                      |
-| `Vector3`  | table            | table with numeric `x`, `y`, and `z` fields  |
+| `Vector3`  | table            | table with numeric `X`, `Y`, and `Z` fields  |
 | `EntityId` | lightuserdata    | lightuserdata entity handle                  |
 
 Values are never converted between types: a value read back has the same type tag
@@ -80,7 +80,7 @@ local MyEntityValue = MyEntityData["MyEntityKey"] -- value if key exists for ent
 A key-value pair may be created or updated in the key-value store by assigning
 a value to the appropriate table. The type tag is inferred from the Lua value
 being assigned (see the table above); an integer number is stored as `Int`, any
-other number as `Float`, and a table with numeric `x`, `y`, and `z` fields as
+other number as `Float`, and a table with numeric `X`, `Y`, and `Z` fields as
 `Vector3`. Assigning any other value logs a script error and does not write.
 
 For entity key-value stores, this will only ever modify the key-value pair for the
@@ -97,7 +97,7 @@ values from a script will fail with an error.
 
 ```{code-block} lua
 :caption: Writing key-value pairs.
-local MyPosition = { x = 0.5, y = 0.5, z = 1.0 }
+local MyPosition = { X = 0.5, Y = 0.5, Z = 1.0 }
 Data.Global["MyValue"] = 12345        -- stored as an Int
 Data.Global["MyPosition"] = MyPosition -- stored as a Vector3
 -- ...

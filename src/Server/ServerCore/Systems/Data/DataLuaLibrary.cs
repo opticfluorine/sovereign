@@ -420,51 +420,33 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         switch (value.Type)
         {
             case DataValueType.String:
-                lua_pushstring(luaState, value.AsString());
+                LuaMarshaller.Marshal(luaState, value.AsString());
                 break;
 
             case DataValueType.Int:
-                lua_pushinteger(luaState, value.AsInt());
+                LuaMarshaller.Marshal(luaState, value.AsInt());
                 break;
 
             case DataValueType.Float:
-                lua_pushnumber(luaState, value.AsFloat());
+                LuaMarshaller.Marshal(luaState, value.AsFloat());
                 break;
 
             case DataValueType.Bool:
-                lua_pushboolean(luaState, value.AsBool());
+                LuaMarshaller.Marshal(luaState, value.AsBool());
                 break;
 
             case DataValueType.Vector3:
-                PushVector3(luaState, value.AsVector3());
+                LuaMarshaller.Marshal(luaState, value.AsVector3());
                 break;
 
             case DataValueType.EntityId:
-                lua_pushlightuserdata(luaState, (IntPtr)value.AsEntityId());
+                LuaMarshaller.Marshal(luaState, value.AsEntityId());
                 break;
 
             default:
                 lua_pushnil(luaState);
                 break;
         }
-    }
-
-    /// <summary>
-    ///     Pushes a Vector3 as a plain Lua table with x, y, and z fields.
-    /// </summary>
-    /// <param name="luaState">Lua state.</param>
-    /// <param name="value">Vector value.</param>
-    private static void PushVector3(IntPtr luaState, Vector3 value)
-    {
-        luaL_checkstack(luaState, 4, null);
-        lua_createtable(luaState, 0, 3);
-
-        lua_pushnumber(luaState, value.X);
-        lua_setfield(luaState, -2, "x");
-        lua_pushnumber(luaState, value.Y);
-        lua_setfield(luaState, -2, "y");
-        lua_pushnumber(luaState, value.Z);
-        lua_setfield(luaState, -2, "z");
     }
 
     /// <summary>
@@ -480,65 +462,70 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     {
         value = default;
 
-        switch (lua_type(luaState, index))
+        var type = lua_type(luaState, index);
+
+        if (type == LuaType.Table)
         {
-            case LuaType.String:
-                value = DataValue.FromString(lua_tostring(luaState, index));
+            if (TryReadVector3(luaState, index, out var vector))
+            {
+                value = DataValue.FromVector3(vector);
                 return true;
+            }
 
-            case LuaType.Number:
-                value = lua_isinteger(luaState, index)
-                    ? DataValue.FromInt(lua_tointeger(luaState, index))
-                    : DataValue.FromFloat(lua_tonumber(luaState, index));
-                return true;
-
-            case LuaType.Boolean:
-                value = DataValue.FromBool(lua_toboolean(luaState, index));
-                return true;
-
-            case LuaType.LightUserData:
-                value = DataValue.FromEntityId((ulong)lua_touserdata(luaState, index));
-                return true;
-
-            case LuaType.Table:
-                if (TryReadVector3(luaState, index, out var vector))
-                {
-                    value = DataValue.FromVector3(vector);
-                    return true;
-                }
-
-                scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("{Context}: table value requires numeric x, y, and z fields.", context);
-                return false;
-
-            default:
-                scriptingServices.GetScriptLogger(mainState, logger)
-                    .LogError("Unsupported value type for {Context}.", context);
-                return false;
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("{Context}: table value requires numeric X, Y, and Z fields.", context);
+            return false;
         }
-    }
 
-    /// <summary>
-    ///     Reads an x/y/z table as a Vector3, accepting either lowercase or uppercase field names.
-    /// </summary>
-    /// <param name="luaState">Lua state.</param>
-    /// <param name="index">Stack index of the table.</param>
-    /// <param name="value">Parsed vector. Only valid if the method returns true.</param>
-    /// <returns>true if the table has numeric x, y, and z fields, false otherwise.</returns>
-    private static bool TryReadVector3(IntPtr luaState, int index, out Vector3 value)
-    {
-        value = default;
-
-        var absIndex = lua_absindex(luaState, index);
         var top = lua_gettop(luaState);
         try
         {
-            if (!TryGetVectorComponent(luaState, absIndex, "x", "X", out var x)) return false;
-            if (!TryGetVectorComponent(luaState, absIndex, "y", "Y", out var y)) return false;
-            if (!TryGetVectorComponent(luaState, absIndex, "z", "Z", out var z)) return false;
+            // Copy the value to the top of the stack for the marshaller, which pops it.
+            luaL_checkstack(luaState, 1, null);
+            lua_pushvalue(luaState, index);
 
-            value = new Vector3((float)x, (float)y, (float)z);
-            return true;
+            switch (type)
+            {
+                case LuaType.String:
+                    LuaMarshaller.Unmarshal(luaState, out string stringValue);
+                    value = DataValue.FromString(stringValue);
+                    return true;
+
+                case LuaType.Number:
+                    if (lua_isinteger(luaState, -1))
+                    {
+                        LuaMarshaller.Unmarshal(luaState, out long intValue);
+                        value = DataValue.FromInt(intValue);
+                    }
+                    else
+                    {
+                        LuaMarshaller.Unmarshal(luaState, out double floatValue);
+                        value = DataValue.FromFloat(floatValue);
+                    }
+
+                    return true;
+
+                case LuaType.Boolean:
+                    LuaMarshaller.Unmarshal(luaState, out bool boolValue);
+                    value = DataValue.FromBool(boolValue);
+                    return true;
+
+                case LuaType.LightUserData:
+                    LuaMarshaller.Unmarshal(luaState, out ulong entityIdValue);
+                    value = DataValue.FromEntityId(entityIdValue);
+                    return true;
+
+                default:
+                    scriptingServices.GetScriptLogger(mainState, logger)
+                        .LogError("Unsupported value type for {Context}.", context);
+                    return false;
+            }
+        }
+        catch (LuaException)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("Unsupported value type for {Context}.", context);
+            return false;
         }
         finally
         {
@@ -547,43 +534,33 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     }
 
     /// <summary>
-    ///     Reads a numeric vector component field, trying the lowercase name before the uppercase name.
+    ///     Reads a Vector3 table (matching the marshalled Vector3 shape) from the stack, restoring the stack afterwards.
     /// </summary>
     /// <param name="luaState">Lua state.</param>
-    /// <param name="absIndex">Absolute stack index of the table.</param>
-    /// <param name="lowerName">Lowercase field name.</param>
-    /// <param name="upperName">Uppercase field name.</param>
-    /// <param name="component">Parsed component. Only valid if the method returns true.</param>
-    /// <returns>true if a numeric field was found, false otherwise.</returns>
-    private static bool TryGetVectorComponent(IntPtr luaState, int absIndex, string lowerName, string upperName,
-        out double component)
+    /// <param name="index">Stack index of the table.</param>
+    /// <param name="value">Parsed vector. Only valid if the method returns true.</param>
+    /// <returns>true if the table was a valid Vector3, false otherwise.</returns>
+    private static bool TryReadVector3(IntPtr luaState, int index, out Vector3 value)
     {
-        if (TryGetNumericField(luaState, absIndex, lowerName, out component)) return true;
-        return TryGetNumericField(luaState, absIndex, upperName, out component);
-    }
+        value = default;
 
-    /// <summary>
-    ///     Reads a numeric field from a table, restoring the stack afterwards.
-    /// </summary>
-    /// <param name="luaState">Lua state.</param>
-    /// <param name="absIndex">Absolute stack index of the table.</param>
-    /// <param name="name">Field name.</param>
-    /// <param name="component">Parsed component. Only valid if the method returns true.</param>
-    /// <returns>true if a numeric field was found, false otherwise.</returns>
-    private static bool TryGetNumericField(IntPtr luaState, int absIndex, string name, out double component)
-    {
         var top = lua_gettop(luaState);
-        luaL_checkstack(luaState, 1, null);
-        if (lua_getfield(luaState, absIndex, name) == LuaType.Number)
+        try
         {
-            component = lua_tonumber(luaState, -1);
-            lua_settop(luaState, top);
+            // Copy the value to the top of the stack for the marshaller, which pops it.
+            luaL_checkstack(luaState, 1, null);
+            lua_pushvalue(luaState, index);
+            LuaMarshaller.Unmarshal(luaState, out value);
             return true;
         }
-
-        lua_settop(luaState, top);
-        component = 0.0;
-        return false;
+        catch (LuaException)
+        {
+            return false;
+        }
+        finally
+        {
+            lua_settop(luaState, top);
+        }
     }
 
     /// <summary>

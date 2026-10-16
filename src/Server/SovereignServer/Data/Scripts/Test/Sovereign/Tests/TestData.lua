@@ -5,9 +5,11 @@ local Suite = "TestData"
 local setup, stepGlobalWrite, stepGlobalVerify, stepGlobalDelete, stepGlobalVerifyDeleted
 local step1EntityDataWrite, step2EntityDataVerify, step3EntityDataDelete, step4EntityDataVerifyDeleted
 local stepReservedKeyVerify, stepReservedKeyWrite
+local stepVector3Write, stepVector3Verify
 local fixtureEntityId
 
 local globalKey = "TestHarnessDataGlobalKey"
+local vectorKey = "TestHarnessDataVectorKey"
 
 Test.Async("GlobalWriteReadDelete")
 
@@ -58,6 +60,23 @@ step4EntityDataVerifyDeleted = function()
     Test.Pass("EntityDataStore")
 end
 
+Test.Async("Vector3Value")
+
+stepVector3Write = function()
+    Data.Global[vectorKey] = { X = 1.5, Y = 2.5, Z = 3.5 }
+end
+
+stepVector3Verify = function()
+    Test.Step("Vector3Value", function()
+        local value = Data.Global[vectorKey]
+        Test.AssertEqual(1.5, value.X, "Vector3 X component should round-trip")
+        Test.AssertEqual(2.5, value.Y, "Vector3 Y component should round-trip")
+        Test.AssertEqual(3.5, value.Z, "Vector3 Z component should round-trip")
+    end)
+    Data.Global[vectorKey] = nil
+    Test.Pass("Vector3Value")
+end
+
 Test.Async("ReservedKeysIgnored")
 
 stepReservedKeyWrite = function()
@@ -97,6 +116,8 @@ setup = function()
     Scripting.AddTimedCallback(0.5, step2EntityDataVerify)
     Scripting.AddTimedCallback(0.7, step3EntityDataDelete)
     Scripting.AddTimedCallback(0.9, step4EntityDataVerifyDeleted)
+    Scripting.AddTimedCallback(0.3, stepVector3Write)
+    Scripting.AddTimedCallback(0.5, stepVector3Verify)
     Scripting.AddTimedCallback(0.3, stepReservedKeyWrite)
     Scripting.AddTimedCallback(0.5, stepReservedKeyVerify)
 end

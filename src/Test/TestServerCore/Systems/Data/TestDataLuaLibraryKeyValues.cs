@@ -183,7 +183,7 @@ public class TestDataLuaLibraryKeyValues : IDisposable
     [Fact]
     public void GlobalSet_Vector3Table_InfersVector3Tag()
     {
-        Run("Data.Global[\"k\"] = { x = 1, y = 2, z = 3 }");
+        Run("Data.Global[\"k\"] = { X = 1, Y = 2, Z = 3 }");
 
         var value = Assert.Single(dataController.SetValues);
         Assert.Equal(DataValueType.Vector3, value.Type);
@@ -228,7 +228,16 @@ public class TestDataLuaLibraryKeyValues : IDisposable
         Run("Data.Global[\"k\"] = { foo = 1 }");
 
         Assert.Empty(dataController.SetValues);
-        Assert.Contains(logger.Messages, message => message.Contains("numeric x, y, and z"));
+        Assert.Contains(logger.Messages, message => message.Contains("numeric X, Y, and Z"));
+    }
+
+    [Fact]
+    public void GlobalSet_Vector3TableWithLowercaseFields_LogsErrorAndDoesNotWrite()
+    {
+        Run("Data.Global[\"k\"] = { x = 1, y = 2, z = 3 }");
+
+        Assert.Empty(dataController.SetValues);
+        Assert.Contains(logger.Messages, message => message.Contains("numeric X, Y, and Z"));
     }
 
     [Fact]
@@ -379,7 +388,7 @@ public class TestDataLuaLibraryKeyValues : IDisposable
     }
 
     /// <summary>
-    ///     Gets the x/y/z table value of the current test result.
+    ///     Gets the X/Y/Z table value of the current test result.
     /// </summary>
     /// <returns>Vector value.</returns>
     private Vector3 GetResultVector3()
@@ -388,13 +397,13 @@ public class TestDataLuaLibraryKeyValues : IDisposable
         host.ExecuteOther(_ =>
         {
             lua_getglobal(host.LuaState, "__test_result");
-            lua_getfield(host.LuaState, -1, "x");
+            lua_getfield(host.LuaState, -1, "X");
             var x = (float)lua_tonumber(host.LuaState, -1);
             lua_pop(host.LuaState, 1);
-            lua_getfield(host.LuaState, -1, "y");
+            lua_getfield(host.LuaState, -1, "Y");
             var y = (float)lua_tonumber(host.LuaState, -1);
             lua_pop(host.LuaState, 1);
-            lua_getfield(host.LuaState, -1, "z");
+            lua_getfield(host.LuaState, -1, "Z");
             var z = (float)lua_tonumber(host.LuaState, -1);
             lua_pop(host.LuaState, 1);
             result = new Vector3(x, y, z);
