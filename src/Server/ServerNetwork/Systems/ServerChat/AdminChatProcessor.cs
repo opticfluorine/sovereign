@@ -863,10 +863,10 @@ public class AdminChatProcessor : IChatProcessor
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnSetValue(string message, ulong senderEntityId)
     {
-        var args = message.Split(' ', 2, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var args = message.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (args.Length == 0)
         {
-            internalController.SendSystemMessage("Usage: /setvalue key [value]", senderEntityId);
+            internalController.SendSystemMessage("Usage: /setvalue key [value [type]]", senderEntityId);
             return;
         }
 
@@ -886,8 +886,14 @@ public class AdminChatProcessor : IChatProcessor
             return;
         }
 
-        dataController.SetGlobalSync(key, args[1]);
-        internalController.SendSystemMessage($"Key {key} set to {args[1]}.", senderEntityId);
+        if (!DataCommandArgs.TryParseSetValue(args, 1, out var value))
+        {
+            internalController.SendSystemMessage("Usage: /setvalue key [value [type]]", senderEntityId);
+            return;
+        }
+
+        dataController.SetGlobalSync(key, value);
+        internalController.SendSystemMessage($"Key {key} set to {value}.", senderEntityId);
     }
 
     /// <summary>
@@ -932,10 +938,11 @@ public class AdminChatProcessor : IChatProcessor
     /// <param name="senderEntityId">Sender entity ID.</param>
     private void OnSetEntityValue(string message, ulong senderEntityId)
     {
-        var args = message.Split(' ', 3, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var args = message.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (args.Length < 2)
         {
-            internalController.SendSystemMessage("Usage: /setentityvalue entity_id key [value]", senderEntityId);
+            internalController.SendSystemMessage("Usage: /setentityvalue entity_id key [value [type]]",
+                senderEntityId);
             return;
         }
 
@@ -957,8 +964,16 @@ public class AdminChatProcessor : IChatProcessor
             return;
         }
 
-        dataController.SetEntityKeyValueSync(entityId, key, args[2]);
-        internalController.SendSystemMessage($"Key {key} on entity {entityId:X16} set to {args[2]}.", senderEntityId);
+        if (!DataCommandArgs.TryParseSetValue(args, 2, out var value))
+        {
+            internalController.SendSystemMessage("Usage: /setentityvalue entity_id key [value [type]]",
+                senderEntityId);
+            return;
+        }
+
+        dataController.SetEntityKeyValueSync(entityId, key, value);
+        internalController.SendSystemMessage($"Key {key} on entity {entityId:X16} set to {value}.",
+            senderEntityId);
     }
 
     /// <summary>

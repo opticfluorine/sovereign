@@ -4,6 +4,10 @@
 
 ### October
 
+#### 15 October 2026
+
+* Expose the typed key-value data through the Lua API, template editor, and admin commands. The `Data` module's global and entity key-value proxies now return native Lua types (integer, number, boolean, string, an `X`/`Y`/`Z` table for `Vector3`, and light userdata for `EntityId`) and infer the type tag from the assigned Lua value (with `nil` still deleting the key); unsupported values or malformed tables log a script error and are never written, and the old stringly accessors are removed. Entity-data REST payloads now carry a per-pair `DataValueDto` (type name plus canonical text) in both directions, and malformed payloads are rejected with a `400` naming the offending key. The template editor's free-form entity data rows gain a per-row type dropdown defaulting to `String` that renders the matching input and keeps the last valid value while an invalid edit is flagged, and hinted NPC/item template parameters now write `EntityId`-typed values. The admin `/setvalue` and `/setentityvalue` commands accept an optional final type argument (default `String`) validated before the write, with `/getvalue` and `/getentityvalue` already displaying the tag alongside the canonical text.
+
 #### 14 October 2026
 
 * Add per-value type tags to global and per-entity key-value data. A new tag-only `DataValue` type (`String`, `Int`, `Bool`, `Float`, `Vector3`, `EntityId`) with a culture-invariant text codec is now stored by `GlobalKeyValueStore` and `EntityKeyValueStore`; writes no longer flatten values with `ToString()`, and typed reads require an exact tag match (a mismatch logs an error and returns false rather than silently coercing). The key-value tables gain a `type` column via migration 0003, which retypes `__Sovereign.Clock` to `Int` and the `MinimumZ`/`MaximumZ` config keys to `Float` while defaulting existing rows to `String`; the server fails to start if a stored value cannot be decoded under its stored tag. The game clock and movement Z bounds read through the new typed accessors, and the admin `/getvalue` and `/getentityvalue` commands display the tag alongside the canonical text.

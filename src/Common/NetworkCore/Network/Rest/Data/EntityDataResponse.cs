@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.NetworkCore.Network.Rest.Data;
 
@@ -26,5 +27,5 @@ public class EntityDataResponse
     /// <summary>
     ///     Entity key-value data.
     /// </summary>
-    public Dictionary<string, string> EntityData { get; set; } = new();
+    public Dictionary<string, DataValueDto> EntityData { get; set; } = new();
 }

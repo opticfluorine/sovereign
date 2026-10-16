@@ -89,7 +89,7 @@ public class TemplateEntityManager
     /// </summary>
     /// <param name="definition"></param>
     /// <param name="keyValuePairs"></param>
-    public void UpdateKeyed(EntityDefinition definition, Dictionary<string, string> keyValuePairs)
+    public void UpdateKeyed(EntityDefinition definition, Dictionary<string, DataValue> keyValuePairs)
     {
         if (definition.EntityId is < EntityConstants.FirstTemplateEntityId or > EntityConstants.LastTemplateEntityId)
         {
@@ -102,7 +102,7 @@ public class TemplateEntityManager
         dataController.ClearEntityKeyValuesSync(definition.EntityId);
         foreach (var kvp in keyValuePairs)
         {
-            if (kvp.Value == string.Empty) continue;
+            if (kvp.Value.Type == DataValueType.String && kvp.Value.AsString().Length == 0) continue;
             dataController.SetEntityKeyValueSync(definition.EntityId, kvp.Key, kvp.Value);
         }
 

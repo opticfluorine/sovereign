@@ -133,6 +133,10 @@ prompt to download the latest game data files.
 | /reloadentity     | entityId              | Admin only. Reloads the script hooks of the given entity. |
 | /reloadtemplate   | templateRelId         | Admin only. Reloads all loaded entities of the given template. |
 | /segflag          | subcommand, range, flag | Admin only. Adds, removes, or lists world segment flags (e.g. PvP). |
+| /getvalue         | key                   | Admin only. Prints the type and value of a global key-value pair. |
+| /setvalue         | key, [value, [type]]  | Admin only. Sets or deletes a global key-value pair, optionally typed. |
+| /getentityvalue   | entityId, key         | Admin only. Prints the type and value of an entity key-value pair. |
+| /setentityvalue   | entityId, key, [value, [type]] | Admin only. Sets or deletes an entity key-value pair, optionally typed. |
 
 ## Reporting Issues
 

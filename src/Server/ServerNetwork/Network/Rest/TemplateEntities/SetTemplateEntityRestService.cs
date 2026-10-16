@@ -54,8 +54,17 @@ public sealed class SetTemplateEntityRestService(
                 return Task.FromResult(Results.BadRequest());
             }
 
-            // All keys and values are valid for entity data, so no need to validate the dictionary.
-            // If we get here, the request is valid and we can process the update.
+            // Decode every value up front so that a malformed value is rejected with the key named
+            // rather than silently accepted.
+            foreach (var (key, dto) in request.EntityKeyValuePairs)
+            {
+                if (dto.TryToDataValue(out _)) continue;
+
+                logger.LogError("Malformed entity data value for key {Key} received. (Request ID: {Id})",
+                    key, context.TraceIdentifier);
+                return Task.FromResult(Results.BadRequest($"Malformed entity data value for key '{key}'."));
+            }
+
             templateEntityController.UpdateTemplateEntity(eventSender, request.EntityDefinition,
                 request.EntityKeyValuePairs);
             return Task.FromResult(Results.Ok());

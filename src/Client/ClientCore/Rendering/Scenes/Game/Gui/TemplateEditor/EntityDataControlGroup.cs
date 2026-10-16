@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using Hexa.NET.ImGui;
@@ -26,6 +27,7 @@ using Sovereign.ClientCore.Rendering.Sprites.AnimatedSprites;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Scripting;
 
 namespace Sovereign.ClientCore.Rendering.Scenes.Game.Gui.TemplateEditor;
@@ -59,12 +61,12 @@ public class EntityDataControlGroup(
 
     private readonly List<string> keysToRemove = new();
     private readonly List<EntityParameterHint> scriptParameters = new();
-    private Dictionary<string, string>? entityData = new();
+    private Dictionary<string, DataValueDto>? entityData = new();
 
     private bool entityDataLoaded;
     private string inputEntityAddedFunction = "";
     private string inputEntityAddedScript = "";
-    private Dictionary<string, string> inputEntityData = new();
+    private Dictionary<string, DataValueDto> inputEntityData = new();
     private string inputEntityLoadedFunction = "";
     private string inputEntityLoadedScript = "";
     private string inputEntityRemovedFunction = "";
@@ -75,6 +77,7 @@ public class EntityDataControlGroup(
     private string inputInteractScript = "";
     private string inputNewKey = "";
     private bool previousFrameEntityDataLoaded;
+    private Dictionary<string, EntityDataRowEdit> rowEdits = new();
 
     private ulong selectedEntityId;
     private EntityType selectedEntityType;
@@ -93,6 +96,10 @@ public class EntityDataControlGroup(
         RenderEntityData();
     }
 
+    /// <summary>
+    ///     Selects the entity being edited.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
     public void SelectEntity(ulong entityId)
     {
         selectedEntityId = entityId;
@@ -101,6 +108,7 @@ public class EntityDataControlGroup(
 
         inputNewKey = "";
         inputEntityData.Clear(); // will be filled by ResetEntityDataInputBuffers after async load
+        rowEdits.Clear();
         previousFrameEntityDataLoaded = false;
 
         OnChangeScripts();
@@ -110,62 +118,37 @@ public class EntityDataControlGroup(
     ///     Gets a copy of the input entity data.
     /// </summary>
     /// <returns>Input entity data.</returns>
-    public Dictionary<string, string> GetInputEntityData()
+    public Dictionary<string, DataValueDto> GetInputEntityData()
     {
         // Return a copy of the input data to avoid external modifications.
-        var newEntityData = new Dictionary<string, string>(inputEntityData);
+        var newEntityData = new Dictionary<string, DataValueDto>(inputEntityData);
 
-        if (!string.IsNullOrEmpty(inputEntityAddedScript))
-            newEntityData[EntityConstants.AddCallbackScriptKey] = inputEntityAddedScript;
-        else
-            newEntityData.Remove(EntityConstants.AddCallbackScriptKey);
-
-        if (!string.IsNullOrEmpty(inputEntityAddedFunction))
-            newEntityData[EntityConstants.AddCallbackFunctionKey] = inputEntityAddedFunction;
-        else
-            newEntityData.Remove(EntityConstants.AddCallbackFunctionKey);
-
-        if (!string.IsNullOrEmpty(inputEntityLoadedScript))
-            newEntityData[EntityConstants.LoadCallbackScriptKey] = inputEntityLoadedScript;
-        else
-            newEntityData.Remove(EntityConstants.LoadCallbackScriptKey);
-
-        if (!string.IsNullOrEmpty(inputEntityLoadedFunction))
-            newEntityData[EntityConstants.LoadCallbackFunctionKey] = inputEntityLoadedFunction;
-        else
-            newEntityData.Remove(EntityConstants.LoadCallbackFunctionKey);
-
-        if (!string.IsNullOrEmpty(inputEntityRemovedScript))
-            newEntityData[EntityConstants.RemoveCallbackScriptKey] = inputEntityRemovedScript;
-        else
-            newEntityData.Remove(EntityConstants.RemoveCallbackScriptKey);
-
-        if (!string.IsNullOrEmpty(inputEntityRemovedFunction))
-            newEntityData[EntityConstants.RemoveCallbackFunctionKey] = inputEntityRemovedFunction;
-        else
-            newEntityData.Remove(EntityConstants.RemoveCallbackFunctionKey);
-
-        if (!string.IsNullOrEmpty(inputEntityUnloadedScript))
-            newEntityData[EntityConstants.UnloadCallbackScriptKey] = inputEntityUnloadedScript;
-        else
-            newEntityData.Remove(EntityConstants.UnloadCallbackScriptKey);
-
-        if (!string.IsNullOrEmpty(inputEntityUnloadedFunction))
-            newEntityData[EntityConstants.UnloadCallbackFunctionKey] = inputEntityUnloadedFunction;
-        else
-            newEntityData.Remove(EntityConstants.UnloadCallbackFunctionKey);
-
-        if (!string.IsNullOrEmpty(inputInteractScript))
-            newEntityData[EntityConstants.InteractScriptKey] = inputInteractScript;
-        else
-            newEntityData.Remove(EntityConstants.InteractScriptKey);
-
-        if (!string.IsNullOrEmpty(inputInteractFunction))
-            newEntityData[EntityConstants.InteractFunctionKey] = inputInteractFunction;
-        else
-            newEntityData.Remove(EntityConstants.InteractFunctionKey);
+        SetOrRemoveString(newEntityData, EntityConstants.AddCallbackScriptKey, inputEntityAddedScript);
+        SetOrRemoveString(newEntityData, EntityConstants.AddCallbackFunctionKey, inputEntityAddedFunction);
+        SetOrRemoveString(newEntityData, EntityConstants.LoadCallbackScriptKey, inputEntityLoadedScript);
+        SetOrRemoveString(newEntityData, EntityConstants.LoadCallbackFunctionKey, inputEntityLoadedFunction);
+        SetOrRemoveString(newEntityData, EntityConstants.RemoveCallbackScriptKey, inputEntityRemovedScript);
+        SetOrRemoveString(newEntityData, EntityConstants.RemoveCallbackFunctionKey, inputEntityRemovedFunction);
+        SetOrRemoveString(newEntityData, EntityConstants.UnloadCallbackScriptKey, inputEntityUnloadedScript);
+        SetOrRemoveString(newEntityData, EntityConstants.UnloadCallbackFunctionKey, inputEntityUnloadedFunction);
+        SetOrRemoveString(newEntityData, EntityConstants.InteractScriptKey, inputInteractScript);
+        SetOrRemoveString(newEntityData, EntityConstants.InteractFunctionKey, inputInteractFunction);
 
         return newEntityData;
+    }
+
+    /// <summary>
+    ///     Sets or removes a string-valued entry in the given dictionary.
+    /// </summary>
+    /// <param name="data">Data dictionary.</param>
+    /// <param name="key">Key.</param>
+    /// <param name="value">String value; an empty value removes the key.</param>
+    private static void SetOrRemoveString(Dictionary<string, DataValueDto> data, string key, string value)
+    {
+        if (!string.IsNullOrEmpty(value))
+            data[key] = DataValueDto.FromDataValue(DataValue.FromString(value));
+        else
+            data.Remove(key);
     }
 
     /// <summary>
@@ -271,25 +254,31 @@ public class EntityDataControlGroup(
         }
 
         ImGui.TableNextColumn();
-        var currentValue = inputEntityData.TryGetValue(hint.Name, out var value) ? value : "";
+        var currentValue = inputEntityData.TryGetValue(hint.Name, out var dto) ? dto.Value : "";
         switch (hint.Type)
         {
             case EntityParameterType.Int:
-                var intValue = int.TryParse(currentValue, out var i) ? i : 0;
+                var intValue = int.TryParse(currentValue, NumberStyles.Integer, EntityConstants.EntityDataCulture,
+                    out var i)
+                    ? i
+                    : 0;
                 if (ImGui.InputInt($"##{hint.Name}", ref intValue))
-                    inputEntityData[hint.Name] = intValue.ToString();
+                    inputEntityData[hint.Name] = DataValueDto.FromDataValue(DataValue.FromInt(intValue));
                 break;
 
             case EntityParameterType.Float:
-                var floatValue = float.TryParse(currentValue, EntityConstants.EntityDataCulture, out var f) ? f : 0f;
+                var floatValue = float.TryParse(currentValue, NumberStyles.Float, EntityConstants.EntityDataCulture,
+                    out var f)
+                    ? f
+                    : 0f;
                 if (ImGui.InputFloat($"##{hint.Name}", ref floatValue))
-                    inputEntityData[hint.Name] = floatValue.ToString(EntityConstants.EntityDataCulture);
+                    inputEntityData[hint.Name] = DataValueDto.FromDataValue(DataValue.FromFloat(floatValue));
                 break;
 
             case EntityParameterType.Bool:
                 var boolValue = currentValue == "true";
                 if (ImGui.Checkbox($"##{hint.Name}", ref boolValue))
-                    inputEntityData[hint.Name] = boolValue ? "true" : "false";
+                    inputEntityData[hint.Name] = DataValueDto.FromDataValue(DataValue.FromBool(boolValue));
                 break;
 
             case EntityParameterType.NpcTemplate:
@@ -316,8 +305,10 @@ public class EntityDataControlGroup(
 
             case EntityParameterType.String:
             default:
-                ImGui.InputText($"##{hint.Name}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
-                inputEntityData[hint.Name] = currentValue;
+                var stringValue = currentValue;
+                if (ImGui.InputText($"##{hint.Name}", ref stringValue,
+                        EntityConstants.MaxEntityDataValueLength + 1))
+                    inputEntityData[hint.Name] = DataValueDto.FromDataValue(DataValue.FromString(stringValue));
                 break;
         }
     }
@@ -352,8 +343,10 @@ public class EntityDataControlGroup(
 
         if (npcTemplateSelectorPopup.TryGetSelection(hint.Name, out var newNpcId))
         {
-            if (newNpcId > 0) inputEntityData[hint.Name] = newNpcId.ToString();
-            else inputEntityData.Remove(hint.Name);
+            if (newNpcId > 0)
+                inputEntityData[hint.Name] = DataValueDto.FromDataValue(DataValue.FromEntityId(newNpcId));
+            else
+                inputEntityData.Remove(hint.Name);
         }
     }
 
@@ -387,8 +380,10 @@ public class EntityDataControlGroup(
 
         if (itemTemplateSelectorPopup.TryGetSelection(hint.Name, out var newNpcId))
         {
-            if (newNpcId > 0) inputEntityData[hint.Name] = newNpcId.ToString();
-            else inputEntityData.Remove(hint.Name);
+            if (newNpcId > 0)
+                inputEntityData[hint.Name] = DataValueDto.FromDataValue(DataValue.FromEntityId(newNpcId));
+            else
+                inputEntityData.Remove(hint.Name);
         }
     }
 
@@ -412,7 +407,11 @@ public class EntityDataControlGroup(
                     InputKeyValue(key);
                 }
 
-                foreach (var key in keysToRemove) inputEntityData.Remove(key);
+                foreach (var key in keysToRemove)
+                {
+                    inputEntityData.Remove(key);
+                    rowEdits.Remove(key);
+                }
 
                 // Last row is special for adding new keys.
                 ImGui.TableNextColumn();
@@ -421,8 +420,14 @@ public class EntityDataControlGroup(
                 ImGui.InputText("##newKey", ref inputNewKey, EntityConstants.MaxEntityDataKeyLength + 1);
                 ImGui.SameLine();
                 if (ImGui.Button("Add"))
-                    if (inputNewKey.Length > 0 && inputEntityData.TryAdd(inputNewKey, ""))
+                    if (inputNewKey.Length > 0 &&
+                        inputEntityData.TryAdd(inputNewKey,
+                            DataValueDto.FromDataValue(DataValue.FromString(string.Empty))))
+                    {
+                        rowEdits[inputNewKey] =
+                            EntityDataRowEdit.FromDataValue(DataValue.FromString(string.Empty));
                         inputNewKey = "";
+                    }
 
                 ImGui.EndTable();
             }
@@ -443,13 +448,130 @@ public class EntityDataControlGroup(
         ImGui.Text($"{key}:");
 
         ImGui.TableNextColumn();
-        var currentValue = inputEntityData.TryGetValue(key, out var value) ? value : "";
+        if (!rowEdits.TryGetValue(key, out var row))
+        {
+            row = inputEntityData.TryGetValue(key, out var dto) && dto.TryToDataValue(out var value)
+                ? EntityDataRowEdit.FromDataValue(value)
+                : EntityDataRowEdit.FromDataValue(DataValue.FromString(string.Empty));
+            rowEdits[key] = row;
+        }
+
         var fontSize = ImGui.GetFontSize();
-        ImGui.SetNextItemWidth(fontSize * 12.0f);
-        ImGui.InputText($"##{key}", ref currentValue, EntityConstants.MaxEntityDataValueLength + 1);
-        inputEntityData[key] = currentValue;
+        ImGui.SetNextItemWidth(fontSize * 6.0f);
+        var typeIndex = EntityDataRowEdit.IndexOf(row.Type);
+        if (ImGui.Combo($"##type{key}", ref typeIndex, EntityDataRowEdit.TypeNames,
+                EntityDataRowEdit.Types.Length))
+            row.SetType(EntityDataRowEdit.Types[typeIndex]);
+        ImGui.SameLine();
+
+        var invalidColor = new Vector4(0.75f, 0.15f, 0.15f, 1.0f);
+        if (!row.IsValid) ImGui.PushStyleColor(ImGuiCol.FrameBg, invalidColor);
+        RenderRowInput(key, row);
+        if (!row.IsValid)
+        {
+            ImGui.PopStyleColor();
+            if (ImGui.IsItemHovered())
+                if (ImGui.BeginTooltip())
+                {
+                    ImGui.Text($"Value is not valid for type {row.Type}.");
+                    ImGui.EndTooltip();
+                }
+        }
+
         ImGui.SameLine();
         if (ImGui.Button($"Remove##{key}")) keysToRemove.Add(key);
+
+        inputEntityData[key] = row.ToDto();
+    }
+
+    /// <summary>
+    ///     Renders the type-specific input for a single key-value pair row.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    /// <param name="row">Row edit state.</param>
+    private void RenderRowInput(string key, EntityDataRowEdit row)
+    {
+        var fontSize = ImGui.GetFontSize();
+        switch (row.Type)
+        {
+            case DataValueType.Int:
+                var intValue = int.TryParse(row.Text, NumberStyles.Integer, EntityConstants.EntityDataCulture,
+                    out var i)
+                    ? i
+                    : 0;
+                ImGui.SetNextItemWidth(fontSize * 12.0f);
+                if (ImGui.InputInt($"##{key}", ref intValue))
+                    row.SetText(intValue.ToString(EntityConstants.EntityDataCulture));
+                break;
+
+            case DataValueType.Float:
+                var floatValue = float.TryParse(row.Text, NumberStyles.Float, EntityConstants.EntityDataCulture,
+                    out var f)
+                    ? f
+                    : 0f;
+                ImGui.SetNextItemWidth(fontSize * 12.0f);
+                if (ImGui.InputFloat($"##{key}", ref floatValue))
+                    row.SetText(floatValue.ToString(EntityConstants.EntityDataCulture));
+                break;
+
+            case DataValueType.Bool:
+                var boolValue = row.Text == "true";
+                if (ImGui.Checkbox($"##{key}", ref boolValue))
+                    row.SetText(boolValue ? "true" : "false");
+                break;
+
+            case DataValueType.Vector3:
+                RenderVector3Input(key, row, fontSize);
+                break;
+
+            case DataValueType.EntityId:
+            case DataValueType.String:
+            default:
+                var textValue = row.Text;
+                ImGui.SetNextItemWidth(fontSize * 12.0f);
+                if (ImGui.InputText($"##{key}", ref textValue, EntityConstants.MaxEntityDataValueLength + 1))
+                    row.SetText(textValue);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Renders the three-field input for a Vector3-valued row.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    /// <param name="row">Row edit state.</param>
+    /// <param name="fontSize">Current font size.</param>
+    private void RenderVector3Input(string key, EntityDataRowEdit row, float fontSize)
+    {
+        var parts = row.Text.Split(',');
+        var x = parts.Length > 0 && float.TryParse(parts[0], NumberStyles.Float, EntityConstants.EntityDataCulture,
+            out var px)
+            ? px
+            : 0f;
+        var y = parts.Length > 1 && float.TryParse(parts[1], NumberStyles.Float, EntityConstants.EntityDataCulture,
+            out var py)
+            ? py
+            : 0f;
+        var z = parts.Length > 2 && float.TryParse(parts[2], NumberStyles.Float, EntityConstants.EntityDataCulture,
+            out var pz)
+            ? pz
+            : 0f;
+
+        var width = fontSize * 4.0f;
+        ImGui.SetNextItemWidth(width);
+        var changed = ImGui.InputFloat($"##{key}x", ref x);
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(width);
+        changed |= ImGui.InputFloat($"##{key}y", ref y);
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(width);
+        changed |= ImGui.InputFloat($"##{key}z", ref z);
+
+        if (changed)
+            row.SetText(string.Join(',',
+                x.ToString(EntityConstants.EntityDataCulture),
+                y.ToString(EntityConstants.EntityDataCulture),
+                z.ToString(EntityConstants.EntityDataCulture)));
     }
 
     /// <summary>
@@ -458,48 +580,41 @@ public class EntityDataControlGroup(
     private void ResetEntityDataInputBuffers()
     {
         // Reset the working dict.
-        inputEntityData = new Dictionary<string, string>(entityData!);
+        inputEntityData = new Dictionary<string, DataValueDto>(entityData!);
+
+        // Rebuild per-row edit state, preserving rows that survived a refresh.
+        var newRowEdits = new Dictionary<string, EntityDataRowEdit>();
+        foreach (var (key, dto) in inputEntityData)
+            newRowEdits[key] = rowEdits.TryGetValue(key, out var existing)
+                ? existing
+                : dto.TryToDataValue(out var value)
+                    ? EntityDataRowEdit.FromDataValue(value)
+                    : EntityDataRowEdit.FromDataValue(DataValue.FromString(dto.Value));
+        rowEdits = newRowEdits;
 
         // Set up callbacks to match current state.
-        inputEntityAddedFunction = entityData!.TryGetValue(EntityConstants.AddCallbackFunctionKey, out var addFunction)
-            ? addFunction
-            : "";
-        inputEntityAddedScript = entityData!.TryGetValue(EntityConstants.AddCallbackScriptKey, out var addScript)
-            ? addScript
-            : "";
-        inputEntityLoadedFunction =
-            entityData!.TryGetValue(EntityConstants.LoadCallbackFunctionKey, out var loadFunction)
-                ? loadFunction
-                : "";
-        inputEntityLoadedScript = entityData!.TryGetValue(EntityConstants.LoadCallbackScriptKey, out var loadScript)
-            ? loadScript
-            : "";
-        inputEntityRemovedFunction =
-            entityData!.TryGetValue(EntityConstants.RemoveCallbackFunctionKey, out var removeFunction)
-                ? removeFunction
-                : "";
-        inputEntityRemovedScript =
-            entityData!.TryGetValue(EntityConstants.RemoveCallbackScriptKey, out var removeScript)
-                ? removeScript
-                : "";
-        inputEntityUnloadedFunction =
-            entityData!.TryGetValue(EntityConstants.UnloadCallbackFunctionKey, out var unloadFunction)
-                ? unloadFunction
-                : "";
-        inputEntityUnloadedScript =
-            entityData!.TryGetValue(EntityConstants.UnloadCallbackScriptKey, out var unloadScript)
-                ? unloadScript
-                : "";
-        inputInteractFunction =
-            entityData!.TryGetValue(EntityConstants.InteractFunctionKey, out var interacttFunction)
-                ? interacttFunction
-                : "";
-        inputInteractScript =
-            entityData!.TryGetValue(EntityConstants.InteractScriptKey, out var interactScript)
-                ? interactScript
-                : "";
+        inputEntityAddedFunction = GetStringValue(EntityConstants.AddCallbackFunctionKey);
+        inputEntityAddedScript = GetStringValue(EntityConstants.AddCallbackScriptKey);
+        inputEntityLoadedFunction = GetStringValue(EntityConstants.LoadCallbackFunctionKey);
+        inputEntityLoadedScript = GetStringValue(EntityConstants.LoadCallbackScriptKey);
+        inputEntityRemovedFunction = GetStringValue(EntityConstants.RemoveCallbackFunctionKey);
+        inputEntityRemovedScript = GetStringValue(EntityConstants.RemoveCallbackScriptKey);
+        inputEntityUnloadedFunction = GetStringValue(EntityConstants.UnloadCallbackFunctionKey);
+        inputEntityUnloadedScript = GetStringValue(EntityConstants.UnloadCallbackScriptKey);
+        inputInteractFunction = GetStringValue(EntityConstants.InteractFunctionKey);
+        inputInteractScript = GetStringValue(EntityConstants.InteractScriptKey);
 
         OnChangeScripts();
+    }
+
+    /// <summary>
+    ///     Gets the canonical text of a string-valued entity data key.
+    /// </summary>
+    /// <param name="key">Key.</param>
+    /// <returns>Value text, or an empty string if the key is absent.</returns>
+    private string GetStringValue(string key)
+    {
+        return entityData!.TryGetValue(key, out var dto) ? dto.Value : "";
     }
 
     /// <summary>

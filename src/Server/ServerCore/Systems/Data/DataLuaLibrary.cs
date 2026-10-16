@@ -84,7 +84,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         entityGetCallback = EntityKvGet;
         entityGetGcHandle = GCHandle.Alloc(entityGetCallback);
         entitySetCallback = EntityKvSet;
-        entitySetGcHandle = GCHandle.Alloc(entityGetCallback);
+        entitySetGcHandle = GCHandle.Alloc(entitySetCallback);
     }
 
     public void Dispose()
@@ -159,8 +159,8 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             }
 
             var key = lua_tostring(luaState, -1);
-            if (dataServices.TryGetGlobal(key, out string? value))
-                lua_pushstring(luaState, value);
+            if (dataServices.TryGetGlobal(key, out DataValue value))
+                PushDataValue(luaState, value);
             else
                 lua_pushnil(luaState);
         }
@@ -205,34 +205,16 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 return 0;
             }
 
-            var valueType = lua_type(luaState, -1);
-            switch (valueType)
+            // Special case - nil assignment deletes the key-value pair.
+            if (lua_type(luaState, -1) == LuaType.Nil)
             {
-                case LuaType.String:
-                    dataController.SetGlobalSync(key, lua_tostring(luaState, -1));
-                    break;
-
-                case LuaType.Number:
-                    if (lua_isinteger(luaState, -1))
-                        dataController.SetGlobalSync(key, lua_tointeger(luaState, -1));
-                    else
-                        dataController.SetGlobalSync(key, lua_tonumber(luaState, -1));
-                    break;
-
-                case LuaType.Boolean:
-                    dataController.SetGlobalSync(key, lua_toboolean(luaState, -1));
-                    break;
-
-                case LuaType.Nil:
-                    // Special case - nil assignment deletes the key-value pair.
-                    dataController.RemoveGlobalSync(key);
-                    break;
-
-                default:
-                    scriptingServices.GetScriptLogger(mainState, logger)
-                        .LogError("Unsupported value type for data.global[key].");
-                    return 0;
+                dataController.RemoveGlobalSync(key);
+                return 0;
             }
+
+            if (!TryReadDataValue(luaState, -1, mainState, "data.global[key]", out var value)) return 0;
+
+            dataController.SetGlobalSync(key, value);
         }
         catch (Exception e)
         {
@@ -343,10 +325,13 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
 
             // Fetch value for key if it exists.
             var key = lua_tostring(luaState, -1);
-            if (dataServices.TryGetEntityKeyValue(entityId, key, out string? value))
-                lua_pushstring(luaState, value);
-            else
-                return 0;
+            if (dataServices.TryGetEntityKeyValue(entityId, key, out DataValue value))
+            {
+                PushDataValue(luaState, value);
+                return 1;
+            }
+
+            return 0;
         }
         catch (Exception e)
         {
@@ -354,8 +339,6 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
                 .LogError(e, "Error in entity KV getter.");
             return 0;
         }
-
-        return 1;
     }
 
     /// <summary>
@@ -374,6 +357,13 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         try
         {
             luaL_checkstack(luaState, 1, null);
+
+            if (!lua_isstring(luaState, -2))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Entity KV set requires a string key.");
+                return 0;
+            }
 
             var key = lua_tostring(luaState, -2);
 
@@ -400,34 +390,16 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             lua_pop(luaState, 1);
 
             // Handle the set or delete if the type is supported.
-            var valueType = lua_type(luaState, -1);
-            switch (valueType)
+            if (lua_type(luaState, -1) == LuaType.Nil)
             {
-                case LuaType.String:
-                    dataController.SetEntityKeyValueSync(entityId, key, lua_tostring(luaState, -1));
-                    break;
-
-                case LuaType.Number:
-                    if (lua_isinteger(luaState, -1))
-                        dataController.SetEntityKeyValueSync(entityId, key, lua_tointeger(luaState, -1));
-                    else
-                        dataController.SetEntityKeyValueSync(entityId, key, lua_tonumber(luaState, -1));
-                    break;
-
-                case LuaType.Boolean:
-                    dataController.SetEntityKeyValueSync(entityId, key, lua_toboolean(luaState, -1));
-                    break;
-
-                case LuaType.Nil:
-                    // Special case - nil assignment is idiomatic for deleting a key-value pair.
-                    dataController.RemoveEntityKeyValueSync(entityId, key);
-                    break;
-
-                default:
-                    scriptingServices.GetScriptLogger(mainState, logger)
-                        .LogError("Unsupported value type for entity key-value pair.");
-                    return 0;
+                // Special case - nil assignment is idiomatic for deleting a key-value pair.
+                dataController.RemoveEntityKeyValueSync(entityId, key);
+                return 0;
             }
+
+            if (!TryReadDataValue(luaState, -1, mainState, "entity key-value pair", out var value)) return 0;
+
+            dataController.SetEntityKeyValueSync(entityId, key, value);
         }
         catch (Exception e)
         {
@@ -436,6 +408,159 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         }
 
         return 0;
+    }
+
+    /// <summary>
+    ///     Pushes a tagged data value onto the Lua stack as the closest native Lua type.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="value">Tagged value to push.</param>
+    private static void PushDataValue(IntPtr luaState, DataValue value)
+    {
+        switch (value.Type)
+        {
+            case DataValueType.String:
+                LuaMarshaller.Marshal(luaState, value.AsString());
+                break;
+
+            case DataValueType.Int:
+                LuaMarshaller.Marshal(luaState, value.AsInt());
+                break;
+
+            case DataValueType.Float:
+                LuaMarshaller.Marshal(luaState, value.AsFloat());
+                break;
+
+            case DataValueType.Bool:
+                LuaMarshaller.Marshal(luaState, value.AsBool());
+                break;
+
+            case DataValueType.Vector3:
+                LuaMarshaller.Marshal(luaState, value.AsVector3());
+                break;
+
+            case DataValueType.EntityId:
+                LuaMarshaller.Marshal(luaState, value.AsEntityId());
+                break;
+
+            default:
+                lua_pushnil(luaState);
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Reads a tagged data value from the Lua stack, inferring the tag from the Lua type.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="index">Stack index of the value.</param>
+    /// <param name="mainState">Main Lua state.</param>
+    /// <param name="context">Context for error messages.</param>
+    /// <param name="value">Parsed value. Only valid if the method returns true.</param>
+    /// <returns>true if the value was a supported type, false otherwise.</returns>
+    private bool TryReadDataValue(IntPtr luaState, int index, IntPtr mainState, string context, out DataValue value)
+    {
+        value = default;
+
+        var type = lua_type(luaState, index);
+
+        if (type == LuaType.Table)
+        {
+            if (TryReadVector3(luaState, index, out var vector))
+            {
+                value = DataValue.FromVector3(vector);
+                return true;
+            }
+
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("{Context}: table value requires numeric X, Y, and Z fields.", context);
+            return false;
+        }
+
+        var top = lua_gettop(luaState);
+        try
+        {
+            // Copy the value to the top of the stack for the marshaller, which pops it.
+            luaL_checkstack(luaState, 1, null);
+            lua_pushvalue(luaState, index);
+
+            switch (type)
+            {
+                case LuaType.String:
+                    LuaMarshaller.Unmarshal(luaState, out string stringValue);
+                    value = DataValue.FromString(stringValue);
+                    return true;
+
+                case LuaType.Number:
+                    if (lua_isinteger(luaState, -1))
+                    {
+                        LuaMarshaller.Unmarshal(luaState, out long intValue);
+                        value = DataValue.FromInt(intValue);
+                    }
+                    else
+                    {
+                        LuaMarshaller.Unmarshal(luaState, out double floatValue);
+                        value = DataValue.FromFloat(floatValue);
+                    }
+
+                    return true;
+
+                case LuaType.Boolean:
+                    LuaMarshaller.Unmarshal(luaState, out bool boolValue);
+                    value = DataValue.FromBool(boolValue);
+                    return true;
+
+                case LuaType.LightUserData:
+                    LuaMarshaller.Unmarshal(luaState, out ulong entityIdValue);
+                    value = DataValue.FromEntityId(entityIdValue);
+                    return true;
+
+                default:
+                    scriptingServices.GetScriptLogger(mainState, logger)
+                        .LogError("Unsupported value type for {Context}.", context);
+                    return false;
+            }
+        }
+        catch (LuaException)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("Unsupported value type for {Context}.", context);
+            return false;
+        }
+        finally
+        {
+            lua_settop(luaState, top);
+        }
+    }
+
+    /// <summary>
+    ///     Reads a Vector3 table (matching the marshalled Vector3 shape) from the stack, restoring the stack afterwards.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="index">Stack index of the table.</param>
+    /// <param name="value">Parsed vector. Only valid if the method returns true.</param>
+    /// <returns>true if the table was a valid Vector3, false otherwise.</returns>
+    private static bool TryReadVector3(IntPtr luaState, int index, out Vector3 value)
+    {
+        value = default;
+
+        var top = lua_gettop(luaState);
+        try
+        {
+            // Copy the value to the top of the stack for the marshaller, which pops it.
+            luaL_checkstack(luaState, 1, null);
+            lua_pushvalue(luaState, index);
+            LuaMarshaller.Unmarshal(luaState, out value);
+            return true;
+        }
+        catch (LuaException)
+        {
+            return false;
+        }
+        finally
+        {
+            lua_settop(luaState, top);
+        }
     }
 
     /// <summary>

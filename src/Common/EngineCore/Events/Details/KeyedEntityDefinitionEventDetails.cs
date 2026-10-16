@@ -16,6 +16,7 @@
 
 using System.Collections.Generic;
 using Sovereign.EngineCore.Entities;
+using Sovereign.EngineCore.Systems.Data;
 
 namespace Sovereign.EngineCore.Events.Details;
 
@@ -32,5 +33,5 @@ public class KeyedEntityDefinitionEventDetails : IEventDetails
     /// <summary>
     ///     Entity key-value pairs.
     /// </summary>
-    public Dictionary<string, string> EntityKeyValuePairs { get; set; } = new();
+    public Dictionary<string, DataValueDto> EntityKeyValuePairs { get; set; } = new();
 }
