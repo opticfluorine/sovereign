@@ -6,10 +6,12 @@ local setup, stepGlobalWrite, stepGlobalVerify, stepGlobalDelete, stepGlobalVeri
 local step1EntityDataWrite, step2EntityDataVerify, step3EntityDataDelete, step4EntityDataVerifyDeleted
 local stepReservedKeyVerify, stepReservedKeyWrite
 local stepVector3Write, stepVector3Verify
+local stepSegmentDataWriteRead
 local fixtureEntityId
 
 local globalKey = "TestHarnessDataGlobalKey"
 local vectorKey = "TestHarnessDataVectorKey"
+local segmentDataKey = "TestHarnessSegmentDataKey"
 
 Test.Async("GlobalWriteReadDelete")
 
@@ -77,6 +79,31 @@ stepVector3Verify = function()
     Test.Pass("Vector3Value")
 end
 
+Test.Async("SegmentDataStore")
+
+stepSegmentDataWriteRead = function()
+    local segment = { X = 0, Y = 0, Z = 0 }
+    local segmentData = Data.GetSegmentData(segment)
+
+    -- Read-your-write is immediate: the value is visible in the same callback, with no
+    -- tick or Step boundary between the write and the read.
+    segmentData[segmentDataKey] = fixtureEntityId
+    Test.Step("SegmentDataStore", function()
+        Test.AssertEqual(fixtureEntityId, segmentData[segmentDataKey],
+            "segment key-value should round-trip as an EntityId immediately after write")
+    end)
+
+    segmentData[segmentDataKey] = 7
+    Test.Step("SegmentDataStore", function()
+        Test.AssertEqual(7, segmentData[segmentDataKey],
+            "segment key-value should round-trip as an integer immediately after write")
+    end)
+
+    -- Clean up so the test database is not left with a stray row.
+    segmentData[segmentDataKey] = nil
+    Test.Pass("SegmentDataStore")
+end
+
 Test.Async("ReservedKeysIgnored")
 
 stepReservedKeyWrite = function()
@@ -118,6 +145,7 @@ setup = function()
     Scripting.AddTimedCallback(0.9, step4EntityDataVerifyDeleted)
     Scripting.AddTimedCallback(0.3, stepVector3Write)
     Scripting.AddTimedCallback(0.5, stepVector3Verify)
+    Scripting.AddTimedCallback(0.5, stepSegmentDataWriteRead)
     Scripting.AddTimedCallback(0.3, stepReservedKeyWrite)
     Scripting.AddTimedCallback(0.5, stepReservedKeyVerify)
 end

@@ -20,9 +20,11 @@ using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Persistence;
+using Sovereign.Persistence.Systems.Persistence;
 using Sovereign.ServerCore;
 using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.WorldGeneration;
+using Sovereign.ServerCore.Systems.WorldManagement;
 using Sovereign.WorldGen;
 using Xunit;
 
@@ -83,5 +85,27 @@ public class TestWorldGenServiceRegistration
         dataController.SetGlobalSync("service.probe", DataValue.FromInt(5));
         Assert.True(dataServices.TryGetGlobalInt("service.probe", out var value));
         Assert.Equal(5, value);
+    }
+
+    [Fact]
+    public void AddSovereignServer_BuildsProvider_AndResolvesSegmentKeyValueServices()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IEventLoop>(new FakeEventLoop());
+        services.AddSingleton<IEventSender>(new FakeEventSender());
+        services.AddLogging();
+        services.AddOptions();
+        services.Configure<WorldGenOptions>(_ => { });
+        services.AddSovereignCore();
+        services.AddSovereignServer();
+        services.AddSovereignPersistence();
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<SegmentKeyValueManager>());
+        Assert.NotNull(provider.GetRequiredService<PendingSegmentKeyValueUpdates>());
+        Assert.NotNull(provider.GetRequiredService<ISegmentKeyValueController>());
+        Assert.NotNull(provider.GetRequiredService<SegmentKeyValueRetriever>());
+        Assert.NotNull(provider.GetRequiredService<SegmentKeyValuePersister>());
     }
 }

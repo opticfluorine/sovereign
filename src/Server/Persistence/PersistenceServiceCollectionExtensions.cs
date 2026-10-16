@@ -145,6 +145,8 @@ public static class PersistenceServiceCollectionExtensions
         services.TryAddSingleton<PendingSegmentFlagUpdates>();
         services.TryAddSingleton<SegmentFlagPersister>();
         services.TryAddSingleton<SegmentFlagRetriever>();
+        services.TryAddSingleton<SegmentKeyValuePersister>();
+        services.TryAddSingleton<SegmentKeyValueRetriever>();
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, PersistenceSystem>());
     }

@@ -224,10 +224,11 @@ public sealed class StateBuffer
 
     private readonly WorldSegmentPersister worldSegmentPersister;
     private readonly SegmentFlagPersister segmentFlagPersister;
+    private readonly SegmentKeyValuePersister segmentKeyValuePersister;
 
     public StateBuffer(FatalErrorHandler fatalErrorHandler, IEventSender eventSender,
         PersistenceInternalController internalController, WorldSegmentPersister worldSegmentPersister,
-        SegmentFlagPersister segmentFlagPersister,
+        SegmentFlagPersister segmentFlagPersister, SegmentKeyValuePersister segmentKeyValuePersister,
         ILogger<StateBuffer> logger, IDataServices dataServices, ExistingEntitySet existingEntitySet)
     {
         this.fatalErrorHandler = fatalErrorHandler;
@@ -235,6 +236,7 @@ public sealed class StateBuffer
         this.internalController = internalController;
         this.worldSegmentPersister = worldSegmentPersister;
         this.segmentFlagPersister = segmentFlagPersister;
+        this.segmentKeyValuePersister = segmentKeyValuePersister;
         this.logger = logger;
         this.dataServices = dataServices;
         this.existingEntitySet = existingEntitySet;
@@ -855,6 +857,8 @@ public sealed class StateBuffer
                 worldSegmentPersister.SynchronizeWorldSegments(persistenceProvider, transaction);
 
                 segmentFlagPersister.SynchronizeSegmentFlags(persistenceProvider, transaction);
+
+                segmentKeyValuePersister.SynchronizeSegmentKeyValues(persistenceProvider, transaction);
 
                 SynchronizeGlobalKeyValuePairs(persistenceProvider, transaction);
                 SynchronizeEntityKeyValuePairs(persistenceProvider, transaction);

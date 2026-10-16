@@ -643,4 +643,19 @@ public interface IPersistenceProvider : IDisposable
     ///     IRemoveEntityKeyValueQuery for this persistence provider.
     /// </summary>
     IRemoveEntityKeyValueQuery RemoveEntityKeyValueQuery { get; }
+
+    /// <summary>
+    ///     IGetSegmentKeyValuesQuery for this persistence provider.
+    /// </summary>
+    IGetSegmentKeyValuesQuery GetSegmentKeyValuesQuery { get; }
+
+    /// <summary>
+    ///     ISetSegmentKeyValueQuery for this persistence provider.
+    /// </summary>
+    ISetSegmentKeyValueQuery SetSegmentKeyValueQuery { get; }
+
+    /// <summary>
+    ///     IRemoveSegmentKeyValueQuery for this persistence provider.
+    /// </summary>
+    IRemoveSegmentKeyValueQuery RemoveSegmentKeyValueQuery { get; }
 }

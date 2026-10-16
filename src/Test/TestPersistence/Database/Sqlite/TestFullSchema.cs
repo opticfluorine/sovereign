@@ -55,6 +55,25 @@ public sealed class TestFullSchema
     {
         Assert.Equal(1L, CountMigrationLog(1, "Baseline"));
         Assert.Equal(1L, CountMigrationLog(2, "SegmentFlags"));
+        Assert.Equal(1L, CountMigrationLog(3, "TypedKeyValue"));
+        Assert.Equal(1L, CountMigrationLog(4, "SegmentKeyValues"));
+    }
+
+    /// <summary>
+    ///     Tests that the WorldSegmentKeyValue table exists and accepts a typed row.
+    /// </summary>
+    [Fact]
+    public void WorldSegmentKeyValueAcceptsRow()
+    {
+        using var insert = new SqliteCommand(
+            "INSERT INTO WorldSegmentKeyValue (x, y, z, key, value, type) VALUES (1, 2, 3, 'Owner', '5', 5)",
+            testFixture.Connection);
+        insert.ExecuteNonQuery();
+
+        using var select = new SqliteCommand(
+            "SELECT type FROM WorldSegmentKeyValue WHERE x = 1 AND y = 2 AND z = 3 AND key = 'Owner'",
+            testFixture.Connection);
+        Assert.Equal(5L, select.ExecuteScalar());
     }
 
     /// <summary>

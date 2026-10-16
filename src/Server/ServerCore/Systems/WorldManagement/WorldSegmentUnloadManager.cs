@@ -61,6 +61,7 @@ public class WorldSegmentUnloadManager
     private readonly NonBlockWorldSegmentIndexer nonBlockSegmentIndexer;
     private readonly PlayerCharacterTagCollection playerTags;
     private readonly WorldSegmentRegistry registry;
+    private readonly SegmentKeyValueManager segmentKeyValueManager;
     private readonly WorldSegmentSubscriptionManager subscriptionManager;
     private readonly ISystemTimer systemTimer;
     private readonly WorldManagementController worldController;
@@ -72,7 +73,8 @@ public class WorldSegmentUnloadManager
         WorldSegmentRegistry registry, NonBlockWorldSegmentIndexer nonBlockSegmentIndexer,
         BlockWorldSegmentIndexer blockSegmentIndexer, EntityHierarchyIndexer hierarchyIndexer,
         EntityManager entityManager, PlayerCharacterTagCollection playerTags,
-        WorldManagementController worldController, ILogger<WorldSegmentUnloadManager> logger)
+        WorldManagementController worldController, SegmentKeyValueManager segmentKeyValueManager,
+        ILogger<WorldSegmentUnloadManager> logger)
     {
         this.systemTimer = systemTimer;
         this.worldOptions = worldOptions.Value;
@@ -87,6 +89,7 @@ public class WorldSegmentUnloadManager
         this.entityManager = entityManager;
         this.playerTags = playerTags;
         this.worldController = worldController;
+        this.segmentKeyValueManager = segmentKeyValueManager;
         this.logger = logger;
 
         autoLoadSegments = new HashSet<GridPosition>(this.worldOptions.AutoLoadWorldSegments);
@@ -208,6 +211,10 @@ public class WorldSegmentUnloadManager
 
         // Free the cached summary block data for the segment.
         blockDataManager.RemoveWorldSegment(segmentIndex);
+
+        // Drop the cached segment key-value data; pending deltas are preserved so a reactivation
+        // can fold them over the freshly loaded database rows.
+        segmentKeyValueManager.DropSegment(segmentIndex);
 
         // Deactivate the segment so that a later subscription reloads it from the database.
         activationManager.DeactivateWorldSegment(segmentIndex);

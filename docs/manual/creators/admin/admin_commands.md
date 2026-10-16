@@ -375,6 +375,40 @@ requests for block data of an unloaded world segment return empty data until the
 segment is reloaded.
 :::
 
+## World Segment Key-Value Data
+
+The per-segment key-value store described in the [Data Module](../scripting/api/data.md)
+can be inspected and modified with the `/segvalue` command. As with the other key-value
+stores, keys beginning with two underscores (`__`) are reserved for internal use by the
+engine and are read-only. Only a single world segment may be targeted per command.
+
+### /segvalue
+
+**Usage:** `/segvalue get|set|clear <x> <y> <z> <key> [value [type]]`
+
+**Parameters:**
+* `get|set|clear`: Whether to read, write, or remove the pair.
+* `x`, `y`, `z`: Integer indices of the world segment.
+* `key`: Key to read, write, or remove.
+* `value`: New value for the key. Required for `set`.
+* `type`: Optional type tag for the value (`String`, `Int`, `Bool`, `Float`,
+  `Vector3`, or `EntityId`, case insensitive). Defaults to `String`.
+
+Reads, writes, or removes a single key-value pair on the given world segment. `get`
+prints the type tag followed by the canonical text form of the value, or reports that
+the key is not set. For `set`, the value is validated against the type before it is
+written; an invalid value or an unknown type name reports the usage line and does not
+write. `Vector3` values use three comma-separated components (for example `1,2,3`).
+
+**Examples:**
+
+`/segvalue get 0 0 0 Owner` prints the owner stored for segment `(0, 0, 0)`.
+
+`/segvalue set 0 0 0 Owner 7ffe000000000001 EntityId` sets the owner of segment
+`(0, 0, 0)`.
+
+`/segvalue clear 0 0 0 Owner` removes the owner of segment `(0, 0, 0)`.
+
 ## World Segment Flags
 
 World segment flags are bitwise properties attached to a world segment (a 32x32x32

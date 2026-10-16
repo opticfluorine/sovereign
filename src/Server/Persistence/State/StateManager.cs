@@ -49,12 +49,13 @@ public sealed class StateManager : IDisposable
         EntityNotifier entityNotifier, ExistingEntitySet existingEntitySet,
         IEventSender eventSender, PersistenceInternalController internalController,
         WorldSegmentPersister worldSegmentPersister, SegmentFlagPersister segmentFlagPersister,
+        SegmentKeyValuePersister segmentKeyValuePersister,
         IDataServices dataServices, EntityTable entityTable)
     {
         FrontBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            segmentFlagPersister, stateBufferLogger, dataServices, existingEntitySet);
+            segmentFlagPersister, segmentKeyValuePersister, stateBufferLogger, dataServices, existingEntitySet);
         backBuffer = new StateBuffer(fatalErrorHandler, eventSender, internalController, worldSegmentPersister,
-            segmentFlagPersister, stateBufferLogger, dataServices, existingEntitySet);
+            segmentFlagPersister, segmentKeyValuePersister, stateBufferLogger, dataServices, existingEntitySet);
 
         this.entityManager = entityManager;
         this.persistenceProviderManager = persistenceProviderManager;

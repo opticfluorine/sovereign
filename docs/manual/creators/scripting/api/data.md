@@ -129,6 +129,61 @@ has processed it.
 :::
 
 
+(script-data-segmentvalue)=
+## Segment Key-Value Data
+
+In addition to the global and entity stores, Sovereign provides a typed key-value
+store scoped to a world segment. This store holds per-segment region metadata; the
+engine's first consumer is land ownership, which stores the owner's `EntityId` under
+the `Owner` key. Segment key-value data is only available for loaded world segments.
+
+```{eval-rst}
+.. lua:function:: Data.GetSegmentData(segment)
+
+   Gets the key-value store associated with the given world segment.
+
+   :param segment: Segment index. All three components must be integral.
+   :type segment: Vector3
+
+   :return: Key-value store for the requested segment.
+   :rtype: table
+```
+
+The returned table behaves like the other key-value stores: indexing with a string key
+returns the value as the native Lua type matching its tag, and assigning a value creates
+or updates the pair with the type tag inferred from the Lua value (see the type table in
+{ref}`script-data-keyvaluedata`). Assigning `nil` deletes the pair. Keys beginning with
+two underscores (`__`) are reserved by the engine and cannot be modified or removed from
+a script.
+
+Unlike the global and entity stores, the segment passed to `Data.GetSegmentData` is a
+`Vector3` of segment indices, not a world position; scripts resolve world positions to
+segment indices themselves. Every component must be integral, otherwise the call logs a
+script error and returns no table.
+
+Writes are direct: the value is stored in the live in-memory store when the assignment
+runs, so a later read in the same script observes the new value without waiting for a
+database round trip. Persistence to the database happens asynchronously at the next
+synchronization. Reads reflect the live cache, so a segment that is not currently loaded
+returns `nil` and logs a warning rather than loading it.
+
+### Example
+
+```{code-block} lua
+:caption: Reading and writing segment key-value data.
+-- Segments are indexed by integer segment coordinates.
+local segment = { X = 0, Y = 0, Z = 0 }
+local segmentData = Data.GetSegmentData(segment)
+
+-- Store the owning entity under the "Owner" key (inferred as an EntityId).
+segmentData["Owner"] = ownerEntityId
+local owner = segmentData["Owner"]  -- read-your-write: visible immediately
+
+-- Delete the pair.
+segmentData["Owner"] = nil
+```
+
+
 (script-data-segmentflags)=
 ## Segment Flags
 
