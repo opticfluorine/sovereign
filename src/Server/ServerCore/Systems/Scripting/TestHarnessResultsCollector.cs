@@ -222,13 +222,13 @@ public sealed class TestHarnessResultsCollector : IDisposable
 
             var timedOut = 0;
             foreach (var suite in suites)
-            foreach (var test in suite.Tests)
-            {
-                if (test.Status != TestStatus.Pending) continue;
-                test.Status = TestStatus.TimedOut;
-                test.Message = $"Test did not complete within {options.TestTimeoutSeconds} s.";
-                timedOut++;
-            }
+                foreach (var test in suite.Tests)
+                {
+                    if (test.Status != TestStatus.Pending) continue;
+                    test.Status = TestStatus.TimedOut;
+                    test.Message = $"Test did not complete within {options.TestTimeoutSeconds} s.";
+                    timedOut++;
+                }
 
             if (timedOut > 0)
                 logger.LogWarning("Test run watchdog elapsed; marked {Count} tests as timed out.", timedOut);
@@ -247,9 +247,9 @@ public sealed class TestHarnessResultsCollector : IDisposable
         if (suites.Count < expectedSuites) return;
 
         foreach (var suite in suites)
-        foreach (var test in suite.Tests)
-            if (test.Status == TestStatus.Pending)
-                return;
+            foreach (var test in suite.Tests)
+                if (test.Status == TestStatus.Pending)
+                    return;
 
         FinalizeRunLocked();
     }
@@ -268,22 +268,22 @@ public sealed class TestHarnessResultsCollector : IDisposable
         var failed = 0;
         var timedOut = 0;
         foreach (var suite in suites)
-        foreach (var test in suite.Tests)
-        {
-            total++;
-            switch (test.Status)
+            foreach (var test in suite.Tests)
             {
-                case TestStatus.Passed:
-                    passed++;
-                    break;
-                case TestStatus.Failed:
-                    failed++;
-                    break;
-                case TestStatus.TimedOut:
-                    timedOut++;
-                    break;
+                total++;
+                switch (test.Status)
+                {
+                    case TestStatus.Passed:
+                        passed++;
+                        break;
+                    case TestStatus.Failed:
+                        failed++;
+                        break;
+                    case TestStatus.TimedOut:
+                        timedOut++;
+                        break;
+                }
             }
-        }
 
         var durationMs = (DateTimeOffset.UtcNow - runStartTime).TotalMilliseconds;
         logger.LogInformation(
@@ -292,10 +292,10 @@ public sealed class TestHarnessResultsCollector : IDisposable
             suites.Count, total, passed, failed, timedOut, durationMs / 1000.0);
 
         foreach (var suite in suites)
-        foreach (var test in suite.Tests)
-            if (test.Status is TestStatus.Failed or TestStatus.TimedOut)
-                logger.LogError("Test {Test} in suite {Suite} {Status}: {Message}",
-                    test.Name, suite.Name, test.Status, test.Message);
+            foreach (var test in suite.Tests)
+                if (test.Status is TestStatus.Failed or TestStatus.TimedOut)
+                    logger.LogError("Test {Test} in suite {Suite} {Status}: {Message}",
+                        test.Name, suite.Name, test.Status, test.Message);
 
         if (!string.IsNullOrWhiteSpace(options.ResultsFile)) WriteResultsFile(durationMs, total, passed, failed, timedOut);
 

@@ -213,10 +213,10 @@ internal sealed class AttackHandler
             new Vector3(actorPosition.X + range, actorPosition.Y + range, actorPosition.Z));
 
         for (var x = minSegment.X; x <= maxSegment.X; ++x)
-        for (var y = minSegment.Y; y <= maxSegment.Y; ++y)
-        for (var z = minSegment.Z - 1; z <= maxSegment.Z + 1; ++z)
-        foreach (var entityId in nonBlockIndexer.GetEntitiesInWorldSegment(new GridPosition { X = x, Y = y, Z = z }))
-            yield return entityId;
+            for (var y = minSegment.Y; y <= maxSegment.Y; ++y)
+                for (var z = minSegment.Z - 1; z <= maxSegment.Z + 1; ++z)
+                    foreach (var entityId in nonBlockIndexer.GetEntitiesInWorldSegment(new GridPosition { X = x, Y = y, Z = z }))
+                        yield return entityId;
     }
 
     /// <summary>

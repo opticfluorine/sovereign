@@ -77,7 +77,7 @@ public class ServerChatSystem : ISystem
 
                     router.RouteChatMessage(details);
                 }
-                    break;
+                break;
             }
 
             processed++;

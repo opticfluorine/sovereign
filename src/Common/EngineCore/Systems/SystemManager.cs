@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -41,7 +41,7 @@ public class SystemManager : BackgroundService
     private readonly PerformanceOptions performanceOptions;
 
     public SystemManager(IEnumerable<ISystem> systems,
-        ILogger<SystemManager> logger, IServiceScopeFactory serviceScopeFactory, 
+        ILogger<SystemManager> logger, IServiceScopeFactory serviceScopeFactory,
         IOptions<PerformanceOptions> performanceOptions)
     {
         this.systems = systems;

@@ -89,7 +89,7 @@ public class ClientChatSystem : ISystem
 
                     OnLocalChat(details);
                 }
-                    break;
+                break;
 
                 case EventId.Core_Chat_Global:
                 {
@@ -101,7 +101,7 @@ public class ClientChatSystem : ISystem
 
                     OnGlobalChat(details);
                 }
-                    break;
+                break;
 
                 case EventId.Core_Chat_System:
                 {
@@ -113,7 +113,7 @@ public class ClientChatSystem : ISystem
 
                     OnSystemChat(details);
                 }
-                    break;
+                break;
 
                 case EventId.Core_Chat_Generic:
                 {
@@ -125,7 +125,7 @@ public class ClientChatSystem : ISystem
 
                     OnGenericChat(details);
                 }
-                    break;
+                break;
 
                 case EventId.Client_Network_ConnectionLost:
                 case EventId.Core_Network_Logout:

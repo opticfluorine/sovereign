@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -77,8 +77,8 @@ public class DisplayModeSelector
         var desiredWidth = displayOptions.ResolutionWidth;
         var desiredHeight = displayOptions.ResolutionHeight;
         var preferredModes = from mode in availableModes
-            where mode.Width == desiredWidth && mode.Height == desiredHeight
-            select mode;
+                             where mode.Width == desiredWidth && mode.Height == desiredHeight
+                             select mode;
         if (preferredModes.Count() > 0 &&
             Math.Abs((double)desiredWidth / desiredHeight - AspectRatio) < AspectRatioTolerance)
         {
@@ -89,9 +89,9 @@ public class DisplayModeSelector
         {
             /* Preferred mode not found, use the highest resolution mode that matches the aspect ratio. */
             var resSortedModes = from mode in availableModes
-                where Math.Abs((double)mode.Width / mode.Height - AspectRatio) < AspectRatioTolerance
-                orderby mode.Width * mode.Height descending
-                select mode;
+                                 where Math.Abs((double)mode.Width / mode.Height - AspectRatio) < AspectRatioTolerance
+                                 orderby mode.Width * mode.Height descending
+                                 select mode;
             try
             {
                 selectedMode = resSortedModes.First();

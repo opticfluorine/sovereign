@@ -159,7 +159,7 @@ public class ScriptManager : IDisposable
                     {
                         Name = f,
                         EntityParameters = host.EntityParameterHintsByFunction.TryGetValue(f, out var hints)
-                            ? [..hints]
+                            ? [.. hints]
                             : []
                     }).ToList()
             };

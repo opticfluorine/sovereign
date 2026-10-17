@@ -229,23 +229,23 @@ public sealed class WorldSegmentBlockDataGenerator
 
         // Now add all of the air blocks.
         var airType = new EngineCore.Systems.WorldManagement.BlockData
-            { BlockType = BlockDataType.Air };
+        { BlockType = BlockDataType.Air };
         for (var i = 0; i < WorldConstants.SegmentLength; ++i)
-        for (var j = 0; j < WorldConstants.SegmentLength; ++j)
-            if (!filledPoints[i, j])
-            {
-                var block = new BlockData
+            for (var j = 0; j < WorldConstants.SegmentLength; ++j)
+                if (!filledPoints[i, j])
                 {
-                    Data = airType,
-                    Position = new GridPosition
+                    var block = new BlockData
                     {
-                        X = baseX + i,
-                        Y = baseY + j,
-                        Z = baseZ + depthPlane.OffsetZ
-                    }
-                };
-                keptBlocks.Add(block);
-            }
+                        Data = airType,
+                        Position = new GridPosition
+                        {
+                            X = baseX + i,
+                            Y = baseY + j,
+                            Z = baseZ + depthPlane.OffsetZ
+                        }
+                    };
+                    keptBlocks.Add(block);
+                }
     }
 
     /// <summary>
@@ -341,7 +341,7 @@ public sealed class WorldSegmentBlockDataGenerator
             // Check for case where air is the most common block type.
             if (airBlockCount > leadingMaterialCount)
                 DefaultBlockType = new EngineCore.Systems.WorldManagement.BlockData
-                    { BlockType = BlockDataType.Air };
+                { BlockType = BlockDataType.Air };
         }
     }
 }

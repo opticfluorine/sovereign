@@ -34,7 +34,8 @@ public sealed class BlockToolUtil(CameraServices cameraServices, ClientWorldEdit
         var hoverPos = cameraServices.GetMousePositionWorldCoordinates();
         var posWithOffset = hoverPos with
         {
-            Y = hoverPos.Y - userState.ZOffset, Z = hoverPos.Z + userState.ZOffset - 1.0f
+            Y = hoverPos.Y - userState.ZOffset,
+            Z = hoverPos.Z + userState.ZOffset - 1.0f
         };
         return (GridPosition)posWithOffset;
     }

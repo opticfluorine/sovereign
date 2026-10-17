@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -56,7 +56,7 @@ public sealed class NetworkSystem : ISystem
     public void Initialize()
     {
     }
-    
+
     public void Cleanup()
     {
     }

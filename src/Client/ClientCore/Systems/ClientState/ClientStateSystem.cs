@@ -116,8 +116,8 @@ public class ClientStateSystem : ISystem
 
                     playerStateManager.PlayerSelected(details.EntityId);
                 }
-                    worldEntryDetector.OnPlayerSelected();
-                    break;
+                worldEntryDetector.OnPlayerSelected();
+                break;
 
                 case EventId.Core_Network_Logout:
                     OnLogout();

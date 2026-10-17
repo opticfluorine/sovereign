@@ -111,15 +111,15 @@ public class WorldSegmentBlockDataLoader
         var baseZ = (int)basePosition.Z;
 
         for (var x = 0; x < WorldConstants.SegmentLength; x++)
-        for (var y = 0; y < WorldConstants.SegmentLength; y++)
-        {
-            var block = new BlockRecord
+            for (var y = 0; y < WorldConstants.SegmentLength; y++)
             {
-                Position = new GridPosition(baseX + x, baseY + y, baseZ + offsetZ),
-                TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
-            };
-            blocksToAdd.Add(block);
-        }
+                var block = new BlockRecord
+                {
+                    Position = new GridPosition(baseX + x, baseY + y, baseZ + offsetZ),
+                    TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
+                };
+                blocksToAdd.Add(block);
+            }
     }
 
     /// <summary>
@@ -171,15 +171,15 @@ public class WorldSegmentBlockDataLoader
         /* Fill in the default blocks (unless they are air). */
         if (defaultBlock.BlockType != BlockDataType.Air)
             for (var i = 0; i < WorldConstants.SegmentLength; ++i)
-            for (var j = 0; j < WorldConstants.SegmentLength; ++j)
-                if (!nonDefaults[i, j])
-                {
-                    var blockRecord = new BlockRecord
+                for (var j = 0; j < WorldConstants.SegmentLength; ++j)
+                    if (!nonDefaults[i, j])
                     {
-                        Position = new GridPosition(baseX + i, baseY + j, baseZ + plane.OffsetZ),
-                        TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
-                    };
-                    blocksToAdd.Add(blockRecord);
-                }
+                        var blockRecord = new BlockRecord
+                        {
+                            Position = new GridPosition(baseX + i, baseY + j, baseZ + plane.OffsetZ),
+                            TemplateEntityId = defaultBlock.TemplateIdOffset + EntityConstants.FirstTemplateEntityId
+                        };
+                        blocksToAdd.Add(blockRecord);
+                    }
     }
 }

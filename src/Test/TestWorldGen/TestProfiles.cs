@@ -91,7 +91,7 @@ internal static class TestProfiles
             {
                 ContinentalnessWavelengthFactor = 1f,
                 Thresholds = new ContinentalnessThresholdOptions
-                    { Ocean = 0.30f, Coast = 0.38f, Inland = 0.55f }
+                { Ocean = 0.30f, Coast = 0.38f, Inland = 0.55f }
             }
         };
     }

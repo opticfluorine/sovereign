@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -185,14 +185,14 @@ public sealed class WorldEntityRetriever
         // This ensures that the resulting lists of vertices are ordered correctly in depth within each
         // list provided that the objects are correctly sorted within the perspective line's Z-layer.
         for (var y = maxExtent.Y; y >= minExtent.Y; --y)
-        for (var x = minExtent.X; x <= maxExtent.X; ++x)
-        {
-            var intersectingPos = new GridPosition(x, y, minExtent.Z);
-            if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
-                continue;
+            for (var x = minExtent.X; x <= maxExtent.X; ++x)
+            {
+                var intersectingPos = new GridPosition(x, y, minExtent.Z);
+                if (!perspectiveServices.TryGetPerspectiveLine(intersectingPos, out var line))
+                    continue;
 
-            ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan, cameraPos, intersectingPos);
-        }
+                ProcessPerspectiveLine(line, zMin, zMax, systemTime, timeSinceTick, renderPlan, cameraPos, intersectingPos);
+            }
     }
 
     /// <summary>

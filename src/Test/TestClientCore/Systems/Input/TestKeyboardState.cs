@@ -17,8 +17,8 @@
 using System.Linq;
 using Sovereign.ClientCore.Systems.Input;
 using TestClientCore.TestSupport;
-using static SDL2.SDL;
 using Xunit;
+using static SDL2.SDL;
 
 namespace TestClientCore.Systems.Input;
 

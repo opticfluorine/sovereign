@@ -207,15 +207,15 @@ internal class OverheadTransparency(
 
         var invNorm = 1.0f / (spriteInfo.WidthInTiles * spriteInfo.HeightInTiles);
         for (var x = x0; x < x1; ++x)
-        for (var y = y0; y < y1; ++y)
-        {
-            var dx = 1.0f - Math.Max(0.0f, pos0.X - x) - Math.Max(0.0f, x + 1 - pos1.X);
-            var dy = 1.0f - Math.Max(0.0f, pos0.Y - y) - Math.Max(0.0f, y + 1 - pos1.Y);
-            var overlap = dx * dy * invNorm;
-            playerOverlaps.Add((x, y, overlap));
+            for (var y = y0; y < y1; ++y)
+            {
+                var dx = 1.0f - Math.Max(0.0f, pos0.X - x) - Math.Max(0.0f, x + 1 - pos1.X);
+                var dy = 1.0f - Math.Max(0.0f, pos0.Y - y) - Math.Max(0.0f, y + 1 - pos1.Y);
+                var overlap = dx * dy * invNorm;
+                playerOverlaps.Add((x, y, overlap));
 
-            if (debugFrame) logger.LogDebug("Player overlap at ({X}, {Y}): {Overlap}", x, y, overlap);
-        }
+                if (debugFrame) logger.LogDebug("Player overlap at ({X}, {Y}): {Overlap}", x, y, overlap);
+            }
     }
 
     /// <summary>
@@ -254,20 +254,20 @@ internal class OverheadTransparency(
         // Use this as a threshold. This eliminates some choppiness when passing through
         // doors and other areas.
         for (var dx = -ZLimitSearchRadius; dx <= ZLimitSearchRadius; ++dx)
-        for (var dy = -ZLimitSearchRadius; dy <= ZLimitSearchRadius; ++dy)
-        {
-            var searchPoint = (baseX + dx, baseY + dy);
-            if (!perspectiveLineManager.TryGetPerspectiveLine(searchPoint, out var line)) continue;
-            if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var lineZ, out var hasTopFace)) continue;
+            for (var dy = -ZLimitSearchRadius; dy <= ZLimitSearchRadius; ++dy)
+            {
+                var searchPoint = (baseX + dx, baseY + dy);
+                if (!perspectiveLineManager.TryGetPerspectiveLine(searchPoint, out var line)) continue;
+                if (!line.TryGetFirstZFloorWithBlockAbove(baseZ, out var lineZ, out var hasTopFace)) continue;
 
-            // If there is a top face, also grab the front face in the z floor below.
-            maxAbove = Math.Max(maxAbove, hasTopFace ? lineZ - 1 : lineZ);
+                // If there is a top face, also grab the front face in the z floor below.
+                maxAbove = Math.Max(maxAbove, hasTopFace ? lineZ - 1 : lineZ);
 
-            // Ensure that the threshold doesn't rise above the lowest layer of the ceiling.
-            foreach (var (ox, oy, overlap) in playerOverlaps)
-                if (ox == searchPoint.Item1 && oy == searchPoint.Item2 && overlap > 0.0f)
-                    directAbove = Math.Min(lineZ, directAbove);
-        }
+                // Ensure that the threshold doesn't rise above the lowest layer of the ceiling.
+                foreach (var (ox, oy, overlap) in playerOverlaps)
+                    if (ox == searchPoint.Item1 && oy == searchPoint.Item2 && overlap > 0.0f)
+                        directAbove = Math.Min(lineZ, directAbove);
+            }
 
         return maxAbove == int.MinValue ? baseZ + 1 : Math.Min(maxAbove, directAbove);
     }

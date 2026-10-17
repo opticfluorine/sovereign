@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -74,7 +74,7 @@ public class KeyboardEventHandler
                 HandleKeyUpEvent(ev);
                 break;
 
-            /* Ignore unhandled events. */
+                /* Ignore unhandled events. */
         }
     }
 

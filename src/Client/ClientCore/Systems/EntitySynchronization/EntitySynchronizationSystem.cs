@@ -108,7 +108,7 @@ public class EntitySynchronizationSystem : ISystem
 
                     HandleSyncTemplate(syncDetails);
                 }
-                    break;
+                break;
 
                 case EventId.Core_WorldManagement_Subscribe:
                     if (ev.EventDetails is not WorldSegmentSubscriptionEventDetails)

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -138,7 +138,7 @@ public sealed class AccountsSystem : ISystem
 
                     OnLogout(entityDetails.EntityId);
                 }
-                    break;
+                break;
             }
         }
 

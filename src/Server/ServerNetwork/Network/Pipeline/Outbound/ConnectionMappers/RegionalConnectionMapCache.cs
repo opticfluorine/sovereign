@@ -105,9 +105,9 @@ public class RegionalConnectionMapCache
             radiusSet = new HashSet<GridPosition>();
             var (center, radius) = key;
             for (var i = center.X - (int)radius; i < center.X + radius + 1; ++i)
-            for (var j = center.Y - (int)radius; j < center.Y + radius + 1; ++j)
-            for (var k = center.Z - (int)radius; k < center.Z + radius + 1; ++k)
-                radiusSet.Add(new GridPosition(i, j, k));
+                for (var j = center.Y - (int)radius; j < center.Y + radius + 1; ++j)
+                    for (var k = center.Z - (int)radius; k < center.Z + radius + 1; ++k)
+                        radiusSet.Add(new GridPosition(i, j, k));
 
             radiusSets[key] = radiusSet;
         }

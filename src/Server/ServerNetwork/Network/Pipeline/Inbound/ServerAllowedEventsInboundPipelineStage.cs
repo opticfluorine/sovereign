@@ -75,7 +75,7 @@ public class ServerAllowedEventsInboundPipelineStage : IInboundPipelineStage
     public void ProcessEvent(Event ev, NetworkConnection connection)
     {
         if (allowList.Contains(ev.EventId))
-            // Event type is permitted, pass to the next stage of the pipeline.
+        // Event type is permitted, pass to the next stage of the pipeline.
         {
             NextStage?.ProcessEvent(ev, connection);
         }
