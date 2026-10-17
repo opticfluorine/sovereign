@@ -78,7 +78,16 @@ public class TestDataValueCodec
         var value = DataValue.FromEntityId(0x7FFE000000000001UL);
 
         Assert.Equal(DataValueType.EntityId, value.Type);
+        Assert.Equal("7ffe000000000001", DataValueCodec.Encode(value));
         Assert.Equal(value, DataValueCodec.Decode(value.Type, DataValueCodec.Encode(value)));
+    }
+
+    [Fact]
+    public void Decode_EntityId_ParsesHex()
+    {
+        var value = DataValueCodec.Decode(DataValueType.EntityId, "7fff000000000000");
+
+        Assert.Equal(DataValue.FromEntityId(0x7FFF000000000000UL), value);
     }
 
     [Fact]
