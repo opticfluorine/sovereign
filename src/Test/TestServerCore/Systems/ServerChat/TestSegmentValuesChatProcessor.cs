@@ -78,7 +78,8 @@ public class TestSegmentValuesChatProcessor
 
         processor.ProcessChat("segvalue", "get 1 2 3 Owner", AdminId);
 
-        Assert.Equal("EntityId 7", LastSystemMessage());
+        // EntityId values display in canonical hex: 16 lowercase digits.
+        Assert.Equal("EntityId 0000000000000007", LastSystemMessage());
     }
 
     [Fact]

@@ -76,7 +76,8 @@ public class TestDataCommandArgs
     [Fact]
     public void TryParseSetValue_EntityIdType()
     {
-        Assert.True(DataCommandArgs.TryParseSetValue(new[] { "key", "255", "EntityId" }, 1, out var value));
+        // EntityId values parse as hexadecimal ("ff" = 255).
+        Assert.True(DataCommandArgs.TryParseSetValue(new[] { "key", "ff", "EntityId" }, 1, out var value));
         Assert.Equal(DataValueType.EntityId, value.Type);
         Assert.Equal(255UL, value.AsEntityId());
     }
