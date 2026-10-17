@@ -175,6 +175,7 @@ public static class ServerServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, RescueChatProcessor>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, ModerationChatProcessor>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, SegmentFlagsChatProcessor>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IChatProcessor, SegmentValuesChatProcessor>());
     }
 
     private static void AddServerManagementSystem(IServiceCollection services)
@@ -239,6 +240,11 @@ public static class ServerServiceCollectionExtensions
         services.TryAddSingleton<WorldManagementServices>();
         services.TryAddSingleton<WorldSegmentChangeMonitor>();
         services.TryAddSingleton<SegmentFlagManager>();
+        services.TryAddSingleton<PendingSegmentKeyValueUpdates>();
+        services.TryAddSingleton<SegmentKeyValueManager>();
+        services.TryAddSingleton<SegmentKeyValueController>();
+        services.TryAddSingleton<ISegmentKeyValueController>(s =>
+            s.GetRequiredService<SegmentKeyValueController>());
 
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ISystem, WorldManagementSystem>());
     }

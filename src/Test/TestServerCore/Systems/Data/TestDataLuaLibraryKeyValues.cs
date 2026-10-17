@@ -47,6 +47,7 @@ public class TestDataLuaLibraryKeyValues : IDisposable
     private readonly PersistenceController persistenceController = new();
     private readonly ScriptManager scriptManager;
     private readonly SegmentFlagManager segmentFlagManager = new();
+    private readonly RecordingSegmentKeyValueController segmentKeyValueController = new();
     private readonly WorldSegmentResolver segmentResolver = new();
 
     private readonly LuaHost host;
@@ -59,7 +60,7 @@ public class TestDataLuaLibraryKeyValues : IDisposable
         var scriptingServices = new ScriptingServices(scriptManager);
 
         library = new DataLuaLibrary(dataController, scriptingServices, logger, dataServices,
-            segmentFlagManager, segmentResolver, persistenceController, eventSender);
+            segmentFlagManager, segmentKeyValueController, segmentResolver, persistenceController, eventSender);
 
         host = new LuaHost(NullLogger.Instance, ".");
         library.Install(host);

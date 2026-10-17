@@ -160,6 +160,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
         RemoveGlobalKeyValuePairQuery = new SqliteRemoveGlobalKeyValuePairQuery(conn);
         UpdateEntityKeyValueQuery = new SqliteUpdateEntityKeyValueQuery(conn);
         RemoveEntityKeyValueQuery = new SqliteRemoveEntityKeyValueQuery(conn);
+        GetSegmentKeyValuesQuery = new SqliteGetSegmentKeyValuesQuery(conn);
+        SetSegmentKeyValueQuery = new SqliteSetSegmentKeyValueQuery(conn);
+        RemoveSegmentKeyValueQuery = new SqliteRemoveSegmentKeyValueQuery(conn);
 
         /* Position component. */
         AddPositionQuery = new SqliteAddPositionComponentQuery(conn);
@@ -535,6 +538,9 @@ public sealed class SqlitePersistenceProvider : IPersistenceProvider
     public IRemoveGlobalKeyValuePairQuery RemoveGlobalKeyValuePairQuery { get; }
     public IUpdateEntityKeyValueQuery UpdateEntityKeyValueQuery { get; }
     public IRemoveEntityKeyValueQuery RemoveEntityKeyValueQuery { get; }
+    public IGetSegmentKeyValuesQuery GetSegmentKeyValuesQuery { get; }
+    public ISetSegmentKeyValueQuery SetSegmentKeyValueQuery { get; }
+    public IRemoveSegmentKeyValueQuery RemoveSegmentKeyValueQuery { get; }
 
     public void Dispose()
     {

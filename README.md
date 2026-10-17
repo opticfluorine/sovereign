@@ -137,6 +137,7 @@ prompt to download the latest game data files.
 | /setvalue         | key, [value, [type]]  | Admin only. Sets or deletes a global key-value pair, optionally typed. |
 | /getentityvalue   | entityId, key         | Admin only. Prints the type and value of an entity key-value pair. |
 | /setentityvalue   | entityId, key, [value, [type]] | Admin only. Sets or deletes an entity key-value pair, optionally typed. |
+| /segvalue         | subcommand, x, y, z, key, [value, [type]] | Admin only. Gets, sets, or clears a typed key-value pair on a single world segment. |
 
 ## Reporting Issues
 

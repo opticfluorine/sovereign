@@ -33,6 +33,7 @@ public sealed class PersistenceRangeRetriever
     private readonly ILogger<PersistenceRangeRetriever> logger;
     private readonly PersistenceProviderManager providerManager;
     private readonly SegmentFlagRetriever segmentFlagRetriever;
+    private readonly SegmentKeyValueRetriever segmentKeyValueRetriever;
     private readonly WorldSegmentPersister worldSegmentPersister;
     private readonly WorldSegmentResolver worldSegmentResolver;
 
@@ -41,6 +42,7 @@ public sealed class PersistenceRangeRetriever
         WorldSegmentResolver worldSegmentResolver,
         WorldSegmentPersister worldSegmentPersister,
         SegmentFlagRetriever segmentFlagRetriever,
+        SegmentKeyValueRetriever segmentKeyValueRetriever,
         ILogger<PersistenceRangeRetriever> logger)
     {
         this.entityProcessor = entityProcessor;
@@ -48,6 +50,7 @@ public sealed class PersistenceRangeRetriever
         this.worldSegmentResolver = worldSegmentResolver;
         this.worldSegmentPersister = worldSegmentPersister;
         this.segmentFlagRetriever = segmentFlagRetriever;
+        this.segmentKeyValueRetriever = segmentKeyValueRetriever;
         this.logger = logger;
     }
 
@@ -75,6 +78,9 @@ public sealed class PersistenceRangeRetriever
             // Load the segment flags first so that entities never load into a segment whose flags
             // have not yet been cached.
             segmentFlagRetriever.RetrieveFlags(providerManager.PersistenceProvider, segmentIndex);
+
+            // Load the segment key-value data alongside the flags.
+            segmentKeyValueRetriever.RetrieveKeyValues(providerManager.PersistenceProvider, segmentIndex);
 
             // Retrieve and load the block data for the segment.
             worldSegmentPersister.LoadWorldSegmentBlockData(providerManager.PersistenceProvider, segmentIndex);

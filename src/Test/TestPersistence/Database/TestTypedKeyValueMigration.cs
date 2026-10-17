@@ -78,16 +78,17 @@ public sealed class TestTypedKeyValueMigration
     }
 
     /// <summary>
-    ///     Tests that a fresh database built from the full schema comes up at level 3 with typed seeds.
+    ///     Tests that a fresh database built from the full schema comes up at the latest level with
+    ///     typed seeds.
     /// </summary>
     [Fact]
-    public void FreshFullSchema_IsAtLevelThreeWithTypedSeeds()
+    public void FreshFullSchema_IsAtLatestLevelWithTypedSeeds()
     {
         using var connection = OpenInMemory();
         Execute(connection, File.ReadAllText(FullScript));
 
         var query = new SqliteMigrationQuery(connection);
-        Assert.Equal(3, query.GetLatestMigrationLevel());
+        Assert.Equal(4, query.GetLatestMigrationLevel());
 
         Assert.Equal(3, ReadType(connection, "__Sovereign.Config.MinimumZ"));
         Assert.Equal(3, ReadType(connection, "__Sovereign.Config.MaximumZ"));
@@ -96,8 +97,8 @@ public sealed class TestTypedKeyValueMigration
         /* Applying migrations again is a no-op. */
         var runner = new MigrationRunner(connection, query, new MigrationScriptLocator(MigrationsDirectory),
             NullLogger.Instance);
-        runner.ApplyMigrations(3);
-        Assert.Equal(3, CountMigrationLogRows(connection));
+        runner.ApplyMigrations(4);
+        Assert.Equal(4, CountMigrationLogRows(connection));
     }
 
     /// <summary>

@@ -44,6 +44,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
 
     private readonly RecordingLogger<DataLuaLibrary> logger = new();
     private readonly SegmentFlagManager segmentFlagManager = new();
+    private readonly RecordingSegmentKeyValueController segmentKeyValueController = new();
     private readonly WorldSegmentResolver segmentResolver = new();
     private readonly PersistenceController persistenceController = new();
     private readonly FakeEventSender eventSender = new();
@@ -59,7 +60,7 @@ public class TestDataLuaLibrarySegmentFlags : IDisposable
         var scriptingServices = new ScriptingServices(scriptManager);
 
         library = new DataLuaLibrary(null!, scriptingServices, logger, new FakeDataServices(),
-            segmentFlagManager, segmentResolver, persistenceController, eventSender);
+            segmentFlagManager, segmentKeyValueController, segmentResolver, persistenceController, eventSender);
 
         host = new LuaHost(NullLogger.Instance, ".");
         new Sovereign.EngineCore.Lua.EnumsLuaLibrary().Install(host);

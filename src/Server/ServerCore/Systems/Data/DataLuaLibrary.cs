@@ -41,6 +41,15 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     private const long TableEntityIndex = 0;
 
     /// <summary>
+    ///     Integer keys used to bind a segment proxy's x, y, and z indices. String keys never
+    ///     collide with these, so the proxy's own user keys remain unaffected.
+    /// </summary>
+    private const long TableSegmentXIndex = 0;
+
+    private const long TableSegmentYIndex = 1;
+    private const long TableSegmentZIndex = 2;
+
+    /// <summary>
     ///     Maximum number of world segments a single box flag write may affect.
     /// </summary>
     private const int MaximumBoxSegments = 65536;
@@ -61,14 +70,20 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
     private readonly ILogger<DataLuaLibrary> logger;
     private readonly PersistenceController persistenceController;
     private readonly ScriptingServices scriptingServices;
+    private readonly ISegmentKeyValueController segmentKeyValueController;
     private readonly SegmentFlagManager segmentFlagManager;
     private readonly WorldSegmentResolver segmentResolver;
+    private readonly LuaCFunction segmentGetCallback;
+    private readonly LuaCFunction segmentSetCallback;
     private GCHandle entityGetGcHandle;
     private GCHandle entitySetGcHandle;
+    private GCHandle segmentGetGcHandle;
+    private GCHandle segmentSetGcHandle;
 
     public DataLuaLibrary(IDataController dataController,
         ScriptingServices scriptingServices, ILogger<DataLuaLibrary> logger,
         IDataServices dataServices, SegmentFlagManager segmentFlagManager,
+        ISegmentKeyValueController segmentKeyValueController,
         WorldSegmentResolver segmentResolver, PersistenceController persistenceController,
         IEventSender eventSender)
     {
@@ -77,6 +92,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         this.logger = logger;
         this.dataServices = dataServices;
         this.segmentFlagManager = segmentFlagManager;
+        this.segmentKeyValueController = segmentKeyValueController;
         this.segmentResolver = segmentResolver;
         this.persistenceController = persistenceController;
         this.eventSender = eventSender;
@@ -85,12 +101,18 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         entityGetGcHandle = GCHandle.Alloc(entityGetCallback);
         entitySetCallback = EntityKvSet;
         entitySetGcHandle = GCHandle.Alloc(entitySetCallback);
+        segmentGetCallback = SegmentKvGet;
+        segmentGetGcHandle = GCHandle.Alloc(segmentGetCallback);
+        segmentSetCallback = SegmentKvSet;
+        segmentSetGcHandle = GCHandle.Alloc(segmentSetCallback);
     }
 
     public void Dispose()
     {
         entityGetGcHandle.Free();
         entitySetGcHandle.Free();
+        segmentGetGcHandle.Free();
+        segmentSetGcHandle.Free();
     }
 
     public void Install(LuaHost luaHost)
@@ -102,6 +124,7 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
             InstallGlobalKeyValues(luaHost);
             InstallEntityKeyValues(luaHost);
             InstallSegmentFlags(luaHost);
+            InstallSegmentKeyValues(luaHost);
         }
         finally
         {
@@ -408,6 +431,251 @@ public class DataLuaLibrary : ILuaLibrary, IDisposable
         }
 
         return 0;
+    }
+
+    /// <summary>
+    ///     Installs the world segment key-value API into a Lua host.
+    /// </summary>
+    /// <param name="luaHost">Lua host.</param>
+    private void InstallSegmentKeyValues(LuaHost luaHost)
+    {
+        luaL_checkstack(luaHost.LuaState, 2, null);
+        lua_getglobal(luaHost.LuaState, LibraryName); // <-- data
+
+        luaHost.PushFunction(GetSegmentData);
+        lua_setfield(luaHost.LuaState, -2, nameof(GetSegmentData));
+
+        lua_pop(luaHost.LuaState, 1);
+    }
+
+    /// <summary>
+    ///     Implementation of data.GetSegmentData(segment). Creates a Lua table for accessing
+    ///     per-segment key-value data.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of values returned.</returns>
+    private int GetSegmentData(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+
+        if (lua_gettop(luaState) != 1)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("data.GetSegmentData(segment) requires exactly one Vector3 argument.");
+            return 0;
+        }
+
+        if (!TryGetVector3Argument(luaState, 1, mainState, nameof(GetSegmentData), "segment", out var vector))
+            return 0;
+
+        if (!IsIntegralSegmentVector(vector))
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError("data.GetSegmentData(segment): segment components must be integral.");
+            return 0;
+        }
+
+        // Create an opaque object to act as a proxy to the segment key-values.
+        luaL_checkstack(luaState, 6, null);
+        lua_createtable(luaState, 3, 0); // <-- returned table
+        lua_createtable(luaState, 0, 2); // <-- metatable for returned table
+
+        // Bind the segment indices to the returned table.
+        lua_pushinteger(luaState, TableSegmentXIndex);
+        lua_pushinteger(luaState, (long)vector.X);
+        lua_rawset(luaState, -4);
+
+        lua_pushinteger(luaState, TableSegmentYIndex);
+        lua_pushinteger(luaState, (long)vector.Y);
+        lua_rawset(luaState, -4);
+
+        lua_pushinteger(luaState, TableSegmentZIndex);
+        lua_pushinteger(luaState, (long)vector.Z);
+        lua_rawset(luaState, -4);
+
+        // Populate metatable.
+        lua_pushcfunction(luaState, segmentGetCallback);
+        lua_setfield(luaState, -2, "__index");
+        lua_pushcfunction(luaState, segmentSetCallback);
+        lua_setfield(luaState, -2, "__newindex");
+        lua_setmetatable(luaState, -2);
+
+        return 1;
+    }
+
+    /// <summary>
+    ///     Lua metamethod on a segment KV table that reads a key-value pair.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values.</returns>
+    private int SegmentKvGet(IntPtr luaState)
+    {
+        // First argument: segment KV table
+        // Second argument: key
+
+        var mainState = LuaUtil.GetMainThread(luaState);
+
+        try
+        {
+            luaL_checkstack(luaState, 4, null);
+
+            if (!lua_isstring(luaState, -1))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Segment KV access requires a string key.");
+                return 0;
+            }
+
+            if (!TryGetBoundSegment(luaState, -2, mainState, out var segment)) return 0;
+
+            if (!segmentKeyValueController.IsSegmentLoaded(segment))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogWarning("Segment KV read for unloaded segment {Segment}.", segment);
+                return 0;
+            }
+
+            var key = lua_tostring(luaState, -1);
+            if (!segmentKeyValueController.TryGetValue(segment, key, out var value)) return 0;
+
+            PushDataValue(luaState, value);
+            return 1;
+        }
+        catch (Exception e)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError(e, "Error in segment KV getter.");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    ///     Lua metamethod on a segment KV table that writes or removes a key-value pair.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Number of return values (always 0).</returns>
+    private int SegmentKvSet(IntPtr luaState)
+    {
+        // First argument: segment KV table
+        // Second argument: key
+        // Third argument: value
+
+        var mainState = LuaUtil.GetMainThread(luaState);
+
+        try
+        {
+            luaL_checkstack(luaState, 4, null);
+
+            if (!lua_isstring(luaState, -2))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Segment KV set requires a string key.");
+                return 0;
+            }
+
+            var key = lua_tostring(luaState, -2);
+
+            if (dataServices.IsKeyReadOnly(key))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogError("Segment KV set: key {Key} is read-only.", key);
+                return 0;
+            }
+
+            if (!TryGetBoundSegment(luaState, -3, mainState, out var segment)) return 0;
+
+            // Special case - nil assignment is idiomatic for deleting a key-value pair.
+            if (lua_type(luaState, -1) == LuaType.Nil)
+            {
+                segmentKeyValueController.RemoveKey(segment, key);
+                return 0;
+            }
+
+            if (!TryReadDataValue(luaState, -1, mainState, "segment key-value pair", out var value)) return 0;
+
+            segmentKeyValueController.SetValue(segment, key, value);
+        }
+        catch (Exception e)
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError(e, "Error in segment KV setter.");
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Reads the segment indices bound to a segment KV proxy table.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="tableIndex">Stack index of the proxy table.</param>
+    /// <param name="mainState">Main Lua state.</param>
+    /// <param name="segment">Parsed segment. Only valid if the method returns true.</param>
+    /// <returns>true if the table was a valid segment proxy, false otherwise.</returns>
+    private bool TryGetBoundSegment(IntPtr luaState, int tableIndex, IntPtr mainState, out GridPosition segment)
+    {
+        segment = default;
+
+        var absoluteIndex = lua_absindex(luaState, tableIndex);
+        var top = lua_gettop(luaState);
+        try
+        {
+            luaL_checkstack(luaState, 2, null);
+            if (!TryReadTableInteger(luaState, absoluteIndex, TableSegmentXIndex, out var x)
+                || !TryReadTableInteger(luaState, absoluteIndex, TableSegmentYIndex, out var y)
+                || !TryReadTableInteger(luaState, absoluteIndex, TableSegmentZIndex, out var z))
+            {
+                scriptingServices.GetScriptLogger(mainState, logger)
+                    .LogCritical(
+                        "Possible Lua host corruption: Segment KV table has no bound segment index. Script may have a security issue.");
+                return false;
+            }
+
+            segment = new GridPosition(x, y, z);
+            return true;
+        }
+        finally
+        {
+            lua_settop(luaState, top);
+        }
+    }
+
+    /// <summary>
+    ///     Reads an integer field of a table by key without disturbing the stack.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <param name="tableIndex">Absolute stack index of the table.</param>
+    /// <param name="key">Field key.</param>
+    /// <param name="value">Read value. Only valid if the method returns true.</param>
+    /// <returns>true if the field held an integer, false otherwise.</returns>
+    private static bool TryReadTableInteger(IntPtr luaState, int tableIndex, long key, out int value)
+    {
+        value = 0;
+
+        lua_pushinteger(luaState, key);
+        lua_rawget(luaState, tableIndex);
+        if (!lua_isinteger(luaState, -1))
+        {
+            lua_pop(luaState, 1);
+            return false;
+        }
+
+        value = (int)lua_tointeger(luaState, -1);
+        lua_pop(luaState, 1);
+        return true;
+    }
+
+    /// <summary>
+    ///     Checks that a Vector3 holds integral, finite segment indices.
+    /// </summary>
+    /// <param name="vector">Value to check.</param>
+    /// <returns>true if the vector is a valid segment index, false otherwise.</returns>
+    private static bool IsIntegralSegmentVector(Vector3 vector)
+    {
+        return float.IsFinite(vector.X) && float.IsFinite(vector.Y) && float.IsFinite(vector.Z)
+               && vector.X == MathF.Truncate(vector.X)
+               && vector.Y == MathF.Truncate(vector.Y)
+               && vector.Z == MathF.Truncate(vector.Z);
     }
 
     /// <summary>

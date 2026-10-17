@@ -349,7 +349,7 @@ public static class DataValueCodec
             DataValueType.Bool => value.AsBool() ? "true" : "false",
             DataValueType.Float => EncodeFloat(value.AsFloat()),
             DataValueType.Vector3 => EncodeVector3(value.AsVector3()),
-            DataValueType.EntityId => value.AsEntityId().ToString(CultureInfo.InvariantCulture),
+            DataValueType.EntityId => value.AsEntityId().ToString("x16", CultureInfo.InvariantCulture),
             _ => throw new InvalidOperationException($"Unknown data value type {value.Type}.")
         };
     }
@@ -382,7 +382,7 @@ public static class DataValueCodec
             case DataValueType.Vector3:
                 return DataValue.FromVector3(DecodeVector3(text));
             case DataValueType.EntityId:
-                if (!ulong.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var entityIdValue))
+                if (!ulong.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var entityIdValue))
                     throw new FormatException($"Malformed EntityId value '{text}'.");
                 return DataValue.FromEntityId(entityIdValue);
             default:

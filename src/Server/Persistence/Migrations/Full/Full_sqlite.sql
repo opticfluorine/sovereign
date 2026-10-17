@@ -207,6 +207,22 @@ CREATE TABLE EntityKeyValue
 CREATE INDEX EntityKeyValue_Id ON EntityKeyValue (entity_id);
 
 
+----------------------------------
+-- World Segment Key-Value Store --
+----------------------------------
+
+CREATE TABLE WorldSegmentKeyValue
+(
+    x     INTEGER NOT NULL,
+    y     INTEGER NOT NULL,
+    z     INTEGER NOT NULL,
+    key   TEXT    NOT NULL,
+    value TEXT    NOT NULL,
+    type  INTEGER NOT NULL,
+    PRIMARY KEY (x, y, z, key)
+);
+
+
 -------------------
 -- Ban Table     --
 -------------------
@@ -376,6 +392,9 @@ VALUES (2, 'SegmentFlags');
 
 INSERT INTO MigrationLog
 VALUES (3, 'TypedKeyValue');
+
+INSERT INTO MigrationLog
+VALUES (4, 'SegmentKeyValues');
 
 -- Enable WAL.
 PRAGMA
