@@ -16,10 +16,10 @@
 
 using System;
 
-namespace Sovereign.ServerCore.Systems.WorldGeneration;
+namespace Sovereign.WorldGen;
 
 /// <summary>
-///     Thrown when one or more template names referenced by a world generation profile
+///     Exception thrown when a world generation profile references a template name that
 ///     cannot be resolved against the live template entity set.
 /// </summary>
 public sealed class WorldGenTemplateResolutionException : Exception

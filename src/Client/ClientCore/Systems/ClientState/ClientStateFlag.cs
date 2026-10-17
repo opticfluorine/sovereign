@@ -108,5 +108,10 @@ public enum ClientStateFlag
     /// <summary>
     ///     Flag indicating that hidden entities should be drawn with a placeholder.
     /// </summary>
-    ShowHiddenEntities
+    ShowHiddenEntities,
+
+    /// <summary>
+    ///     Flag indicating that the world generator window should be displayed.
+    /// </summary>
+    ShowWorldGenerator
 }

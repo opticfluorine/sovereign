@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Layout;
@@ -387,6 +388,159 @@ public class TestProfileLoader
 
         Assert.Equal(LayoutConnectivity.Strict, profile.Layout!.Connectivity);
         Assert.Equal(1.8f, profile.Layout.Strength);
+    }
+
+    [Fact]
+    public void Save_ValidProfile_RoundTripsThroughLoad()
+    {
+        using var scope = new TempProfileDirectory();
+        var loader = new ProfileLoader(scope.DirectoryPath);
+        var profile = TestProfiles.CreateSmall128Biomes();
+
+        loader.Save("saved", profile);
+        var loaded = loader.Load("saved");
+
+        Assert.Equal(Serialize(profile), Serialize(loaded));
+    }
+
+    [Fact]
+    public void Save_OverwritesExistingProfile()
+    {
+        using var scope = new TempProfileDirectory();
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        loader.Save("profile", TestProfiles.CreateSmall128());
+        var modified = TestProfiles.CreateSmall128();
+        modified.SeaLevelZ = 5;
+        loader.Save("profile", modified);
+
+        var loaded = loader.Load("profile");
+        Assert.Equal(5, loaded.SeaLevelZ);
+    }
+
+    [Fact]
+    public void Save_CreatesMissingDirectory()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName(), "nested");
+        try
+        {
+            var loader = new ProfileLoader(directory);
+
+            loader.Save("fresh", TestProfiles.CreateSmall128());
+
+            Assert.True(File.Exists(Path.Combine(directory, "fresh.json")));
+        }
+        finally
+        {
+            Directory.Delete(Path.Combine(Path.GetTempPath(),
+                Path.GetFileName(Path.GetDirectoryName(directory))!), true);
+        }
+    }
+
+    [Theory]
+    [InlineData("../evil")]
+    [InlineData("sub/dir")]
+    [InlineData("a\\\\b")]
+    [InlineData("..")]
+    [InlineData(".")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("a:b")]
+    [InlineData("a?b")]
+    [InlineData("a\nb")]
+    public void Save_InvalidName_ThrowsAndWritesNothing(string name)
+    {
+        using var scope = new TempProfileDirectory();
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        Assert.Throws<ProfileLoadException>(
+            () => loader.Save(name, TestProfiles.CreateSmall128()));
+
+        Assert.Empty(Directory.EnumerateFiles(scope.DirectoryPath, "*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public void Save_TraversalName_DoesNotWriteOutsideDirectory()
+    {
+        var parent = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(parent);
+        try
+        {
+            var loader = new ProfileLoader(Path.Combine(parent, "profiles"));
+
+            Assert.Throws<ProfileLoadException>(
+                () => loader.Save("../evil", TestProfiles.CreateSmall128()));
+
+            Assert.Empty(Directory.GetFiles(parent, "evil.json", SearchOption.AllDirectories));
+        }
+        finally
+        {
+            Directory.Delete(parent, true);
+        }
+    }
+
+    [Theory]
+    [InlineData("../evil")]
+    [InlineData("sub/dir")]
+    [InlineData("..")]
+    [InlineData("")]
+    public void Load_InvalidName_Throws(string name)
+    {
+        using var scope = new TempProfileDirectory();
+        var loader = new ProfileLoader(scope.DirectoryPath);
+
+        Assert.Throws<ProfileLoadException>(() => loader.Load(name));
+    }
+
+    [Fact]
+    public void Parse_MinimalProfile_ParsesToExpectedValues()
+    {
+        var loader = new ProfileLoader("unused");
+
+        var profile = loader.Parse(MinimalProfileJson);
+
+        Assert.Equal(2048, profile.Width);
+        Assert.Equal("Bedrock", profile.BedrockTemplate);
+    }
+
+    [Fact]
+    public void Parse_MalformedJson_Throws()
+    {
+        var loader = new ProfileLoader("unused");
+
+        Assert.Throws<ProfileLoadException>(() => loader.Parse("{ not json"));
+    }
+
+    [Fact]
+    public void Parse_UnknownProperty_Throws()
+    {
+        var loader = new ProfileLoader("unused");
+        var json = MinimalProfileJson.Replace("\"seaLevelZ\": 12",
+            "\"seaLevelZ\": 12, \"bogus\": 1");
+
+        Assert.Throws<ProfileLoadException>(() => loader.Parse(json));
+    }
+
+    [Fact]
+    public void Parse_MissingRequiredProperty_Throws()
+    {
+        var loader = new ProfileLoader("unused");
+        var json = MinimalProfileJson.Replace("\"width\": 2048,", "");
+
+        Assert.Throws<ProfileLoadException>(() => loader.Parse(json));
+    }
+
+    /// <summary>
+    ///     Serializes a profile for deep comparison.
+    /// </summary>
+    /// <param name="profile">Profile to serialize.</param>
+    /// <returns>Serialized profile.</returns>
+    private static string Serialize(WorldGenProfile profile)
+    {
+        return JsonSerializer.Serialize(profile, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
     }
 
     /// <summary>

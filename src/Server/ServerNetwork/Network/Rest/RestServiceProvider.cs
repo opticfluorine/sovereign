@@ -19,6 +19,7 @@ using Sovereign.EngineCore.Network.Rest;
 using Sovereign.ServerNetwork.Network.Rest.Accounts;
 using Sovereign.ServerNetwork.Network.Rest.Players;
 using Sovereign.ServerNetwork.Network.Rest.TemplateEntities;
+using Sovereign.ServerNetwork.Network.Rest.WorldGen;
 using Sovereign.ServerNetwork.Network.Rest.WorldSegment;
 
 namespace Sovereign.ServerNetwork.Network.Rest;
@@ -37,7 +38,8 @@ public sealed class RestServiceProvider(
     ScriptInfoRestService scriptInfo,
     SetTemplateEntityRestService setTemplateEntity,
     TemplateEntitiesRestService templateEntities,
-    WorldSegmentRestService worldSegments)
+    WorldSegmentRestService worldSegments,
+    SetWorldGenProfileRestService setWorldGenProfile)
 {
     /// <summary>
     ///     Adds Sovereign endpoints to a WebApplication.
@@ -70,6 +72,10 @@ public sealed class RestServiceProvider(
 
         // Entity data.
         app.MapGet($"{RestEndpoints.EntityData}/{{entityId}}", entityData.EntityDataGet)
+            .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
+
+        // World generation profiles.
+        app.MapPut($"{RestEndpoints.WorldGenProfiles}/{{name}}", setWorldGenProfile.PutProfile)
             .RequireAuthorization(RestAuthorization.Policies.AdminOnly);
 
         // World segments.

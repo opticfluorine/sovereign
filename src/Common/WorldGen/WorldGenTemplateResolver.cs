@@ -19,9 +19,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineUtil.Collections;
-using Sovereign.WorldGen;
 
-namespace Sovereign.ServerCore.Systems.WorldGeneration;
+namespace Sovereign.WorldGen;
 
 /// <summary>
 ///     Resolves the template names referenced by a world generation profile against the

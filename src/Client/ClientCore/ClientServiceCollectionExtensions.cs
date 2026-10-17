@@ -83,6 +83,7 @@ using Sovereign.NetworkCore.Network.Infrastructure;
 using Sovereign.NetworkCore.Network.Pipeline.Inbound;
 using Sovereign.NetworkCore.Network.Pipeline.Outbound;
 using Sovereign.NetworkCore.Systems.Network;
+using Sovereign.WorldGen;
 
 namespace Sovereign.ClientCore;
 
@@ -211,6 +212,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<RegistrationClient>();
         services.TryAddSingleton<ScriptInfoClient>();
         services.TryAddSingleton<TemplateEntityDataClient>();
+        services.TryAddSingleton<WorldGenProfileClient>();
         services.TryAddSingleton<WorldSegmentDataClient>();
         services.TryAddSingleton<ClientNetworkInternalController>();
         services.TryAddSingleton<INetworkClient, NetworkClient>();
@@ -246,6 +248,8 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<ItemContextGui>();
         services.TryAddSingleton<RendererDebugGui>();
         services.TryAddSingleton<HotbarGui>();
+        services.TryAddSingleton<IWorldGenPipeline, WorldGenPipeline>();
+        services.TryAddSingleton<WorldGenTemplateResolver>();
     }
 
     private static void AddScenes(IServiceCollection services)
@@ -272,6 +276,7 @@ public static class ClientServiceCollectionExtensions
         services.TryAddSingleton<GenerateAnimatedSpritesPopup>();
         services.TryAddSingleton<SpritesheetSelector>();
         services.TryAddSingleton<TemplateEditorGui>();
+        services.TryAddSingleton<WorldGeneratorGui>();
         services.TryAddSingleton<BlockTemplateEditorTab>();
         services.TryAddSingleton<NpcTemplateEditorTab>();
         services.TryAddSingleton<ItemTemplateEditorTab>();

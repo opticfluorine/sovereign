@@ -36,6 +36,7 @@ public class GameGui(
     TemplateEditorGui templateEditorGui,
     PlayerRoleCheck roleCheck,
     WorldEditorGui worldEditorGui,
+    WorldGeneratorGui worldGeneratorGui,
     OverlayGui overlayGui,
     DialogueGui dialogueGui,
     InventoryGui inventoryGui,
@@ -85,6 +86,7 @@ public class GameGui(
             !roleCheck.IsPlayerAdmin(playerEntityId)) return;
 
         if (stateServices.GetStateFlagValue(ClientStateFlag.ShowTemplateEntityEditor)) templateEditorGui.Render();
+        if (stateServices.GetStateFlagValue(ClientStateFlag.ShowWorldGenerator)) worldGeneratorGui.Render();
         if (stateServices.GetStateFlagValue(ClientStateFlag.WorldEditMode)) worldEditorGui.Render();
     }
 }
