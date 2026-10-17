@@ -52,6 +52,7 @@ public sealed class InventoryManager(
     EntityTable entityTable,
     QuantityComponentCollection quantities,
     UseRangeComponentCollection useRanges,
+    ItemUseComponentCollection itemUses,
     EquipmentTypeComponentCollection equipmentTypes,
     PlayerEquipmentIndexer equipmentIndexer,
     EquipmentSlotIndexer equipmentSlotIndexer,
@@ -258,8 +259,65 @@ public sealed class InventoryManager(
                 return;
             }
 
+            if (!IsItemUsePermitted(toolItemId, targetEntityId))
+            {
+                if (engineConfiguration.IsAuthoritative)
+                    logger.LogWarning(
+                        "[SECURITY] Player {Actor} tried to use item {Tool} on ineligible target {Target}.",
+                        loggingUtil.FormatEntity(playerId), loggingUtil.FormatEntity(toolItemId),
+                        loggingUtil.FormatEntity(targetEntityId));
+                return;
+            }
+
             if (engineConfiguration.IsAuthoritative)
                 scriptingController.InvokeInteractCallback(eventSender, playerId, toolItemId, targetEntityId);
+        }
+    }
+
+    /// <summary>
+    ///     Determines whether the given tool may be used on the given target based on the tool's
+    ///     <see cref="ItemUse" /> component. Tools without the component may be used on anything.
+    /// </summary>
+    /// <param name="toolItemId">Tool item entity ID.</param>
+    /// <param name="targetEntityId">Target entity ID.</param>
+    /// <returns>true if the use is permitted, false otherwise.</returns>
+    private bool IsItemUsePermitted(ulong toolItemId, ulong targetEntityId)
+    {
+        // Tools without an ItemUse component are wildcards usable on any target.
+        if (!itemUses.TryGetValue(toolItemId, out var itemUse)) return true;
+
+        // The target must map to at least one flag set on the tool.
+        return TryGetItemUseFlagForTarget(targetEntityId, out var targetFlag) && (itemUse & targetFlag) > 0;
+    }
+
+    /// <summary>
+    ///     Maps a target entity to the <see cref="ItemUse" /> flag required to use a tool on it.
+    /// </summary>
+    /// <param name="targetEntityId">Target entity ID.</param>
+    /// <param name="flag">Required flag. Only meaningful if the method returns true.</param>
+    /// <returns>true if the target type is mappable, false otherwise.</returns>
+    private bool TryGetItemUseFlagForTarget(ulong targetEntityId, out ItemUse flag)
+    {
+        flag = ItemUse.None;
+
+        // Block entities never map to a flag in this gate and must be rejected explicitly.
+        if (EntityUtil.IsBlockEntity(targetEntityId)) return false;
+        if (!entityTypes.TryGetValue(targetEntityId, out var entityType)) return false;
+
+        switch (entityType)
+        {
+            case EntityType.Npc:
+                flag = ItemUse.Npc;
+                return true;
+            case EntityType.Player:
+                flag = ItemUse.Player;
+                return true;
+            case EntityType.Item:
+                flag = ItemUse.Item;
+                return true;
+            default:
+                // Slot, EquipmentSlot, Other, and unknown types are not usable targets.
+                return false;
         }
     }
 
