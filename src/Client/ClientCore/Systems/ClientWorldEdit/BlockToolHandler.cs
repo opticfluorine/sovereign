@@ -78,10 +78,10 @@ public class BlockToolHandler(
         var leftStep = userState.PenWidth % 2 == 0 ? rightStep - 1 : rightStep;
 
         for (var x = -leftStep; x <= rightStep; ++x)
-        for (var y = -leftStep; y <= rightStep; ++y)
-        {
-            var pos = center with { X = center.X + x, Y = center.Y + y };
-            action(pos);
-        }
+            for (var y = -leftStep; y <= rightStep; ++y)
+            {
+                var pos = center with { X = center.X + x, Y = center.Y + y };
+                action(pos);
+            }
     }
 }

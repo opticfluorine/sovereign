@@ -81,7 +81,7 @@ internal class PerspectiveSystem : ISystem
 
                     lineManager.OnWorldSegmentSubscribe(subDetails.SegmentIndex);
                 }
-                    break;
+                break;
 
                 case EventId.Core_WorldManagement_Unsubscribe:
                 {
@@ -93,7 +93,7 @@ internal class PerspectiveSystem : ISystem
 
                     lineManager.OnWorldSegmentUnsubscribe(subDetails.SegmentIndex);
                 }
-                    break;
+                break;
             }
 
             count++;

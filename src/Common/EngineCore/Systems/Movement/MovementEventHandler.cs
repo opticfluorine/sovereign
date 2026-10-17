@@ -57,7 +57,7 @@ public class MovementEventHandler
 
                 manager.HandleAuthoritativeMove(details);
             }
-                break;
+            break;
 
             case EventId.Core_Movement_RequestMove:
             {

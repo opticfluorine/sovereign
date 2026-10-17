@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Sovereign.ClientCore.Configuration;
 
 namespace Sovereign.ClientCore.Rendering.Configuration;

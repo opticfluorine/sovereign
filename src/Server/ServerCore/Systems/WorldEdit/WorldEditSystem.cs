@@ -181,7 +181,7 @@ public class WorldEditSystem : ISystem
         }
 
         if (blockServices.TryGetBlockAtPosition(details.BlockRecord.Position, out var entityId))
-            // Block already exists, update in place.
+        // Block already exists, update in place.
         {
             entityTable.SetTemplate(entityId, details.BlockRecord.TemplateEntityId);
         }

@@ -324,11 +324,11 @@ public class TestCollisionMeshFactory
     private void DrawRect(bool[] grid, int x0, int y0, int w, int h, uint stride)
     {
         for (var y = y0; y < y0 + h; ++y)
-        for (var x = x0; x < x0 + w; ++x)
-        {
-            var idx = stride * y + x;
-            grid[idx] = true;
-        }
+            for (var x = x0; x < x0 + w; ++x)
+            {
+                var idx = stride * y + x;
+                grid[idx] = true;
+            }
     }
 
     /// <summary>

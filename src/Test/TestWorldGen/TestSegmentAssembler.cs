@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -30,7 +31,6 @@ using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Output;
 using Sovereign.WorldGen.Terrain;
 using Xunit;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace TestWorldGen;
 
@@ -399,10 +399,10 @@ public class TestSegmentAssembler : IDisposable
             LakeSurfaceZ = new int[profile.Width, profile.Height]
         };
         for (var y = 0; y < profile.Height; ++y)
-        for (var x = 0; x < profile.Width; ++x)
-        {
-            map.Heights[x, y] = height;
-        }
+            for (var x = 0; x < profile.Width; ++x)
+            {
+                map.Heights[x, y] = height;
+            }
 
         return map;
     }
@@ -428,12 +428,12 @@ public class TestSegmentAssembler : IDisposable
             SurfaceModifier = new byte[profile.Width, profile.Height]
         };
         for (var y = 0; y < profile.Height; ++y)
-        for (var x = 0; x < profile.Width; ++x)
-        {
-            materials.SurfaceTemplate[x, y] = surface;
-            materials.SubSurfaceTemplate[x, y] = subSurface;
-            materials.SubSurfaceDepth[x, y] = depth;
-        }
+            for (var x = 0; x < profile.Width; ++x)
+            {
+                materials.SurfaceTemplate[x, y] = surface;
+                materials.SubSurfaceTemplate[x, y] = subSurface;
+                materials.SubSurfaceDepth[x, y] = depth;
+            }
 
         return materials;
     }
@@ -530,10 +530,10 @@ public class TestSegmentAssembler : IDisposable
     {
         var array = new T[profile.Width, profile.Height];
         for (var y = 0; y < profile.Height; ++y)
-        for (var x = 0; x < profile.Width; ++x)
-        {
-            array[x, y] = value;
-        }
+            for (var x = 0; x < profile.Width; ++x)
+            {
+                array[x, y] = value;
+            }
 
         return array;
     }
@@ -582,24 +582,24 @@ public class TestSegmentAssembler : IDisposable
         {
             var defaultBlock = data.DefaultsPerPlane[z];
             for (var y = 0; y < 32; ++y)
-            for (var x = 0; x < 32; ++x)
-            {
-                cells[(baseX + x, baseY + y, baseZ + z)] =
-                    defaultBlock.BlockType == BlockDataType.Air
-                        ? Air
-                        : EntityConstants.FirstTemplateEntityId + defaultBlock.TemplateIdOffset;
-            }
+                for (var x = 0; x < 32; ++x)
+                {
+                    cells[(baseX + x, baseY + y, baseZ + z)] =
+                        defaultBlock.BlockType == BlockDataType.Air
+                            ? Air
+                            : EntityConstants.FirstTemplateEntityId + defaultBlock.TemplateIdOffset;
+                }
         }
 
         foreach (var plane in data.DataPlanes)
-        foreach (var line in plane.Lines)
-        foreach (var entry in line.BlockData)
-        {
-            var position = (baseX + entry.OffsetX, baseY + line.OffsetY, baseZ + plane.OffsetZ);
-            cells[position] = entry.Data.BlockType == BlockDataType.Air
-                ? Air
-                : EntityConstants.FirstTemplateEntityId + entry.Data.TemplateIdOffset;
-        }
+            foreach (var line in plane.Lines)
+                foreach (var entry in line.BlockData)
+                {
+                    var position = (baseX + entry.OffsetX, baseY + line.OffsetY, baseZ + plane.OffsetZ);
+                    cells[position] = entry.Data.BlockType == BlockDataType.Air
+                        ? Air
+                        : EntityConstants.FirstTemplateEntityId + entry.Data.TemplateIdOffset;
+                }
 
         return cells;
     }
@@ -616,37 +616,37 @@ public class TestSegmentAssembler : IDisposable
     {
         var occupied = new HashSet<(int X, int Y, int Z)>();
         foreach (var plane in data.DataPlanes)
-        foreach (var line in plane.Lines)
-        foreach (var entry in line.BlockData)
-        {
-            occupied.Add((entry.OffsetX, line.OffsetY, plane.OffsetZ));
-        }
+            foreach (var line in plane.Lines)
+                foreach (var entry in line.BlockData)
+                {
+                    occupied.Add((entry.OffsetX, line.OffsetY, plane.OffsetZ));
+                }
 
         for (var dz = 0; dz < 32; ++dz)
         {
             var defaultBlock = data.DefaultsPerPlane[dz];
             for (var dy = 0; dy < 32; ++dy)
-            for (var dx = 0; dx < 32; ++dx)
-            {
-                BlockData block;
-                if (occupied.Contains((dx, dy, dz)))
+                for (var dx = 0; dx < 32; ++dx)
                 {
-                    block = FindBlock(data, dz, dy, dx);
-                }
-                else
-                {
-                    block = defaultBlock;
-                }
+                    BlockData block;
+                    if (occupied.Contains((dx, dy, dz)))
+                    {
+                        block = FindBlock(data, dz, dy, dx);
+                    }
+                    else
+                    {
+                        block = defaultBlock;
+                    }
 
-                if (block.BlockType == BlockDataType.Air) continue;
+                    if (block.BlockType == BlockDataType.Air) continue;
 
-                yield return (new GridPosition
-                {
-                    X = segmentIndex.X * 32 + dx,
-                    Y = segmentIndex.Y * 32 + dy,
-                    Z = segmentIndex.Z * 32 + dz
-                }, EntityConstants.FirstTemplateEntityId + block.TemplateIdOffset);
-            }
+                    yield return (new GridPosition
+                    {
+                        X = segmentIndex.X * 32 + dx,
+                        Y = segmentIndex.Y * 32 + dy,
+                        Z = segmentIndex.Z * 32 + dz
+                    }, EntityConstants.FirstTemplateEntityId + block.TemplateIdOffset);
+                }
         }
     }
 

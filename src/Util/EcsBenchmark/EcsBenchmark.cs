@@ -1,4 +1,4 @@
-﻿// Sovereign Engine
+// Sovereign Engine
 // Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify

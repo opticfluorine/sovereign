@@ -321,13 +321,13 @@ public class WorldSegmentSubscriptionManager
         for (var x = center.X - WorldConstants.SubscriptionRange;
              x < center.X + WorldConstants.SubscriptionRange + 1;
              ++x)
-        for (var y = center.Y - WorldConstants.SubscriptionRange;
-             y < center.Y + WorldConstants.SubscriptionRange + 1;
-             ++y)
-        for (var z = center.Z - WorldConstants.SubscriptionRange;
-             z < center.Z + WorldConstants.SubscriptionRange + 1;
-             ++z)
-            result.Add(new GridPosition(x, y, z));
+            for (var y = center.Y - WorldConstants.SubscriptionRange;
+                 y < center.Y + WorldConstants.SubscriptionRange + 1;
+                 ++y)
+                for (var z = center.Z - WorldConstants.SubscriptionRange;
+                     z < center.Z + WorldConstants.SubscriptionRange + 1;
+                     ++z)
+                    result.Add(new GridPosition(x, y, z));
 
         return result;
     }

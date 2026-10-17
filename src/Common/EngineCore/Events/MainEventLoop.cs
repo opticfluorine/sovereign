@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -183,7 +183,7 @@ public class MainEventLoop : IEventLoop
     private void UpdateCommunicatorTables(ISystem system)
     {
         var eventIds = from id in system.EventIdsOfInterest.Distinct()
-            select id;
+                       select id;
 
         foreach (var eventId in eventIds)
         {

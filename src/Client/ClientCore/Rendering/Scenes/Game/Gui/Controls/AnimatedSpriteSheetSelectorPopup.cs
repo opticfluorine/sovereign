@@ -195,16 +195,16 @@ public sealed class AnimatedSpriteSheetSelectorPopup(
             var scale = GuiExtensions.SpriteScaleFactor * fontSize * zoom;
 
             for (var i = 0; i < rows; ++i)
-            for (var j = 0; j < cols; ++j)
-                if (coverageMap[i, j] != null)
-                {
-                    // Sprite exists, draw a box around it.
-                    var minPos = start + scale * new Vector2(j * sheet.Definition.SpriteWidth,
-                        i * sheet.Definition.SpriteHeight);
-                    var maxPos = minPos + scale *
-                        new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
-                    drawList.AddRect(minPos, maxPos, 0x7FFFFFFF);
-                }
+                for (var j = 0; j < cols; ++j)
+                    if (coverageMap[i, j] != null)
+                    {
+                        // Sprite exists, draw a box around it.
+                        var minPos = start + scale * new Vector2(j * sheet.Definition.SpriteWidth,
+                            i * sheet.Definition.SpriteHeight);
+                        var maxPos = minPos + scale *
+                            new Vector2(sheet.Definition.SpriteWidth, sheet.Definition.SpriteHeight);
+                        drawList.AddRect(minPos, maxPos, 0x7FFFFFFF);
+                    }
 
             // If mouse is over a covered sprite, show the sprite ID in a tooltip.
             var relMousePos = ImGui.GetMousePos() - start;

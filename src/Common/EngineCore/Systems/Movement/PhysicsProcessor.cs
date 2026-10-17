@@ -186,17 +186,17 @@ public class PhysicsProcessor(
         var lastZ = (int)Math.Ceiling(entityEnd.Z);
 
         for (var segX = firstSegment.X; segX <= lastSegment.X; ++segX)
-        for (var segY = firstSegment.Y; segY <= lastSegment.Y; ++segY)
-        for (var segZ = firstSegment.Z; segZ <= lastSegment.Z; ++segZ)
-        {
-            var segmentIndex = new GridPosition(segX, segY, segZ);
-            var segmentRange = resolver.GetRangeForWorldSegment(segmentIndex);
-            var segMinZ = Math.Max(firstZ, (int)segmentRange.Item1.Z);
-            var segMaxZ = Math.Min(lastZ, (int)segmentRange.Item2.Z);
-            for (var z = segMinZ; z <= segMaxZ; ++z)
-                if (meshManager.TryGetMeshes(segmentIndex, z, out var meshes))
-                    activeMeshes.Add(meshes);
-        }
+            for (var segY = firstSegment.Y; segY <= lastSegment.Y; ++segY)
+                for (var segZ = firstSegment.Z; segZ <= lastSegment.Z; ++segZ)
+                {
+                    var segmentIndex = new GridPosition(segX, segY, segZ);
+                    var segmentRange = resolver.GetRangeForWorldSegment(segmentIndex);
+                    var segMinZ = Math.Max(firstZ, (int)segmentRange.Item1.Z);
+                    var segMaxZ = Math.Min(lastZ, (int)segmentRange.Item2.Z);
+                    for (var z = segMinZ; z <= segMaxZ; ++z)
+                        if (meshManager.TryGetMeshes(segmentIndex, z, out var meshes))
+                            activeMeshes.Add(meshes);
+                }
     }
 
     /// <summary>
@@ -215,24 +215,24 @@ public class PhysicsProcessor(
 
         // Block collisions.
         foreach (var layer in activeMeshes)
-        foreach (var blockMesh in layer)
-        {
-            if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, blockMesh)) return true;
-        }
+            foreach (var blockMesh in layer)
+            {
+                if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, blockMesh)) return true;
+            }
 
         // Non-block collisions.
         var centerIndex = resolver.GetWorldSegmentForPosition(posVel.Position);
         for (var i = centerIndex.X - NonBlockSearchRadius; i < centerIndex.X + NonBlockSearchRadius + 1; ++i)
-        for (var j = centerIndex.Y - NonBlockSearchRadius; j < centerIndex.Y + NonBlockSearchRadius + 1; ++j)
-        for (var k = centerIndex.Z - NonBlockSearchRadius; k < centerIndex.Z + NonBlockSearchRadius + 1; ++k)
-        {
-            foreach (var nonBlockMesh in nonBlockCollisionMeshes.GetMeshesForWorldSegment(
-                         new GridPosition(i, j, k), entityId))
-            {
-                if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, nonBlockMesh))
-                    return true;
-            }
-        }
+            for (var j = centerIndex.Y - NonBlockSearchRadius; j < centerIndex.Y + NonBlockSearchRadius + 1; ++j)
+                for (var k = centerIndex.Z - NonBlockSearchRadius; k < centerIndex.Z + NonBlockSearchRadius + 1; ++k)
+                {
+                    foreach (var nonBlockMesh in nonBlockCollisionMeshes.GetMeshesForWorldSegment(
+                                 new GridPosition(i, j, k), entityId))
+                    {
+                        if (CheckSingleCollision(kinematicsIndex, entityMesh, posVel, ref supportedBelow, nonBlockMesh))
+                            return true;
+                    }
+                }
 
         return false;
     }

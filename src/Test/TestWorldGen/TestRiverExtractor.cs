@@ -274,7 +274,8 @@ public class TestRiverExtractor
     ///     Builds a shaped terrain surface with routing for extraction.
     /// </summary>
     private static (TerrainMap Map, int[,] Filled, FlowRouting Routing, WorldGenProfile Profile)
-        BuildSurface(WorldGenProfile profile)    {
+        BuildSurface(WorldGenProfile profile)
+    {
         var fields = new TerrainFieldStack().Sample(profile.Width, profile.Height,
             SeedDerivation.DeriveSubSeed(Seed, "TerrainFields"), profile.Terrain);
         var continentalness = new ContinentalnessStage().Apply(fields, profile.Width,

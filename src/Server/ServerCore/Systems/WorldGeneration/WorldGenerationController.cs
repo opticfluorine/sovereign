@@ -35,7 +35,7 @@ public class WorldGenerationController
     /// <param name="profileName">World generation profile name, or null for the default profile.</param>
     /// <param name="origin">Origin of the generated world region, or null for the default origin.</param>
     /// <param name="senderEntityId">Entity to reply to.</param>
-    public void Plan(IEventSender eventSender, ulong seed, string? profileName, GridPosition? origin, 
+    public void Plan(IEventSender eventSender, ulong seed, string? profileName, GridPosition? origin,
         ulong senderEntityId)
     {
         var details = new WorldGenPlanEventDetails

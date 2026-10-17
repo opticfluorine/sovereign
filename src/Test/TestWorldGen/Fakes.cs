@@ -17,6 +17,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Indexers;
 using Sovereign.EngineCore.Components.Types;
@@ -24,13 +26,11 @@ using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems;
 using Sovereign.EngineCore.Systems.WorldManagement;
+using Sovereign.ServerCore.Configuration;
 using Sovereign.ServerCore.Systems.ServerChat;
 using Sovereign.ServerCore.Systems.WorldGeneration;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Output;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
-using Sovereign.ServerCore.Configuration;
 using Sovereign.WorldGen.Terrain;
 
 namespace TestWorldGen;

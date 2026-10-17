@@ -115,7 +115,7 @@ public class EntityAnimationSystem : ISystem
 
                     animationPhaseStateMachine.OnMovement(details);
                 }
-                    break;
+                break;
 
                 case EventId.Client_EntityAnimation_PlayOverride:
                 {
@@ -130,7 +130,7 @@ public class EntityAnimationSystem : ISystem
 
                     animationManager.OnPlayOverride(details);
                 }
-                    break;
+                break;
 
                 case EventId.Server_Combat_Attack:
                 {
@@ -156,7 +156,7 @@ public class EntityAnimationSystem : ISystem
                         Loops = 1
                     });
                 }
-                    break;
+                break;
             }
         }
 

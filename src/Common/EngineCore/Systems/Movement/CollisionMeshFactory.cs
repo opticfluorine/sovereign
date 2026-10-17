@@ -150,21 +150,21 @@ public class CollisionMeshFactory
     {
         var found = 0;
         for (var i = 0; i < WorldConstants.SegmentLength; ++i)
-        for (var j = 0; j < WorldConstants.SegmentLength; ++j)
-        {
-            var idx = j * (int)WorldConstants.SegmentLength + i;
-            if (!grid[idx]) continue;
-
-            var offset = new Vector3(i, j, 0);
-            slabs.Add(new BoundingBox
+            for (var j = 0; j < WorldConstants.SegmentLength; ++j)
             {
-                Position = basePos + offset,
-                Size = Vector3.One
-            });
+                var idx = j * (int)WorldConstants.SegmentLength + i;
+                if (!grid[idx]) continue;
 
-            found++;
-            if (found == maxBlocks) return;
-        }
+                var offset = new Vector3(i, j, 0);
+                slabs.Add(new BoundingBox
+                {
+                    Position = basePos + offset,
+                    Size = Vector3.One
+                });
+
+                found++;
+                if (found == maxBlocks) return;
+            }
     }
 
     /// <summary>
@@ -326,10 +326,10 @@ public class CollisionMeshFactory
             Size = new Vector3(width, height, 1.0f)
         });
         for (var i = 0; i < width; ++i)
-        for (var j = 0; j < height; ++j)
-        {
-            var idx = (int)WorldConstants.SegmentLength * (j0 + j) + i0 + i;
-            tempGrid[idx] = false;
-        }
+            for (var j = 0; j < height; ++j)
+            {
+                var idx = (int)WorldConstants.SegmentLength * (j0 + j) + i0 + i;
+                tempGrid[idx] = false;
+            }
     }
 }

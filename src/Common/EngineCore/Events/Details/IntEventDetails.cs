@@ -23,5 +23,5 @@ namespace Sovereign.EngineCore.Events.Details;
 [Scriptable]
 public class IntEventDetails : IEventDetails
 {
-    [Key(0)] [ScriptableField] public uint Value { get; set; }
+    [Key(0)][ScriptableField] public uint Value { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -68,9 +68,9 @@ public sealed class NetworkMainLoopAction : IMainLoopAction
             fatalErrorHandler.FatalError();
         }
     }
-    
+
     public ulong CycleInterval => 1;
-    
+
     public void Execute()
     {
         try

@@ -22,8 +22,8 @@ using Sovereign.ClientCore.Systems.Input;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Network;
 using TestClientCore.TestSupport;
-using static SDL2.SDL;
 using Xunit;
+using static SDL2.SDL;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace TestClientCore.Systems.DebugInterface;

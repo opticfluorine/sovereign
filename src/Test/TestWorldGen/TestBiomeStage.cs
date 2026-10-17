@@ -203,7 +203,8 @@ public class TestBiomeStage
             TestTerrainMaps.ConstantField(Size, Size, 0.5f));
 
         Assert.Equal(BiomeId.Grassland, biomes.Biome[3, 3]);
-    }    [Fact]
+    }
+    [Fact]
     public void Apply_AbsentSwampOverride_NeverClassifiesSwamp()
     {
         var map = TestTerrainMaps.Create(Size, Size);

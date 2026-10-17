@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -79,7 +79,7 @@ public sealed class WorldManagementEventHandler
                 syncManager.OnWorldSegmentLoaded(details.SegmentIndex);
                 blockDataManager.AddWorldSegment(details.SegmentIndex);
             }
-                break;
+            break;
 
             case EventId.Core_WorldManagement_EntityLeaveWorldSegment:
             {
@@ -91,7 +91,7 @@ public sealed class WorldManagementEventHandler
 
                 subscriptionManager.OnEntityChangeSegment(details.EntityId);
             }
-                break;
+            break;
 
             case EventId.Server_WorldManagement_ResyncEntityTree:
             {
@@ -103,7 +103,7 @@ public sealed class WorldManagementEventHandler
 
                 subscriptionManager.OnResyncTreeRequest(details.EntityId);
             }
-                break;
+            break;
 
             case EventId.Server_WorldManagement_ResyncEntity:
             {

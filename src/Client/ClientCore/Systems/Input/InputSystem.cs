@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -119,7 +119,7 @@ public class InputSystem : ISystem, IDisposable
                     movementMapper.SelectPlayer((EntityEventDetails)ev.EventDetails);
                     break;
 
-                /* Ignore other events. */
+                    /* Ignore other events. */
             }
 
             eventsProcessed++;

@@ -98,32 +98,32 @@ public sealed class PlayerInteractionHandler(
         // Search non-block entities.
         var nearest = (D2: float.MaxValue, EntityId: 0UL);
         foreach (var segmentIndex in searchSegments)
-        foreach (var entityId in indexer.GetEntitiesInWorldSegment(segmentIndex))
-        {
-            if (entityId == sourceEntityId) continue;
-            if (!kinematics.TryGetValue(entityId, out var tgtPosVel) ||
-                !boundingBoxes.TryGetValue(entityId, out var targetBoundingBox)) continue;
-            targetBoundingBox = targetBoundingBox.Translate(tgtPosVel.Position);
+            foreach (var entityId in indexer.GetEntitiesInWorldSegment(segmentIndex))
+            {
+                if (entityId == sourceEntityId) continue;
+                if (!kinematics.TryGetValue(entityId, out var tgtPosVel) ||
+                    !boundingBoxes.TryGetValue(entityId, out var targetBoundingBox)) continue;
+                targetBoundingBox = targetBoundingBox.Translate(tgtPosVel.Position);
 
-            // Exclude distant entities based on the distance between their bounding boxes where the boxes
-            // intercept a line drawn between the target center and the player face. This is roughly the
-            // "closest approach" of the axis-aligned bounding boxes for the two entities.
-            var targetCenter = tgtPosVel.Position + 0.5f * targetBoundingBox.Size;
-            var targetAimVector = basePos - targetCenter;
-            var targetPos = targetBoundingBox.FindInterceptFromCenter(targetAimVector);
+                // Exclude distant entities based on the distance between their bounding boxes where the boxes
+                // intercept a line drawn between the target center and the player face. This is roughly the
+                // "closest approach" of the axis-aligned bounding boxes for the two entities.
+                var targetCenter = tgtPosVel.Position + 0.5f * targetBoundingBox.Size;
+                var targetAimVector = basePos - targetCenter;
+                var targetPos = targetBoundingBox.FindInterceptFromCenter(targetAimVector);
 
-            // Exclude if z ranges do not overlap.
-            if (!RangeUtil.RangesIntersect(boundingBox.ZRange, targetBoundingBox.ZRange)) continue;
+                // Exclude if z ranges do not overlap.
+                if (!RangeUtil.RangesIntersect(boundingBox.ZRange, targetBoundingBox.ZRange)) continue;
 
-            // Rank by distance in xy plane (with cutoff).
-            var delta = targetPos - basePos;
-            if (Vector3.Dot(delta, aimVector) < 0.0f) continue; // exclude entities behind the player
-            var delta2 = delta * delta;
-            var d2 = delta2.X + delta2.Y;
-            if (d2 >= MaxRange * MaxRange) continue; // exclude entities that are out of range
+                // Rank by distance in xy plane (with cutoff).
+                var delta = targetPos - basePos;
+                if (Vector3.Dot(delta, aimVector) < 0.0f) continue; // exclude entities behind the player
+                var delta2 = delta * delta;
+                var d2 = delta2.X + delta2.Y;
+                if (d2 >= MaxRange * MaxRange) continue; // exclude entities that are out of range
 
-            if (d2 < nearest.D2) nearest = (d2, entityId); // keep only if closer than any other entity considered
-        }
+                if (d2 < nearest.D2) nearest = (d2, entityId); // keep only if closer than any other entity considered
+            }
 
         if (nearest.D2 > MaxRange * MaxRange) return false;
         targetEntityId = nearest.EntityId;

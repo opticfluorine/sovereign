@@ -24,7 +24,7 @@ namespace Sovereign.ClientCore.Systems.ClientState;
 public class PlayerStateManager
 {
     private const ulong NoPlayer = 0;
-    
+
     /// <summary>
     ///     Current player entity ID. Empty if a player is not logged in.
     /// </summary>

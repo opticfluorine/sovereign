@@ -22,9 +22,9 @@ using Moq;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Systems.Data;
+using Sovereign.Persistence.Data;
 using Sovereign.Persistence.Database;
 using Sovereign.Persistence.Database.Sqlite.Queries;
-using Sovereign.Persistence.Data;
 using Sovereign.Persistence.Entities;
 using Xunit;
 

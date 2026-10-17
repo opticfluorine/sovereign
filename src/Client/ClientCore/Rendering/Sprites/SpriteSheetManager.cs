@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -134,9 +134,9 @@ public class SpriteSheetManager
         /* Look in the spritesheet resource directory. */
         var baseDir = resourcePathBuilder.GetBaseDirectoryForResource(ResourceType.Spritesheet);
         return from filename in Directory.EnumerateFiles(baseDir)
-            where filename.EndsWith(DefinitionSuffix)
-            orderby filename
-            select filename;
+               where filename.EndsWith(DefinitionSuffix)
+               orderby filename
+               select filename;
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ public class SpriteSheetManager
     private IList<SpriteSheetDefinition> LoadDefinitions()
     {
         var defs = from filename in FindDefinitionFiles()
-            select definitionLoader.LoadDefinition(filename);
+                   select definitionLoader.LoadDefinition(filename);
         return defs.OrderBy(def => def.Filename).ToList();
     }
 

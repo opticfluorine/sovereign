@@ -31,7 +31,7 @@ public enum NpcFlag
     ///     No flags.
     /// </summary>
     None = 0,
-    
+
     /// <summary>
     ///     The entity is chest-like (i.e. has an inventory that can be accessed by a player).
     /// </summary>

@@ -38,7 +38,7 @@ public class UpdaterResourceSet
     ///     Unique release ID. Used to avoid server-side cache conflicts between releases.
     /// </summary>
     public Guid ReleaseId { get; set; }
-    
+
     /// <summary>
     ///     List of updateable resources.
     /// </summary>

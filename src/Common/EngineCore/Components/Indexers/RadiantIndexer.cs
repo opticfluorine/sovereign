@@ -91,13 +91,13 @@ public class RadiantIndexer : BaseComponentIndexer<RadiantData>
 
             var sum = 0.0f;
             for (var x = minSegment.X; x <= maxSegment.X; ++x)
-            for (var y = minSegment.Y; y <= maxSegment.Y; ++y)
-            for (var z = minSegment.Z; z <= maxSegment.Z; ++z)
-            {
-                if (!buckets.TryGetValue((category, new GridPosition(x, y, z)), out var entries)) continue;
-                foreach (var entry in entries)
-                    sum += EvaluateEntry(entry, position);
-            }
+                for (var y = minSegment.Y; y <= maxSegment.Y; ++y)
+                    for (var z = minSegment.Z; z <= maxSegment.Z; ++z)
+                    {
+                        if (!buckets.TryGetValue((category, new GridPosition(x, y, z)), out var entries)) continue;
+                        foreach (var entry in entries)
+                            sum += EvaluateEntry(entry, position);
+                    }
 
             return sum;
         }

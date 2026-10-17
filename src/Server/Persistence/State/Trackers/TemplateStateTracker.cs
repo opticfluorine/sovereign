@@ -49,7 +49,7 @@ public class TemplateStateTracker
         if (isLoad || !entityTable.IsPersisted(entityId)) return;
         var persistedId = GetPersistedId(entityId);
         var update = new StateUpdate<ulong>
-            { EntityId = persistedId, StateUpdateType = StateUpdateType.Modify, Value = templateEntityId };
+        { EntityId = persistedId, StateUpdateType = StateUpdateType.Modify, Value = templateEntityId };
         stateManager.FrontBuffer.UpdateTemplate(ref update);
     }
 

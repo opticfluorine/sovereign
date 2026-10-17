@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -233,8 +233,8 @@ public sealed class CommonGuiManager : IDisposable
                     io.AddMouseButtonEvent(button, ev.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN);
                 }
             }
-                shouldDispatch = !io.WantCaptureMouse;
-                break;
+            shouldDispatch = !io.WantCaptureMouse;
+            break;
 
             case SDL.SDL_EventType.SDL_TEXTINPUT:
                 HandleTextInput(ref ev, io);
@@ -253,8 +253,8 @@ public sealed class CommonGuiManager : IDisposable
                 io.SetKeyEventNativeData(key, (int)ev.key.keysym.sym, (int)ev.key.keysym.scancode,
                     (int)ev.key.keysym.scancode);
             }
-                shouldDispatch = !io.WantCaptureKeyboard;
-                break;
+            shouldDispatch = !io.WantCaptureKeyboard;
+            break;
 
             case SDL.SDL_EventType.SDL_WINDOWEVENT:
                 if (ev.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED)

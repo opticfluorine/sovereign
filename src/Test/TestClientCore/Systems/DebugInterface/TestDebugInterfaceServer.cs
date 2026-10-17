@@ -19,8 +19,8 @@ using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Systems.DebugInterface.Protocol;
 using Sovereign.EngineCore.Events;
 using TestClientCore.TestSupport;
-using static SDL2.SDL;
 using Xunit;
+using static SDL2.SDL;
 using EventId = Sovereign.EngineCore.Events.EventId;
 
 namespace TestClientCore.Systems.DebugInterface;

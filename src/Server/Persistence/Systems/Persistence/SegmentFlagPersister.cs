@@ -52,18 +52,18 @@ public sealed class SegmentFlagPersister
             var stored = getInRange.GetFlagsInRange(update.MinSegment, update.MaxSegment, transaction);
 
             for (var x = update.MinSegment.X; x <= update.MaxSegment.X; ++x)
-            for (var y = update.MinSegment.Y; y <= update.MaxSegment.Y; ++y)
-            for (var z = update.MinSegment.Z; z <= update.MaxSegment.Z; ++z)
-            {
-                var segment = new GridPosition(x, y, z);
-                var storedFlags = stored.TryGetValue(segment, out var value) ? value : WorldSegmentFlag.None;
-                var updatedFlags = update.Set ? storedFlags | update.Flag : storedFlags & ~update.Flag;
+                for (var y = update.MinSegment.Y; y <= update.MaxSegment.Y; ++y)
+                    for (var z = update.MinSegment.Z; z <= update.MaxSegment.Z; ++z)
+                    {
+                        var segment = new GridPosition(x, y, z);
+                        var storedFlags = stored.TryGetValue(segment, out var value) ? value : WorldSegmentFlag.None;
+                        var updatedFlags = update.Set ? storedFlags | update.Flag : storedFlags & ~update.Flag;
 
-                // Skip rows that remain absent so an empty box does not fan out delete statements.
-                if (updatedFlags == WorldSegmentFlag.None && !stored.ContainsKey(segment)) continue;
+                        // Skip rows that remain absent so an empty box does not fan out delete statements.
+                        if (updatedFlags == WorldSegmentFlag.None && !stored.ContainsKey(segment)) continue;
 
-                setFlags.SetFlags(segment, updatedFlags, transaction);
-            }
+                        setFlags.SetFlags(segment, updatedFlags, transaction);
+                    }
         }
     }
 }

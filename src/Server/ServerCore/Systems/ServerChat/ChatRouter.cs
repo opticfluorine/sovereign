@@ -68,19 +68,19 @@ public class ChatRouter
 
         // Build lookup table.
         foreach (var proc in processors)
-        foreach (var command in proc.MatchingCommands)
-        {
-            var lowerCommand = command.Command.ToLower();
-            if (processorsByCommand.TryGetValue(lowerCommand, out var otherProc))
+            foreach (var command in proc.MatchingCommands)
             {
-                logger.LogWarning(
-                    "Command {Command} already registered by {OtherProc}; {Proc} will not be used for this command.",
-                    command.Command, otherProc.GetType(), proc.GetType());
-                continue;
-            }
+                var lowerCommand = command.Command.ToLower();
+                if (processorsByCommand.TryGetValue(lowerCommand, out var otherProc))
+                {
+                    logger.LogWarning(
+                        "Command {Command} already registered by {OtherProc}; {Proc} will not be used for this command.",
+                        command.Command, otherProc.GetType(), proc.GetType());
+                    continue;
+                }
 
-            processorsByCommand[lowerCommand] = proc;
-        }
+                processorsByCommand[lowerCommand] = proc;
+            }
     }
 
     /// <summary>

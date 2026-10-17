@@ -26,10 +26,10 @@ using Sovereign.ClientCore.Rendering;
 using Sovereign.ClientCore.Systems.DebugInterface;
 using Sovereign.ClientCore.Systems.DebugInterface.Protocol;
 using Sovereign.ClientCore.Systems.Input;
+using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Main;
 using Sovereign.EngineCore.Network;
-using Sovereign.EngineCore.Configuration;
 
 namespace TestClientCore.TestSupport;
 

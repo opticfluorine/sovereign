@@ -20,11 +20,11 @@ using System.IO;
 using System.Security.Cryptography;
 using Sovereign.WorldGen;
 using Sovereign.WorldGen.Biomes;
+using Sovereign.WorldGen.Caves;
+using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Layout;
 using Sovereign.WorldGen.Noise;
 using Sovereign.WorldGen.Output;
-using Sovereign.WorldGen.Caves;
-using Sovereign.WorldGen.Decorations;
 using Sovereign.WorldGen.Terrain;
 using Xunit;
 
@@ -818,7 +818,9 @@ public class TestWorldGenPipeline
         var profile = TestProfiles.CreateSmall128();
         profile.Terrain.Thresholds = new ContinentalnessThresholdOptions
         {
-            Ocean = 2f, Coast = 3f, Inland = 4f
+            Ocean = 2f,
+            Coast = 3f,
+            Inland = 4f
         };
         profile.Layout = new LayoutOptions
         {

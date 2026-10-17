@@ -680,8 +680,8 @@ public class PerspectiveLineManager
         var maxIndices = GetIndexForProjectedPosition(maxPosition);
 
         for (var x = minIndices.Item1; x <= maxIndices.Item1; ++x)
-        for (var y = minIndices.Item2; y <= maxIndices.Item2; ++y)
-            indices.Add(new PerspectiveLineKey(x, y, x == originX && y == originY));
+            for (var y = minIndices.Item2; y <= maxIndices.Item2; ++y)
+                indices.Add(new PerspectiveLineKey(x, y, x == originX && y == originY));
     }
 
     /// <summary>

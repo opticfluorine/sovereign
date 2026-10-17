@@ -108,11 +108,11 @@ public class UnionFind2dGrid
             // Relabel components for affected neighbors
             visited.Clear();
             foreach (var v in toRemove)
-            foreach (var (dx, dy) in Neighbors)
-            {
-                var n = (v.Item1 + dx, v.Item2 + dy);
-                if (parent.ContainsKey(n) && !visited.Contains(n)) FloodFillRelabel(n, nextComponentId++);
-            }
+                foreach (var (dx, dy) in Neighbors)
+                {
+                    var n = (v.Item1 + dx, v.Item2 + dy);
+                    if (parent.ContainsKey(n) && !visited.Contains(n)) FloodFillRelabel(n, nextComponentId++);
+                }
         }
     }
 

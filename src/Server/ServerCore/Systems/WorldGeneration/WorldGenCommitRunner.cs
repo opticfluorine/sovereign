@@ -386,11 +386,11 @@ public sealed class WorldGenCommitRunner
         int width, int height, int minSegmentZ, int maxSegmentZ)
     {
         for (var sz = minSegmentZ; sz <= maxSegmentZ; ++sz)
-        for (var sy = originY >> 5; sy <= (originY + height - 1) >> 5; ++sy)
-        for (var sx = originX >> 5; sx <= (originX + width - 1) >> 5; ++sx)
-        {
-            yield return new GridPosition { X = sx, Y = sy, Z = sz };
-        }
+            for (var sy = originY >> 5; sy <= (originY + height - 1) >> 5; ++sy)
+                for (var sx = originX >> 5; sx <= (originX + width - 1) >> 5; ++sx)
+                {
+                    yield return new GridPosition { X = sx, Y = sy, Z = sz };
+                }
     }
 
     /// <summary>

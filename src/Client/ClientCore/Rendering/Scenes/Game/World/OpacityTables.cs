@@ -42,8 +42,8 @@ public sealed class OpacityTables
     public OpacityTables()
     {
         for (var n = 0; n < MaxDraws; ++n)
-        for (var i = 0; i < BinCount; ++i)
-            tables[n, i] = ComputeFactor(n + 2, i);
+            for (var i = 0; i < BinCount; ++i)
+                tables[n, i] = ComputeFactor(n + 2, i);
     }
 
     /// <summary>

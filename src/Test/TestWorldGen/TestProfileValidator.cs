@@ -371,7 +371,7 @@ public class TestProfileValidator
             WarpAmplitudeInner = 0f,
             WarpAmplitudeOuter = 1.5f,
             Thresholds = new ContinentalnessThresholdOptions
-                { Ocean = 0.25f, Coast = 0.5f, Inland = 0.75f },
+            { Ocean = 0.25f, Coast = 0.5f, Inland = 0.75f },
             MaxStraightRiverRun = 16
         };
 
@@ -432,12 +432,12 @@ public class TestProfileValidator
     {
         var profile = TestProfiles.CreateValid();
         profile.Terrain.Thresholds = new ContinentalnessThresholdOptions
-            { Ocean = 0.5f, Coast = 0.48f, Inland = 0.62f };
+        { Ocean = 0.5f, Coast = 0.48f, Inland = 0.62f };
 
         AssertHasError(validator.Validate(profile), "ocean < coast < inland");
 
         profile.Terrain.Thresholds = new ContinentalnessThresholdOptions
-            { Ocean = 0.40f, Coast = 0.48f, Inland = 0.42f };
+        { Ocean = 0.40f, Coast = 0.48f, Inland = 0.42f };
         AssertHasError(validator.Validate(profile), "ocean < coast < inland");
     }
 

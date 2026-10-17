@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2018 opticfluorine
  *
@@ -211,12 +211,12 @@ public sealed class TileSpriteDefinitionsValidator
     {
         var contexts = tile.TileContexts;
         for (var i = 0; i < contexts.Count - 1; ++i)
-        for (var j = i + 1; j < contexts.Count; ++j)
-            if (contexts[i].NorthTileSpriteId == contexts[j].NorthTileSpriteId
-                && contexts[i].EastTileSpriteId == contexts[j].EastTileSpriteId
-                && contexts[i].SouthTileSpriteId == contexts[j].SouthTileSpriteId
-                && contexts[i].WestTileSpriteId == contexts[j].WestTileSpriteId)
-                return true;
+            for (var j = i + 1; j < contexts.Count; ++j)
+                if (contexts[i].NorthTileSpriteId == contexts[j].NorthTileSpriteId
+                    && contexts[i].EastTileSpriteId == contexts[j].EastTileSpriteId
+                    && contexts[i].SouthTileSpriteId == contexts[j].SouthTileSpriteId
+                    && contexts[i].WestTileSpriteId == contexts[j].WestTileSpriteId)
+                    return true;
         return false;
     }
 

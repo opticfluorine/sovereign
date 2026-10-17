@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Sovereign Engine
  * Copyright (c) 2019 opticfluorine
  *
@@ -250,14 +250,14 @@ public sealed class PersistenceEventHandler
         // Update the live cache immediately so gameplay and /segflag list observe the change
         // before the next database synchronization.
         for (var x = details.MinSegment.X; x <= details.MaxSegment.X; ++x)
-        for (var y = details.MinSegment.Y; y <= details.MaxSegment.Y; ++y)
-        for (var z = details.MinSegment.Z; z <= details.MaxSegment.Z; ++z)
-        {
-            var segment = new GridPosition(x, y, z);
-            var current = segmentFlagManager.GetFlags(segment);
-            var updated = details.Set ? current | details.Flag : current & ~details.Flag;
-            segmentFlagManager.SetFlagsInCache(segment, updated);
-        }
+            for (var y = details.MinSegment.Y; y <= details.MaxSegment.Y; ++y)
+                for (var z = details.MinSegment.Z; z <= details.MaxSegment.Z; ++z)
+                {
+                    var segment = new GridPosition(x, y, z);
+                    var current = segmentFlagManager.GetFlags(segment);
+                    var updated = details.Set ? current | details.Flag : current & ~details.Flag;
+                    segmentFlagManager.SetFlagsInCache(segment, updated);
+                }
 
         // Queue the raw update for the next database synchronization.
         pendingSegmentFlags.Enqueue(details.MinSegment, details.MaxSegment, details.Flag, details.Set);

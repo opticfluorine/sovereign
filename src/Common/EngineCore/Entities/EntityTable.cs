@@ -1,4 +1,4 @@
-﻿// Sovereign Engine
+// Sovereign Engine
 // Copyright (c) 2024 opticfluorine
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -153,7 +153,10 @@ public class EntityTable
         if (Exists(entityId)) return;
         var newAdd = new EntityAdd
         {
-            EntityId = entityId, TemplateEntityId = templateEntityId, IsBlock = isBlock, IsLoad = isLoad
+            EntityId = entityId,
+            TemplateEntityId = templateEntityId,
+            IsBlock = isBlock,
+            IsLoad = isLoad
         };
         pendingAdds.Add(ref newAdd);
         pendingTemplates[entityId] = templateEntityId;
