@@ -13,9 +13,10 @@ local s16AddSword4, s17Consume, s18VerifyConsume
 local s19AddShield2, s20RemoveItem, s21VerifyRemove
 local s22AddTool, s23VerifyTool, s24AddPlainItem, s25UseOutOfRange
 local s26UseWithoutUseRange, s27UseInRangeNoKeys
+local s28UseOnItemTargetRejected, s29VerifyUseOnItemTargetRejected
 local actorId, chestAId, chestBId, swordTemplateId, shieldTemplateId
 local sword1, sword2, sword3, sword4, shield1, shield2
-local useItemActor, toolItem, plainItem, interactTarget, farTarget
+local useItemActor, toolItem, plainItem, interactTarget, farTarget, itemTarget
 
 Test.Async("AddSlotsAndSlotCount")
 
@@ -224,6 +225,19 @@ s27UseInRangeNoKeys = function()
         Test.AssertEqual(toolItem, Inventory.GetItem(useItemActor, 1), "tool should remain in slot 1")
         Test.AssertEqual(plainItem, Inventory.GetItem(useItemActor, 2), "plain item should remain in slot 2")
     end)
+end
+
+s28UseOnItemTargetRejected = function()
+    -- The tool only permits Npc targets (ItemUse = ItemUse.Npc); using it on an Item
+    -- target is rejected by the server-side target-type gate.
+    Inventory.UseItem(useItemActor, toolItem, itemTarget)
+end
+
+s29VerifyUseOnItemTargetRejected = function()
+    Test.Step("UseItem", function()
+        Test.AssertEqual(toolItem, Inventory.GetItem(useItemActor, 1), "tool should remain in slot 1")
+        Test.AssertEqual(plainItem, Inventory.GetItem(useItemActor, 2), "plain item should remain in slot 2")
+    end)
     Test.Pass("UseItem")
 end
 
@@ -279,11 +293,13 @@ setup = function()
         }
     })
 
-    -- The UseRange spec key exercises the scriptable entity builder action.
+    -- The UseRange and ItemUse spec keys exercise the scriptable entity builder actions.
+    -- ItemUse.Npc restricts the tool to Npc targets.
     toolItem = Entities.Create({
         Template = swordTemplateId,
         NonPersistent = true,
-        UseRange = 5.0
+        UseRange = 5.0,
+        ItemUse = ItemUse.Npc
     })
 
     interactTarget = Entities.Create({
@@ -302,6 +318,17 @@ setup = function()
         NonPersistent = true,
         Kinematics = {
             Position = { X = 20.5, Y = 0.5, Z = 1.0 },
+            Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }
+        }
+    })
+
+    -- In-range Item target: the tool's ItemUse.Npc flag does not permit use on it.
+    itemTarget = Entities.Create({
+        Name = "TestInventoryItemTarget",
+        EntityType = EntityType.Item,
+        NonPersistent = true,
+        Kinematics = {
+            Position = { X = 12.5, Y = 0.5, Z = 1.0 },
             Velocity = { X = 0.0, Y = 0.0, Z = 0.0 }
         }
     })
@@ -339,6 +366,8 @@ setup = function()
     Scripting.AddTimedCallback(1.5, s25UseOutOfRange)
     Scripting.AddTimedCallback(1.7, s26UseWithoutUseRange)
     Scripting.AddTimedCallback(1.9, s27UseInRangeNoKeys)
+    Scripting.AddTimedCallback(2.1, s28UseOnItemTargetRejected)
+    Scripting.AddTimedCallback(2.3, s29VerifyUseOnItemTargetRejected)
 end
 
 s1CreateItems = function()

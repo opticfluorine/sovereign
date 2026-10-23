@@ -4,6 +4,10 @@
 
 ### October
 
+#### 17 October 2026
+
+* Gate item-on-entity use on the server by the tool's `ItemUse` component. `InventoryManager.UseItem` now rejects a use unless the target's type matches at least one flag set on the tool (NPC, player, or item); block entities, slots, and targets without a mappable type are rejected and logged with a `[SECURITY]` warning. Tools without an `ItemUse` component remain wildcards usable on any target, preserving existing content, while a tool whose component is present but empty (`ItemUse.None`) is usable on nothing. Breaking for content that relied on type-mismatched uses.
+
 #### 16 October 2026
 
 * Add per-segment key-value data. A new `WorldSegmentKeyValue` table (migration 0004, primary key `(x, y, z, key)`) stores typed metadata for a world segment, cached in a new `SegmentKeyValueManager` that loads a segment's rows when it activates (folding any still-pending delta so a segment that deactivates and reactivates before the next synchronization does not lose a just-written value) and drops them on deactivation; reads of an unloaded segment return nothing with a warning. Writes go through the new `ISegmentKeyValueController`, which rejects reserved `__`-prefixed keys, updates the cache immediately (so a write is visible to a following read) and queues a delta drained by the new `SegmentKeyValuePersister` at the next synchronization. Scripts access the data through `Data.GetSegmentData(segment)` (a `__index`/`__newindex` proxy keyed by a `Vector3` of integral segment indices, with the value type inferred on write as with the other key-value stores), and admins manage a single segment's pairs with `/segvalue get|set|clear <x> <y> <z> <key> [value [type]]`.

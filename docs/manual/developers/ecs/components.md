@@ -22,7 +22,7 @@ Core components are available in both the client and server.
 | `EntityType`       | `EntityTypeComponentCollection`       | Denotes that the entity is a special type (e.g. item, NPC, player).                             |
 | `EquipmentType`    | `EquipmentTypeComponentCollection`    | For items, specifies the equipment slot type that the item may be equipped into.                |
 | `Experience`       | `ExperienceComponentCollection`       | For players and NPCs, specifies the accumulated experience.                                     |
-| `ItemUse`          | `ItemUseComponentCollection`          | Provides a hint on how an item may be used as a tool.                                           |
+| `ItemUse`          | `ItemUseComponentCollection`          | Gates item-on-entity use on the server: a tool with this component may only be used on targets whose type matches one of its flags. |
 | `Kinematics`       | `KinematicsComponentCollection`       | For non-block positioned entities, contains the position and velocity of the entity.            |
 | `Level`            | `LevelComponentCollection`            | For players and NPCs, specifies the level of the entity.                                        |
 | `Name`             | `NameComponentCollection`             | Gives the name of the entity.                                                                   |
