@@ -69,6 +69,27 @@ This section describes constants and enumerations provided by the scripting engi
         Item may be used on an empty block.
 ```
 
+(script-constants-itemuseface)=
+## ItemUseFace
+
+```{eval-rst}
+.. lua:class:: ItemUseFace
+
+    Face of a block targeted by an item use.
+
+    .. lua:attribute:: None: integer
+
+        No block face was targeted. Value ``0``.
+
+    .. lua:attribute:: BlockFrontFace: integer
+
+        Front face of a block. Value ``1``.
+
+    .. lua:attribute:: BlockTopFace: integer
+
+        Top face of a block. Value ``2``.
+```
+
 (script-constants-orientation)=
 ## Orientation
 

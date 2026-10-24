@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 
 namespace Sovereign.EngineCore.Systems.Scripting;
@@ -71,14 +72,15 @@ public interface IScriptingController
     void CallFunctionAsync(string scriptName, string functionName, params ulong[] args);
 
     /// <summary>
-    ///     Requests that the interaction callback of the target entity be invoked with the given tool entity.
-    ///     If the target has an interaction callback, it is invoked with the using entity ID, tool entity ID,
-    ///     and target entity ID as arguments, in that order.
+    ///     Requests that the tool's use callback and the target entity's interaction callback be invoked.
+    ///     If present, each callback is invoked with the using entity ID, tool entity ID, target entity ID,
+    ///     and block face as arguments, in that order.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="actorEntityId">Entity ID of the entity using the tool.</param>
     /// <param name="toolEntityId">Tool entity ID.</param>
     /// <param name="targetEntityId">Target entity ID.</param>
+    /// <param name="face">Targeted block face.</param>
     void InvokeInteractCallback(IEventSender eventSender, ulong actorEntityId, ulong toolEntityId,
-        ulong targetEntityId);
+        ulong targetEntityId, ItemUseFace face);
 }

@@ -17,6 +17,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Events.Details;
 using Sovereign.EngineCore.Systems.Scripting;
@@ -131,22 +132,24 @@ public class ScriptingController(ScriptManager scriptManager, ILogger<ScriptingC
     }
 
     /// <summary>
-    ///     Requests that the interaction callback of the target entity be invoked with the given tool entity.
-    ///     If the target has an interaction callback, it is invoked with the using entity ID, tool entity ID,
-    ///     and target entity ID as arguments, in that order.
+    ///     Requests that the tool's use callback and the target entity's interaction callback be invoked.
+    ///     If present, each callback is invoked with the using entity ID, tool entity ID, target entity ID,
+    ///     and block face as arguments, in that order.
     /// </summary>
     /// <param name="eventSender">Event sender.</param>
     /// <param name="actorEntityId">Entity ID of the entity using the tool.</param>
     /// <param name="toolEntityId">Tool entity ID.</param>
     /// <param name="targetEntityId">Target entity ID.</param>
+    /// <param name="face">Targeted block face.</param>
     public void InvokeInteractCallback(IEventSender eventSender, ulong actorEntityId, ulong toolEntityId,
-        ulong targetEntityId)
+        ulong targetEntityId, ItemUseFace face)
     {
         var details = new ScriptingInteractEventDetails
         {
             ActorEntityId = actorEntityId,
             ToolEntityId = toolEntityId,
-            TargetEntityId = targetEntityId
+            TargetEntityId = targetEntityId,
+            Face = face
         };
         var ev = new Event(EventId.Server_Scripting_InteractCallback, details);
         eventSender.SendEvent(ev);

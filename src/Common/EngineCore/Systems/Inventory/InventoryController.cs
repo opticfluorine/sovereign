@@ -89,7 +89,9 @@ public interface IInventoryController
     /// <param name="actorEntityId">Entity ID performing the use.</param>
     /// <param name="toolItemId">Item entity ID to use as a tool.</param>
     /// <param name="targetEntityId">Entity ID of the target.</param>
-    void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId);
+    /// <param name="face">Targeted block face, or <see cref="ItemUseFace.None" /> if no face was targeted.</param>
+    void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId,
+        ItemUseFace face);
 
     /// <summary>
     ///     Equips the item in one of a player's inventory slots.
@@ -186,12 +188,14 @@ internal class InventoryController : IInventoryController
         eventSender.SendEvent(ev);
     }
 
-    public void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId)
+    public void UseItem(IEventSender eventSender, ulong actorEntityId, ulong toolItemId, ulong targetEntityId,
+        ItemUseFace face)
     {
         var details = new UseItemEventDetails
         {
             ToolEntityId = toolItemId,
-            TargetEntityId = targetEntityId
+            TargetEntityId = targetEntityId,
+            Face = face
         };
         var ev = new Event(EventId.Core_Inventory_UseItem, details)
         {

@@ -134,6 +134,21 @@ public static class EntityConstants
     public const string InteractFunctionKey = $"__{InteractCallbackName}_Function";
 
     /// <summary>
+    ///     Callback name for using an item as a tool.
+    /// </summary>
+    public const string UseItemCallbackName = "OnUseItem";
+
+    /// <summary>
+    ///     Entity data key for use item callback script name.
+    /// </summary>
+    public const string UseItemScriptKey = $"__{UseItemCallbackName}_Script";
+
+    /// <summary>
+    ///     Entity data key for use item callback function name.
+    /// </summary>
+    public const string UseItemFunctionKey = $"__{UseItemCallbackName}_Function";
+
+    /// <summary>
     ///     Maximum length in bytes of an entity's key-value data key.
     /// </summary>
     public const int MaxEntityDataKeyLength = 64;

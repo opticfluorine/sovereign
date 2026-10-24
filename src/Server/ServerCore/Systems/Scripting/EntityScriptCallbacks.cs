@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Scripting.Lua;
@@ -110,21 +111,32 @@ public sealed class EntityScriptCallbacks
     }
 
     /// <summary>
-    ///     Invokes the interact callback of the target entity with the using entity ID, tool entity ID,
-    ///     and target entity ID as arguments, in that order.
+    ///     Invokes the tool's use callback followed by the target entity's interact callback, each with the
+    ///     using entity ID, tool entity ID, target entity ID, and block face as arguments, in that order.
     /// </summary>
     /// <param name="usingEntityId">Entity ID of the entity using the tool.</param>
     /// <param name="toolEntityId">Tool entity ID.</param>
     /// <param name="targetEntityId">Target entity ID.</param>
-    public void InvokeInteractCallback(ulong usingEntityId, ulong toolEntityId, ulong targetEntityId)
+    /// <param name="face">Targeted block face.</param>
+    public void InvokeInteractCallback(ulong usingEntityId, ulong toolEntityId, ulong targetEntityId,
+        ItemUseFace face)
     {
+        // Enqueue the tool-side callback first. The per-entity FIFO chains are independent, so this defines
+        // enqueue order only, not completion order.
+        if (dataServices.TryGetEntityKeyValue(toolEntityId, EntityConstants.UseItemScriptKey,
+                out string? useScriptName) &&
+            dataServices.TryGetEntityKeyValue(toolEntityId, EntityConstants.UseItemFunctionKey,
+                out string? useFunctionName))
+            InvokeCallbackWithIntegerFinalArg(toolEntityId, EntityConstants.UseItemCallbackName, useScriptName,
+                useFunctionName, usingEntityId, toolEntityId, targetEntityId, (ulong)face);
+
         if (!dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractScriptKey,
                 out string? scriptName) ||
             !dataServices.TryGetEntityKeyValue(targetEntityId, EntityConstants.InteractFunctionKey,
                 out string? functionName)) return;
 
-        InvokeCallback(targetEntityId, EntityConstants.InteractCallbackName, scriptName, functionName,
-            usingEntityId, toolEntityId, targetEntityId);
+        InvokeCallbackWithIntegerFinalArg(targetEntityId, EntityConstants.InteractCallbackName, scriptName,
+            functionName, usingEntityId, toolEntityId, targetEntityId, (ulong)face);
     }
 
     /// <summary>
@@ -192,6 +204,20 @@ public sealed class EntityScriptCallbacks
     }
 
     /// <summary>
+    ///     Invokes a callback for the given entity with an integer final argument.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="callbackName">Callback name.</param>
+    /// <param name="scriptName">Script name.</param>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="callbackArgs">Arguments passed to the callback.</param>
+    private void InvokeCallbackWithIntegerFinalArg(ulong entityId, string callbackName, string scriptName,
+        string functionName, params ulong[] callbackArgs)
+    {
+        InvokeCallbackCore(entityId, callbackName, scriptName, functionName, true, callbackArgs);
+    }
+
+    /// <summary>
     ///     Invokes a lifecycle callback for the given entity.
     /// </summary>
     /// <param name="entityId">Entity ID.</param>
@@ -201,6 +227,21 @@ public sealed class EntityScriptCallbacks
     /// <param name="callbackArgs">Arguments passed to the callback.</param>
     private void InvokeCallback(ulong entityId, string callbackName, string scriptName, string functionName,
         params ulong[] callbackArgs)
+    {
+        InvokeCallbackCore(entityId, callbackName, scriptName, functionName, false, callbackArgs);
+    }
+
+    /// <summary>
+    ///     Invokes a callback for the given entity.
+    /// </summary>
+    /// <param name="entityId">Entity ID.</param>
+    /// <param name="callbackName">Callback name.</param>
+    /// <param name="scriptName">Script name.</param>
+    /// <param name="functionName">Function name.</param>
+    /// <param name="integerFinalArg">Whether the final argument is passed to Lua as an integer.</param>
+    /// <param name="callbackArgs">Arguments passed to the callback.</param>
+    private void InvokeCallbackCore(ulong entityId, string callbackName, string scriptName, string functionName,
+        bool integerFinalArg, params ulong[] callbackArgs)
     {
         if (!scriptManager.TryGetHost(scriptName, out var host))
         {
@@ -215,10 +256,11 @@ public sealed class EntityScriptCallbacks
                 callbackName, scriptName, functionName, entityId);
             if (!entityTasks.TryGetValue(entityId, out var prevTask))
                 entityTasks[entityId] = Task.Run(() =>
-                    RunCallback(callbackName, functionName, host, entityId, callbackArgs));
+                    RunCallback(callbackName, functionName, host, entityId, integerFinalArg, callbackArgs));
             else
                 entityTasks[entityId] =
-                    prevTask.ContinueWith(_ => RunCallback(callbackName, functionName, host, entityId, callbackArgs));
+                    prevTask.ContinueWith(_ =>
+                        RunCallback(callbackName, functionName, host, entityId, integerFinalArg, callbackArgs));
         }
         catch (Exception e)
         {
@@ -234,15 +276,18 @@ public sealed class EntityScriptCallbacks
     /// <param name="functionName">Function name.</param>
     /// <param name="host">Script host.</param>
     /// <param name="entityId">Entity ID.</param>
+    /// <param name="integerFinalArg">Whether the final argument is passed to Lua as an integer.</param>
     /// <param name="callbackArgs">Arguments passed to the callback.</param>
     private static void RunCallback(string callbackName, string functionName, LuaHost host, ulong entityId,
-        ulong[] callbackArgs)
+        bool integerFinalArg, ulong[] callbackArgs)
     {
         try
         {
             host.CallNamedFunction(functionName, args =>
             {
-                foreach (var arg in callbackArgs) args.AddLightUserData(arg);
+                var lightArgumentCount = integerFinalArg ? callbackArgs.Length - 1 : callbackArgs.Length;
+                for (var i = 0; i < lightArgumentCount; ++i) args.AddLightUserData(callbackArgs[i]);
+                if (integerFinalArg && callbackArgs.Length > 0) args.AddInteger((long)callbackArgs[^1]);
                 return callbackArgs.Length;
             });
         }
