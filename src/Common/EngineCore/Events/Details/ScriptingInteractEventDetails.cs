@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Components.Types;
+
 namespace Sovereign.EngineCore.Events.Details;
 
 /// <summary>
@@ -36,4 +38,9 @@ public sealed class ScriptingInteractEventDetails : IEventDetails
     ///     Entity on which the tool is used.
     /// </summary>
     public ulong TargetEntityId { get; set; }
+
+    /// <summary>
+    ///     Targeted block face.
+    /// </summary>
+    public ItemUseFace Face { get; set; } = ItemUseFace.None;
 }

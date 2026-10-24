@@ -18,6 +18,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sovereign.EngineCore.Systems.Data;
 using Sovereign.Scripting.Lua;
 using Sovereign.ServerCore.Configuration;
 using static Sovereign.Scripting.Lua.LuaBindings;
@@ -35,7 +36,8 @@ public class TestHarnessLuaLibrary(
     TestHarnessResultsCollector collector,
     IOptions<TestHarnessOptions> options,
     ILogger<TestHarnessLuaLibrary> logger,
-    ScriptingServices scriptingServices)
+    ScriptingServices scriptingServices,
+    IDataController dataController)
     : ILuaLibrary
 {
     /// <summary>
@@ -90,6 +92,7 @@ public class TestHarnessLuaLibrary(
             luaHost.AddLibraryFunction(nameof(Step), Step);
             luaHost.AddLibraryFunction(nameof(Pass), Pass);
             luaHost.AddLibraryFunction(nameof(Fail), Fail);
+            luaHost.AddLibraryFunction(nameof(SetEntityKeyValue), SetEntityKeyValue);
         }
         finally
         {
@@ -258,6 +261,32 @@ public class TestHarnessLuaLibrary(
         var message = "Test.Fail called without message.";
         if (top == 2 && lua_isstring(luaState, 2)) message = lua_tostring(luaState, 2) ?? message;
         collector.CompleteTest(suite, name, false, message);
+        return 0;
+    }
+
+    /// <summary>
+    ///     Implements Test.SetEntityKeyValue(entityId, key, value), which sets a string entity key-value pair.
+    ///     Unlike the Data module, this helper allows reserved keys so tests can attach engine callbacks.
+    /// </summary>
+    /// <param name="luaState">Lua state.</param>
+    /// <returns>Always zero.</returns>
+    private int SetEntityKeyValue(IntPtr luaState)
+    {
+        var mainState = LuaUtil.GetMainThread(luaState);
+        if (lua_gettop(luaState) != 3 || !lua_islightuserdata(luaState, 1) || !lua_isstring(luaState, 2) ||
+            !lua_isstring(luaState, 3))
+        {
+            scriptingServices.GetScriptLogger(mainState, logger)
+                .LogError(luaState, "Test.SetEntityKeyValue requires an entity ID, key, and string value.");
+            return 0;
+        }
+
+        var entityId = (ulong)lua_touserdata(luaState, 1);
+        var key = lua_tostring(luaState, 2);
+        var value = lua_tostring(luaState, 3);
+        if (key is null || value is null) return 0;
+
+        dataController.SetEntityKeyValueSync(entityId, key, value);
         return 0;
     }
 

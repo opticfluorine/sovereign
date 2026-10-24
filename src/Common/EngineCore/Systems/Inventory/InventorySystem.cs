@@ -167,7 +167,7 @@ internal sealed class InventorySystem : ISystem
                         break;
                     }
 
-                    manager.UseItem(ev.FromPlayerId, details.ToolEntityId, details.TargetEntityId);
+                    manager.UseItem(ev.FromPlayerId, details.ToolEntityId, details.TargetEntityId, details.Face);
                     break;
                 }
 

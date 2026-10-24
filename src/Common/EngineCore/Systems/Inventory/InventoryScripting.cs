@@ -95,7 +95,8 @@ public sealed class InventoryScripting(
         if (!EntityUtil.IsRegularEntity(targetEntityId))
             throw new LuaException("targetEntityId must be a regular entity");
 
-        controller.UseItem(eventSender, actorId, itemId, targetEntityId);
+        // Scripts cannot select a block face; face-targeted use is reserved for the client path.
+        controller.UseItem(eventSender, actorId, itemId, targetEntityId, ItemUseFace.None);
     }
 
     [ScriptableFunction("GetEquipment")]

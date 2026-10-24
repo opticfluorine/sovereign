@@ -4,6 +4,10 @@
 
 ### October
 
+#### 24 October 2026
+
+* Add face-targeted item use and tool-side use callbacks. `UseItemEventDetails` now carries an `ItemUseFace` value (`None`, `BlockFrontFace`, or `BlockTopFace`) that the client resolves from the clicked block face and the server validates at the network edge. `InventoryManager` maps block faces to the tool's `ItemUse.BlockFrontFace`/`BlockTopFace` flags instead of rejecting all block targets, and permits tools whose only matching flag is `ItemUse.EmptyBlock` when the cell adjacent to the clicked face (front face is one cell in `-Y`, top face one cell in `+Z`) is empty. A new tool-side `OnUseItem` callback (`__OnUseItem_Script`/`__OnUseItem_Function`) is enqueued before the target's `OnInteract`, and both callbacks now receive `(actor, tool, target, face)`; the two callbacks run on independent per-entity FIFO chains, so only enqueue order is defined. Scripts' `Inventory.UseItem` remains a three-argument API and always passes `ItemUseFace.None`.
+
 #### 17 October 2026
 
 * Gate item-on-entity use on the server by the tool's `ItemUse` component. `InventoryManager.UseItem` now rejects a use unless the target's type matches at least one flag set on the tool (NPC, player, or item); block entities, slots, and targets without a mappable type are rejected and logged with a `[SECURITY]` warning. Tools without an `ItemUse` component remain wildcards usable on any target, preserving existing content, while a tool whose component is present but empty (`ItemUse.None`) is usable on nothing. Breaking for content that relied on type-mismatched uses.

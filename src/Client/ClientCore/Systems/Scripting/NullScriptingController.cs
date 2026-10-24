@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using Sovereign.EngineCore.Components.Types;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Systems.Scripting;
 
@@ -53,7 +54,7 @@ public sealed class NullScriptingController : IScriptingController
     }
 
     public void InvokeInteractCallback(IEventSender eventSender, ulong usingEntityId, ulong toolEntityId,
-        ulong targetEntityId)
+        ulong targetEntityId, ItemUseFace face)
     {
     }
 }

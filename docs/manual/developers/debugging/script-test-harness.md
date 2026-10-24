@@ -114,6 +114,9 @@ suites. A suite registers tests with the `Test` library:
 - `Test.Step(name, fn)` — runs one step of an asynchronous test under `pcall`; a Lua error
   in `fn` marks the test failed.
 - `Test.Pass(name)` / `Test.Fail(name, [message])` — complete an asynchronous test.
+- `Test.SetEntityKeyValue(entityId, key, value)` — sets a string entity key-value pair.
+  Unlike the `Data` module, this helper permits reserved `__`-prefixed keys, so suites can
+  attach engine callbacks such as `__OnInteract_Script` to fixtures.
 
 Assertions raise ordinary Lua errors and may be used inside `Test.Case` and `Test.Step`:
 
