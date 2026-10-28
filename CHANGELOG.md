@@ -4,6 +4,10 @@
 
 ### October
 
+#### 28 October 2026
+
+* Add a client vitals HUD. While the local player is logged in, three stacked health, stamina, and mana bars with numeric labels are drawn in the top-left corner of the game screen. Each bar is a pixel-art texture generated on the client and drawn through the dynamic-texture GUI path (`IDynamicTextureManager` plus `GuiExtensions.Image`), re-uploaded only when the bar's fill fraction changes.
+
 #### 24 October 2026
 
 * Add face-targeted item use and tool-side use callbacks. `UseItemEventDetails` now carries an `ItemUseFace` value (`None`, `BlockFrontFace`, or `BlockTopFace`) that the client resolves from the clicked block face and the server validates at the network edge. `InventoryManager` maps block faces to the tool's `ItemUse.BlockFrontFace`/`BlockTopFace` flags instead of rejecting all block targets, and permits tools whose only matching flag is `ItemUse.EmptyBlock` when the cell adjacent to the clicked face (front face is one cell in `-Y`, top face one cell in `+Z`) is empty. A new tool-side `OnUseItem` callback (`__OnUseItem_Script`/`__OnUseItem_Function`) is enqueued before the target's `OnInteract`, and both callbacks now receive `(actor, tool, target, face)`; the two callbacks run on independent per-entity FIFO chains, so only enqueue order is defined. Scripts' `Inventory.UseItem` remains a three-argument API and always passes `ItemUseFace.None`.

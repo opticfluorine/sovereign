@@ -41,7 +41,8 @@ public class GameGui(
     InventoryGui inventoryGui,
     SecondaryInventoryGui secondaryInventoryGui,
     ItemContextGui itemContextGui,
-    HotbarGui hotbarGui)
+    HotbarGui hotbarGui,
+    VitalsHudGui vitalsHudGui)
 {
     /// <summary>
     ///     Renders the in-game GUI.
@@ -59,6 +60,7 @@ public class GameGui(
 
         overlayGui.Render(renderPlan);
         hotbarGui.Render();
+        vitalsHudGui.Render();
         dialogueGui.Render();
         itemContextGui.Render();
 
