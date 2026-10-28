@@ -15,6 +15,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using MessagePack;
+using Sovereign.EngineCore.Components.Types;
 
 namespace Sovereign.EngineCore.Events.Details;
 
@@ -35,4 +36,10 @@ public class UseItemEventDetails : IEventDetails
     /// </summary>
     [Key(1)]
     public ulong TargetEntityId { get; set; }
+
+    /// <summary>
+    ///     Block face targeted by the use, or <see cref="ItemUseFace.None" /> if no block face was targeted.
+    /// </summary>
+    [Key(2)]
+    public ItemUseFace Face { get; set; } = ItemUseFace.None;
 }

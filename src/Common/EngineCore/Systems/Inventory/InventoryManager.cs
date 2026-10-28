@@ -27,6 +27,7 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Scripting;
 using Sovereign.EngineCore.Systems.WorldManagement;
 
@@ -53,6 +54,8 @@ public sealed class InventoryManager(
     QuantityComponentCollection quantities,
     UseRangeComponentCollection useRanges,
     ItemUseComponentCollection itemUses,
+    BlockPositionComponentCollection blockPositions,
+    IBlockServices blockServices,
     EquipmentTypeComponentCollection equipmentTypes,
     PlayerEquipmentIndexer equipmentIndexer,
     EquipmentSlotIndexer equipmentSlotIndexer,
@@ -236,16 +239,21 @@ public sealed class InventoryManager(
 
     /// <summary>
     ///     Uses an item from the player's hotbar as a tool on a target entity. If the use is valid on an
-    ///     authoritative engine, the target entity's interaction callback is invoked with the using entity ID,
-    ///     tool entity ID, and target entity ID as arguments, in that order.
+    ///     authoritative engine, the tool's use callback and the target entity's interaction callback are
+    ///     invoked with the using entity ID, tool entity ID, target entity ID, and block face as arguments,
+    ///     in that order.
     /// </summary>
     /// <param name="playerId">Player entity ID performing the use.</param>
     /// <param name="toolItemId">Item entity ID to use as a tool.</param>
     /// <param name="targetEntityId">Entity ID of the target.</param>
-    public void UseItem(ulong playerId, ulong toolItemId, ulong targetEntityId)
+    /// <param name="face">Targeted block face, or <see cref="ItemUseFace.None" /> if no face was targeted.</param>
+    public void UseItem(ulong playerId, ulong toolItemId, ulong targetEntityId, ItemUseFace face)
     {
         lock (mutationLock)
         {
+            // Faces are only meaningful for block targets.
+            var effectiveFace = EntityUtil.IsBlockEntity(targetEntityId) ? face : ItemUseFace.None;
+
             if (!IsToolInHotbar(playerId, toolItemId) ||
                 !useRanges.TryGetValue(toolItemId, out var useRange) ||
                 !TryGetCenterDistanceSq(playerId, targetEntityId, out var d2) ||
@@ -259,7 +267,7 @@ public sealed class InventoryManager(
                 return;
             }
 
-            if (!IsItemUsePermitted(toolItemId, targetEntityId))
+            if (!IsItemUsePermitted(toolItemId, targetEntityId, effectiveFace))
             {
                 if (engineConfiguration.IsAuthoritative)
                     logger.LogWarning(
@@ -270,7 +278,8 @@ public sealed class InventoryManager(
             }
 
             if (engineConfiguration.IsAuthoritative)
-                scriptingController.InvokeInteractCallback(eventSender, playerId, toolItemId, targetEntityId);
+                scriptingController.InvokeInteractCallback(eventSender, playerId, toolItemId, targetEntityId,
+                    effectiveFace);
         }
     }
 
@@ -280,28 +289,53 @@ public sealed class InventoryManager(
     /// </summary>
     /// <param name="toolItemId">Tool item entity ID.</param>
     /// <param name="targetEntityId">Target entity ID.</param>
+    /// <param name="face">Targeted block face, or <see cref="ItemUseFace.None" /> for non-block targets.</param>
     /// <returns>true if the use is permitted, false otherwise.</returns>
-    private bool IsItemUsePermitted(ulong toolItemId, ulong targetEntityId)
+    private bool IsItemUsePermitted(ulong toolItemId, ulong targetEntityId, ItemUseFace face)
     {
         // Tools without an ItemUse component are wildcards usable on any target.
         if (!itemUses.TryGetValue(toolItemId, out var itemUse)) return true;
 
         // The target must map to at least one flag set on the tool.
-        return TryGetItemUseFlagForTarget(targetEntityId, out var targetFlag) && (itemUse & targetFlag) > 0;
+        if (TryGetItemUseFlagForTarget(targetEntityId, face, out var targetFlag) && (itemUse & targetFlag) > 0)
+            return true;
+
+        // An ItemUse.EmptyBlock tool may be used against a block face when the adjacent cell is empty.
+        if (!EntityUtil.IsBlockEntity(targetEntityId) || (itemUse & ItemUse.EmptyBlock) == 0) return false;
+        if (!blockPositions.TryGetValue(targetEntityId, out var blockPosition)) return false;
+        if (!ItemUseFaceUtil.TryGetAdjacentCell(blockPosition, face, out var cell)) return false;
+
+        return !blockServices.BlockExistsAtPosition(cell);
     }
 
     /// <summary>
     ///     Maps a target entity to the <see cref="ItemUse" /> flag required to use a tool on it.
     /// </summary>
     /// <param name="targetEntityId">Target entity ID.</param>
+    /// <param name="face">Targeted block face.</param>
     /// <param name="flag">Required flag. Only meaningful if the method returns true.</param>
     /// <returns>true if the target type is mappable, false otherwise.</returns>
-    private bool TryGetItemUseFlagForTarget(ulong targetEntityId, out ItemUse flag)
+    private bool TryGetItemUseFlagForTarget(ulong targetEntityId, ItemUseFace face, out ItemUse flag)
     {
         flag = ItemUse.None;
 
-        // Block entities never map to a flag in this gate and must be rejected explicitly.
-        if (EntityUtil.IsBlockEntity(targetEntityId)) return false;
+        // Block entities map the clicked face to the corresponding flag.
+        if (EntityUtil.IsBlockEntity(targetEntityId))
+        {
+            switch (face)
+            {
+                case ItemUseFace.BlockFrontFace:
+                    flag = ItemUse.BlockFrontFace;
+                    return true;
+                case ItemUseFace.BlockTopFace:
+                    flag = ItemUse.BlockTopFace;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Non-block targets ignore the face.
         if (!entityTypes.TryGetValue(targetEntityId, out var entityType)) return false;
 
         switch (entityType)

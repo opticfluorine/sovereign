@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+
 namespace Sovereign.EngineCore.Events.Details.Validators;
 
 /// <summary>
@@ -23,6 +25,7 @@ public class UseItemEventDetailsValidator : IEventDetailsValidator
 {
     public bool IsValid(IEventDetails? details)
     {
-        return details is UseItemEventDetails { ToolEntityId: > 0, TargetEntityId: > 0 };
+        return details is UseItemEventDetails { ToolEntityId: > 0, TargetEntityId: > 0 } useItemDetails &&
+               Enum.IsDefined(useItemDetails.Face);
     }
 }

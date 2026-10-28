@@ -28,6 +28,7 @@ using Sovereign.EngineCore.Configuration;
 using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
 using Sovereign.EngineCore.Logging;
+using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Scripting;
 using Sovereign.EngineCore.Systems.WorldManagement;
 using Xunit;
@@ -45,6 +46,7 @@ public class TestInventoryManager
     private const ulong PlayerTargetId = 5;
     private const ulong ItemTargetId = 6;
     private const ulong SlotTargetId = 7;
+    private const ulong BlockTargetId = EntityConstants.FirstBlockEntityId + 1;
 
     private readonly EntityTable entityTable = new();
     private readonly EntityNotifier entityNotifier = new();
@@ -55,6 +57,8 @@ public class TestInventoryManager
     private readonly KinematicsComponentCollection kinematics;
     private readonly UseRangeComponentCollection useRanges;
     private readonly ItemUseComponentCollection itemUses;
+    private readonly BlockPositionComponentCollection blockPositions;
+    private readonly Mock<IBlockServices> blockServices = new();
     private readonly RecordingLogger<InventoryManager> logger = new();
     private readonly FakeScriptingController scriptingController = new();
     private readonly InventoryManager manager;
@@ -70,6 +74,8 @@ public class TestInventoryManager
         kinematics = new KinematicsComponentCollection(entityTable, componentManager);
         useRanges = new UseRangeComponentCollection(entityTable, componentManager);
         itemUses = new ItemUseComponentCollection(entityTable, componentManager);
+        blockPositions = new BlockPositionComponentCollection(entityTable, componentManager);
+        blockServices.Setup(s => s.BlockExistsAtPosition(It.IsAny<GridPosition>())).Returns(false);
         var equipmentTypes = new EquipmentTypeComponentCollection(entityTable, componentManager);
         var boundingBoxes = new BoundingBoxComponentCollection(entityTable, componentManager);
         var quantities = new QuantityComponentCollection(entityTable, componentManager);
@@ -90,7 +96,8 @@ public class TestInventoryManager
         manager = new InventoryManager(slotIndexer, hierarchyIndexer, logger, loggingUtil, parents, kinematics,
             boundingBoxes, entityTypes, Options.Create(new InventoryOptions()), Mock.Of<IEntityFactory>(),
             entityManager, new WorldManagementController(), stackable, entityTable, quantities, useRanges, itemUses,
-            equipmentTypes, equipmentIndexer, equipmentSlotIndexer, engineConfiguration, Mock.Of<IEventSender>(),
+            blockPositions, blockServices.Object, equipmentTypes, equipmentIndexer, equipmentSlotIndexer,
+            engineConfiguration, Mock.Of<IEventSender>(),
             new InventoryPermissionService(npcFlags), scriptingController);
 
         // Player with a single empty hotbar slot at index 0.
@@ -114,12 +121,26 @@ public class TestInventoryManager
     {
         var toolId = CreateTool(null, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, NpcTargetId);
+        manager.UseItem(PlayerId, toolId, NpcTargetId, ItemUseFace.None);
 
         var call = Assert.Single(scriptingController.InteractCalls);
         Assert.Equal(PlayerId, call.ActorId);
         Assert.Equal(toolId, call.ToolId);
         Assert.Equal(NpcTargetId, call.TargetId);
+        Assert.Equal(ItemUseFace.None, call.Face);
+    }
+
+    [Fact]
+    public void UseItem_NoItemUseComponent_IsWildcardOnBlockFace()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(null, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockTopFace);
+
+        var call = Assert.Single(scriptingController.InteractCalls);
+        Assert.Equal(BlockTargetId, call.TargetId);
+        Assert.Equal(ItemUseFace.BlockTopFace, call.Face);
     }
 
     [Fact]
@@ -127,7 +148,7 @@ public class TestInventoryManager
     {
         var toolId = CreateTool(ItemUse.Npc, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, NpcTargetId);
+        manager.UseItem(PlayerId, toolId, NpcTargetId, ItemUseFace.None);
 
         Assert.Single(scriptingController.InteractCalls);
     }
@@ -137,20 +158,55 @@ public class TestInventoryManager
     {
         var toolId = CreateTool(ItemUse.Player, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, NpcTargetId);
+        manager.UseItem(PlayerId, toolId, NpcTargetId, ItemUseFace.None);
 
         Assert.Empty(scriptingController.InteractCalls);
         Assert.Contains(logger.Messages, m => m.Contains("[SECURITY]") && m.Contains("ineligible target"));
     }
 
     [Fact]
-    public void UseItem_BlockEntityTarget_RejectedWithSecurityLog()
+    public void UseItem_BlockEntityTargetWithoutFace_RejectedWithSecurityLog()
     {
-        RegisterEntityOnly(EntityConstants.FirstBlockEntityId);
-        AddKinematics(EntityConstants.FirstBlockEntityId, new Vector3(1.0f, 0.0f, 0.0f));
-        var toolId = CreateTool(ItemUse.Item, 5.0f);
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(ItemUse.BlockFrontFace | ItemUse.BlockTopFace, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, EntityConstants.FirstBlockEntityId);
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.None);
+
+        Assert.Empty(scriptingController.InteractCalls);
+        Assert.Contains(logger.Messages, m => m.Contains("[SECURITY]") && m.Contains("ineligible target"));
+    }
+
+    [Fact]
+    public void UseItem_BlockFrontFaceWithMatchingFlag_InvokesCallback()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(ItemUse.BlockFrontFace, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockFrontFace);
+
+        var call = Assert.Single(scriptingController.InteractCalls);
+        Assert.Equal(BlockTargetId, call.TargetId);
+        Assert.Equal(ItemUseFace.BlockFrontFace, call.Face);
+    }
+
+    [Fact]
+    public void UseItem_BlockTopFaceWithMatchingFlag_InvokesCallback()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(ItemUse.BlockTopFace, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockTopFace);
+
+        Assert.Single(scriptingController.InteractCalls);
+    }
+
+    [Fact]
+    public void UseItem_BlockFaceWithMismatchedFlag_Rejected()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(ItemUse.BlockFrontFace, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockTopFace);
 
         Assert.Empty(scriptingController.InteractCalls);
         Assert.Contains(logger.Messages, m => m.Contains("[SECURITY]") && m.Contains("ineligible target"));
@@ -161,9 +217,9 @@ public class TestInventoryManager
     {
         var toolId = CreateTool(ItemUse.Npc | ItemUse.Item, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, NpcTargetId);
-        manager.UseItem(PlayerId, toolId, ItemTargetId);
-        manager.UseItem(PlayerId, toolId, PlayerTargetId);
+        manager.UseItem(PlayerId, toolId, NpcTargetId, ItemUseFace.None);
+        manager.UseItem(PlayerId, toolId, ItemTargetId, ItemUseFace.None);
+        manager.UseItem(PlayerId, toolId, PlayerTargetId, ItemUseFace.None);
 
         Assert.Equal(2, scriptingController.InteractCalls.Count);
         Assert.Equal(NpcTargetId, scriptingController.InteractCalls[0].TargetId);
@@ -175,7 +231,7 @@ public class TestInventoryManager
     {
         var toolId = CreateTool(ItemUse.Npc | ItemUse.Player | ItemUse.Item, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, SlotTargetId);
+        manager.UseItem(PlayerId, toolId, SlotTargetId, ItemUseFace.None);
 
         Assert.Empty(scriptingController.InteractCalls);
         Assert.Contains(logger.Messages, m => m.Contains("[SECURITY]") && m.Contains("ineligible target"));
@@ -186,9 +242,71 @@ public class TestInventoryManager
     {
         var toolId = CreateTool(ItemUse.None, 5.0f);
 
-        manager.UseItem(PlayerId, toolId, NpcTargetId);
-        manager.UseItem(PlayerId, toolId, PlayerTargetId);
-        manager.UseItem(PlayerId, toolId, ItemTargetId);
+        manager.UseItem(PlayerId, toolId, NpcTargetId, ItemUseFace.None);
+        manager.UseItem(PlayerId, toolId, PlayerTargetId, ItemUseFace.None);
+        manager.UseItem(PlayerId, toolId, ItemTargetId, ItemUseFace.None);
+
+        Assert.Empty(scriptingController.InteractCalls);
+    }
+
+    [Fact]
+    public void UseItem_NonBlockTargetIgnoresFace()
+    {
+        var toolId = CreateTool(ItemUse.Npc, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, NpcTargetId, ItemUseFace.BlockTopFace);
+
+        var call = Assert.Single(scriptingController.InteractCalls);
+        Assert.Equal(ItemUseFace.None, call.Face);
+    }
+
+    [Fact]
+    public void UseItem_EmptyBlockWithEmptyAdjacentCell_Permitted()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(ItemUse.EmptyBlock, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockTopFace);
+
+        var call = Assert.Single(scriptingController.InteractCalls);
+        Assert.Equal(BlockTargetId, call.TargetId);
+        Assert.Equal(ItemUseFace.BlockTopFace, call.Face);
+    }
+
+    [Fact]
+    public void UseItem_EmptyBlockWithOccupiedAdjacentCell_Rejected()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        blockServices.Setup(s => s.BlockExistsAtPosition(new GridPosition(1, 0, 1))).Returns(true);
+        var toolId = CreateTool(ItemUse.EmptyBlock, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockTopFace);
+
+        Assert.Empty(scriptingController.InteractCalls);
+        Assert.Contains(logger.Messages, m => m.Contains("[SECURITY]") && m.Contains("ineligible target"));
+    }
+
+    [Fact]
+    public void UseItem_EmptyBlockFrontFace_UsesAdjacentCell()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(2, 2, 0));
+        var toolId = CreateTool(ItemUse.EmptyBlock, 5.0f);
+
+        // Front face adjacency is one cell in -Y, i.e. (2, 1, 0).
+        blockServices.Setup(s => s.BlockExistsAtPosition(new GridPosition(2, 1, 0))).Returns(true);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.BlockFrontFace);
+
+        Assert.Empty(scriptingController.InteractCalls);
+    }
+
+    [Fact]
+    public void UseItem_EmptyBlockOnlyWithoutFace_Rejected()
+    {
+        CreateBlockTarget(BlockTargetId, new GridPosition(1, 0, 0));
+        var toolId = CreateTool(ItemUse.EmptyBlock, 5.0f);
+
+        manager.UseItem(PlayerId, toolId, BlockTargetId, ItemUseFace.None);
 
         Assert.Empty(scriptingController.InteractCalls);
     }
@@ -214,6 +332,19 @@ public class TestInventoryManager
         }
 
         return toolId;
+    }
+
+    /// <summary>
+    ///     Registers an in-range block target at the given position.
+    /// </summary>
+    /// <param name="entityId">Block entity ID.</param>
+    /// <param name="position">Block position.</param>
+    private void CreateBlockTarget(ulong entityId, GridPosition position)
+    {
+        RegisterEntityOnly(entityId);
+        blockPositions.AddComponent(entityId, position);
+        blockPositions.ApplyComponentUpdates();
+        AddKinematics(entityId, new Vector3(position.X + 0.5f, position.Y + 0.5f, position.Z));
     }
 
     /// <summary>
@@ -274,7 +405,7 @@ public class TestInventoryManager
         /// <summary>
         ///     Recorded interact callback invocations.
         /// </summary>
-        public List<(ulong ActorId, ulong ToolId, ulong TargetId)> InteractCalls { get; } = new();
+        public List<(ulong ActorId, ulong ToolId, ulong TargetId, ItemUseFace Face)> InteractCalls { get; } = new();
 
         public void ReloadAllScripts(IEventSender eventSender)
         {
@@ -305,9 +436,9 @@ public class TestInventoryManager
         }
 
         public void InvokeInteractCallback(IEventSender eventSender, ulong actorEntityId, ulong toolEntityId,
-            ulong targetEntityId)
+            ulong targetEntityId, ItemUseFace face)
         {
-            InteractCalls.Add((actorEntityId, toolEntityId, targetEntityId));
+            InteractCalls.Add((actorEntityId, toolEntityId, targetEntityId, face));
         }
     }
 

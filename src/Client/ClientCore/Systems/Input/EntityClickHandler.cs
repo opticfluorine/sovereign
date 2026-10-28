@@ -15,10 +15,14 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 using Sovereign.ClientCore.Rendering.Scenes.Game.Gui;
+using Sovereign.ClientCore.Systems.Camera;
 using Sovereign.ClientCore.Systems.ClientState;
+using Sovereign.ClientCore.Systems.Perspective;
 using Sovereign.EngineCore.Components;
 using Sovereign.EngineCore.Components.Types;
+using Sovereign.EngineCore.Entities;
 using Sovereign.EngineCore.Events;
+using Sovereign.EngineCore.Systems.Block;
 using Sovereign.EngineCore.Systems.Inventory;
 
 namespace Sovereign.ClientCore.Systems.Input;
@@ -35,7 +39,12 @@ public sealed class EntityClickHandler(
     IInventoryController inventoryController,
     ClientStateController stateController,
     IEventSender eventSender,
-    UseRangeComponentCollection useRanges)
+    UseRangeComponentCollection useRanges,
+    ItemUseComponentCollection itemUses,
+    IPerspectiveServices perspectiveServices,
+    CameraServices cameraServices,
+    BlockPositionComponentCollection blockPositions,
+    IBlockServices blockServices)
 {
     /// <summary>
     ///     Called when an entity is clicked in game.
@@ -75,8 +84,67 @@ public sealed class EntityClickHandler(
 
         if (!useRanges.TryGetValue(itemId, out _)) return false;
 
-        inventoryController.UseItem(eventSender, playerId, itemId, targetEntityId);
+        // Tools that only target empty blocks select the empty cell adjacent to the clicked block face.
+        if (itemUses.TryGetValue(itemId, out var itemUse) && itemUse == ItemUse.EmptyBlock)
+            return TryUseOnEmptyBlock(playerId, itemId);
+
+        inventoryController.UseItem(eventSender, playerId, itemId, targetEntityId,
+            ResolveFace(targetEntityId));
         return true;
+    }
+
+    /// <summary>
+    ///     Attempts to use a tool on the empty cell adjacent to the clicked block face.
+    /// </summary>
+    /// <param name="playerId">Player entity ID.</param>
+    /// <param name="itemId">Tool item entity ID.</param>
+    /// <returns>true if the use was initiated, false to fall through to other click handling.</returns>
+    private bool TryUseOnEmptyBlock(ulong playerId, ulong itemId)
+    {
+        var mousePos = cameraServices.GetMousePositionWorldCoordinates();
+        if (!perspectiveServices.TryGetHighestVisibleCoveringBlock(mousePos, out var blockId, out var faceType,
+                out _)) return false;
+
+        var face = MapFace(faceType);
+        if (!blockPositions.TryGetValue(blockId, out var blockPosition)) return false;
+        if (!ItemUseFaceUtil.TryGetAdjacentCell(blockPosition, face, out var cell)) return false;
+        if (blockServices.BlockExistsAtPosition(cell)) return false;
+
+        inventoryController.UseItem(eventSender, playerId, itemId, blockId, face);
+        return true;
+    }
+
+    /// <summary>
+    ///     Resolves the block face clicked by the mouse for the given target entity. Falls back to
+    ///     <see cref="ItemUseFace.None" /> if the click cannot be resolved to the target, leaving
+    ///     validation to the server.
+    /// </summary>
+    /// <param name="targetEntityId">Entity ID of the clicked entity.</param>
+    /// <returns>Resolved block face, or <see cref="ItemUseFace.None" />.</returns>
+    private ItemUseFace ResolveFace(ulong targetEntityId)
+    {
+        if (!EntityUtil.IsBlockEntity(targetEntityId)) return ItemUseFace.None;
+
+        var mousePos = cameraServices.GetMousePositionWorldCoordinates();
+        if (!perspectiveServices.TryGetHighestVisibleCoveringBlock(mousePos, out var blockId, out var faceType,
+                out _) || blockId != targetEntityId) return ItemUseFace.None;
+
+        return MapFace(faceType);
+    }
+
+    /// <summary>
+    ///     Maps a perspective entity type to the corresponding item use face.
+    /// </summary>
+    /// <param name="faceType">Perspective entity type.</param>
+    /// <returns>Item use face, or <see cref="ItemUseFace.None" /> if the type is not a block face.</returns>
+    private static ItemUseFace MapFace(PerspectiveEntityType faceType)
+    {
+        return faceType switch
+        {
+            PerspectiveEntityType.BlockFrontFace => ItemUseFace.BlockFrontFace,
+            PerspectiveEntityType.BlockTopFace => ItemUseFace.BlockTopFace,
+            _ => ItemUseFace.None
+        };
     }
 
     /// <summary>
